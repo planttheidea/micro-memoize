@@ -1,0 +1,7 @@
+.idea
+.nyc_output
+coverage
+dist
+es
+node_modules
+lib
