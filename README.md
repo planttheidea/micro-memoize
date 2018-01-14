@@ -16,7 +16,7 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
   * [options](#options)
 * [Benchmarks](#benchmarks)
   * [Single parameter](#single-parameter)
-  * [Multiple parameters (primitives only)](#multiple-parameters-primitive-only)
+  * [Multiple parameters (primitives only)](#multiple-parameters-primitives-only)
   * [Multiple parameters (complex objects)](#multiple-parameters-complex-objects)
 * [Browser support](#browser-support)
 * [Node support](#node-support)
@@ -24,7 +24,7 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
 
 ## Summary
 
-As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (959 _bytes_ minified+gzipped).
+As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (959 _bytes_ minified+gzipped).
 
 It also is the fastest memoization library I've benchmarked (even faster than `moize`) in all supported scenarios.
 
@@ -105,13 +105,13 @@ console.log(
 ); // pulled from cache
 ```
 
-**NOTE**: The default method compares [SameValueZero](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero) equality, which is summarized as strictly equal while also considering `NaN` equal to `NaN`.
+**NOTE**: The default method tests for [SameValueZero](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero) equality, which is summarized as strictly equal while also considering `NaN` equal to `NaN`.
 
 #### maxSize
 
 `number`, _defaults to `1`_
 
-The number of values to store in cache, based on a [Least Recently Used](https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_Recently_Used_.28LRU.29) basis. This operates the same as [`maxSize`](https://github.com/planttheidea/moize#maxsize) on `moize`.
+The number of values to store in cache, based on a [Least Recently Used](https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_Recently_Used_.28LRU.29) basis. This operates the same as [`maxSize`](https://github.com/planttheidea/moize#maxsize) on `moize`, with the exception of the default being different.
 
 ```javascript
 const manyPossibleArgs = (one, two) => {
@@ -163,13 +163,13 @@ memoized.cache.values.push('cached');
 console.log(memoized('one', 'two')); // 'cached'
 ```
 
-`moize` offers a variety of convenience methods for this manual `cache` manipulation, and by exposing the `cache` `micro-memoize` allows all the same capabilities, but does not provide any convenience methods.
+`moize` offers a variety of convenience methods for this manual `cache` manipulation, and while `micro-memoize` allows all the same capabilities by exposing the `cache`, it does not provide any convenience methods.
 
 #### cacheSnapshot
 
 `Object`
 
-This is identical to the `cache` object referenced above, but it is a deep clone of the values which will provide a persistent snapshot of the current values. This is useful when tracking the cache changes over time, as the `cache` object is mutated internally for performance reasons.
+This is identical to the `cache` object referenced above, but it is a deep clone created at request, which will provide a persistent snapshot of the values at that time. This is useful when tracking the cache changes over time, as the `cache` object is mutated internally for performance reasons.
 
 #### isMemoized
 
