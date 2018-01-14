@@ -14,6 +14,7 @@ A tiny, crazy fast memoization library for the 95% use-case
   * [cacheSnapshot](#cachesnapshot)
   * [isMemoized](#ismemoized)
   * [options](#options)
+* [Benchmarks](#benchmarks)
 * [Browser support](#browser-support)
 * [Node support](#node-support)
 * [Development](#development)
@@ -178,6 +179,51 @@ Hard-coded to `true` when the function is memoized. This is useful for introspec
 `Object`
 
 The [`options`](#options) passed when creating the memoized method.
+
+## Benchmarks
+
+All values provided are the number of operations per second (ops/sec) calculated by the [Benchmark suite](https://benchmarkjs.com/). Note that `underscore`, `lodash`, and `ramda` do not support mulitple-parameter memoization, so they are not included in those benchmarks.
+
+Each benchmark was performed using the default configuration of the library, with a fibonacci calculation based on a starting parameter of `35`, and in the case of multiple parameters a second parameter (`boolean` for primitives, `object` for complex objects) was used.
+
+#### Simple parameter
+
+|                    | Operations / second | Relative margin of error |
+|--------------------|---------------------|--------------------------|
+| **micro-memoize**  | **42,418,881**      | **0.63%**                |
+| fast-memoize       | 39,213,355          | 0.57%                    |
+| moize              | 29,118,565          | 0.72%                    |
+| lodash             | 24,144,216          | 0.52%                    |
+| underscore         | 22,867,768          | 0.94%                    |
+| memoizee           | 16,130,060          | 0.69%                    |
+| lru-memoize        |  8,850,221          | 1.13%                    |
+| Addy Osmani        |  6,400,200          | 0.67%                    |
+| memoizerific       |  4,767,238          | 0.82%                    |
+| ramda              |  1,038,438          | 0.79%                    |
+
+#### Multiple parameters (primitives only)
+
+|                    | Operations / second | Relative margin of error |
+|--------------------|---------------------|--------------------------|
+| **micro-memoize**  | **28,103,063**      | **0.78%**                |
+| moize              | 20,589,607          | 0.93%                    |
+| memoizee           |  9,282,774          | 0.61%                    |
+| lru-memoize        |  6,674,788          | 1.49%                    |
+| memoizerific       |  3,535,136          | 0.88%                    |
+| Addy Osmani        |  3,205,031          | 0.98%                    |
+| fast-memoize       |  1,039,039          | 0.71%                    |
+
+#### Multiple parameters (complex objects)
+
+|                    | Operations / second | Relative margin of error |
+|--------------------|---------------------|--------------------------|
+| **micro-memoize**  | **28,504,863**      | **0.88%**                |
+| moize              | 21,126,388          | 0.79%                    |
+| memoizee           |  7,145,023          | 0.61%                    |
+| lru-memoize        |  6,623,210          | 1.57%                    |
+| memoizerific       |  3,011,415          | 0.86%                    |
+| Addy Osmani        |  1,471,939          | 1.03%                    |
+| fast-memoize       |    882,447          | 0.69%                    |
 
 ## Browser support
 

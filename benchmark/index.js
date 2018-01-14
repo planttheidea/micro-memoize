@@ -119,35 +119,35 @@ const runSingleParameterSuite = () => {
 
   return new Promise((resolve) => {
     fibonacciSuite
-      .add('underscore', () => {
-        mUnderscore(fibonacciNumber);
-      })
-      .add('lodash', () => {
-        mLodash(fibonacciNumber);
-      })
-      .add('memoizee', () => {
-        mMemoizee(fibonacciNumber);
-      })
-      .add('ramda', () => {
-        mRamda(fibonacciNumber);
+      .add('addy-osmani', () => {
+        mAddyOsmani(fibonacciNumber);
       })
       .add('fast-memoize', () => {
         mFastMemoize(fibonacciNumber);
       })
-      .add('addy-osmani', () => {
-        mAddyOsmani(fibonacciNumber);
-      })
-      .add('memoizerific', () => {
-        mMemoizerific(fibonacciNumber);
+      .add('lodash', () => {
+        mLodash(fibonacciNumber);
       })
       .add('lru-memoize', () => {
         mLruMemoize(fibonacciNumber);
       })
-      .add('moize', () => {
-        mMoize(fibonacciNumber);
+      .add('memoizee', () => {
+        mMemoizee(fibonacciNumber);
+      })
+      .add('memoizerific', () => {
+        mMemoizerific(fibonacciNumber);
       })
       .add('micro-memoize', () => {
         mMicroMemoize(fibonacciNumber);
+      })
+      .add('moize', () => {
+        mMoize(fibonacciNumber);
+      })
+      .add('ramda', () => {
+        mRamda(fibonacciNumber);
+      })
+      .add('underscore', () => {
+        mUnderscore(fibonacciNumber);
       })
       .on('start', () => {
         console.log(''); // eslint-disable-line no-console
@@ -183,26 +183,26 @@ const runMultiplePrimitiveSuite = () => {
 
   return new Promise((resolve) => {
     fibonacciSuite
-      .add('memoizee', () => {
-        mMemoizee(fibonacciNumber, isComplete);
-      })
-      .add('fast-memoize', () => {
-        mFastMemoize(fibonacciNumber, isComplete);
-      })
       .add('addy-osmani', () => {
         mAddyOsmani(fibonacciNumber, isComplete);
-      })
-      .add('memoizerific', () => {
-        mMemoizerific(fibonacciNumber, isComplete);
       })
       .add('lru-memoize', () => {
         mLruMemoize(fibonacciNumber, isComplete);
       })
-      .add('moize', () => {
-        mMoize(fibonacciNumber, isComplete);
+      .add('fast-memoize', () => {
+        mFastMemoize(fibonacciNumber, isComplete);
+      })
+      .add('memoizee', () => {
+        mMemoizee(fibonacciNumber, isComplete);
+      })
+      .add('memoizerific', () => {
+        mMemoizerific(fibonacciNumber, isComplete);
       })
       .add('micro-memoize', () => {
         mMicroMemoize(fibonacciNumber, isComplete);
+      })
+      .add('moize', () => {
+        mMoize(fibonacciNumber, isComplete);
       })
       .on('start', () => {
         console.log(''); // eslint-disable-line no-console
@@ -240,26 +240,26 @@ const runMultipleObjectSuite = () => {
 
   return new Promise((resolve) => {
     fibonacciSuite
-      .add('memoizee', () => {
-        mMemoizee(fibonacciNumber, isComplete);
-      })
-      .add('fast-memoize', () => {
-        mFastMemoize(fibonacciNumber, isComplete);
-      })
       .add('addy-osmani', () => {
         mAddyOsmani(fibonacciNumber, isComplete);
-      })
-      .add('memoizerific', () => {
-        mMemoizerific(fibonacciNumber, isComplete);
       })
       .add('lru-memoize', () => {
         mLruMemoize(fibonacciNumber, isComplete);
       })
-      .add('moize', () => {
-        mMoize(fibonacciNumber, isComplete);
+      .add('fast-memoize', () => {
+        mFastMemoize(fibonacciNumber, isComplete);
+      })
+      .add('memoizee', () => {
+        mMemoizee(fibonacciNumber, isComplete);
+      })
+      .add('memoizerific', () => {
+        mMemoizerific(fibonacciNumber, isComplete);
       })
       .add('micro-memoize', () => {
         mMicroMemoize(fibonacciNumber, isComplete);
+      })
+      .add('moize', () => {
+        mMoize(fibonacciNumber, isComplete);
       })
       .on('start', () => {
         console.log(''); // eslint-disable-line no-console
