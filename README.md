@@ -1,6 +1,6 @@
 # micro-memoize
 
-A tiny, crazy fast memoization library for the 95% use-case
+A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
 
 ## Table of contents
 
@@ -15,6 +15,9 @@ A tiny, crazy fast memoization library for the 95% use-case
   * [isMemoized](#ismemoized)
   * [options](#options)
 * [Benchmarks](#benchmarks)
+  * [Single parameter](#single-parameter)
+  * [Multiple parameters (primitives only)](#multiple-parameters-primitive-only)
+  * [Multiple parameters (complex objects)](#multiple-parameters-complex-objects)
 * [Browser support](#browser-support)
 * [Node support](#node-support)
 * [Development](#development)
@@ -186,7 +189,7 @@ All values provided are the number of operations per second (ops/sec) calculated
 
 Each benchmark was performed using the default configuration of the library, with a fibonacci calculation based on a starting parameter of `35`, and in the case of multiple parameters a second parameter (`boolean` for primitives, `object` for complex objects) was used.
 
-#### Simple parameter
+#### Single parameter
 
 |                    | Operations / second | Relative margin of error |
 |--------------------|---------------------|--------------------------|
