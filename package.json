@@ -3,12 +3,25 @@
   "ava": {
     "babel": "inherit",
     "failFast": true,
-    "files": ["test/*.js"],
-    "require": ["babel-register"],
-    "source": ["src/*.js"],
+    "files": [
+      "test/*.js"
+    ],
+    "require": [
+      "babel-register"
+    ],
+    "source": [
+      "src/*.js"
+    ],
     "verbose": true
   },
-  "browserslist": ["defaults", "Explorer >= 9", "Safari >= 6", "Opera >= 15", "iOS >= 8", "Android >= 4"],
+  "browserslist": [
+    "defaults",
+    "Explorer >= 9",
+    "Safari >= 6",
+    "Opera >= 15",
+    "iOS >= 8",
+    "Android >= 4"
+  ],
   "bugs": {
     "url": "https://github.com/planttheidea/micro-memoize/issues"
   },
@@ -24,6 +37,7 @@
     "babel-preset-stage-2": "^6.24.1",
     "babel-register": "^6.26.0",
     "benchmark": "^2.1.4",
+    "case-sensitive-paths-webpack-plugin": "^2.1.1",
     "cli-table2": "^0.2.0",
     "eslint": "^4.15.0",
     "eslint-config-rapid7": "^2.11.1",
@@ -45,7 +59,9 @@
     "prop-types": "^15.6.0",
     "ramda": "^0.25.0",
     "react": "^16.2.0",
+    "react-dev-utils": "^5.0.0",
     "react-dom": "^16.2.0",
+    "react-hot-loader": "^4.0.0-beta.14",
     "rimraf": "^2.6.2",
     "sinon": "^4.1.5",
     "underscore": "^1.8.3",
@@ -86,8 +102,7 @@
     "dev": "NODE_ENV=development webpack-dev-server --progress --colors --config=webpack/webpack.config.dev.js",
     "lint": "eslint --max-warnings 0 src",
     "prepublish": "if in-publish; then npm run prepublish:compile; fi",
-    "prepublish:compile":
-      "npm run lint && npm run test:coverage && npm run clean && npm run transpile:lib && npm run transpile:es && npm run build && npm run build:minified",
+    "prepublish:compile": "npm run lint && npm run test:coverage && npm run clean && npm run transpile:lib && npm run transpile:es && npm run build && npm run build:minified",
     "start": "npm run dev",
     "test": "NODE_PATH=. NODE_ENV=test ava",
     "test:coverage": "nyc --cache npm test",

@@ -1,15 +1,8 @@
-import PropTypes from 'prop-types';
 import React, {PureComponent} from 'react';
-import {render} from 'react-dom';
 import Bluebird from 'bluebird';
 import {deepEqual, shallowEqual} from 'fast-equals';
 
 import moize from '../src';
-
-document.body.style.backgroundColor = '#1d1d1d';
-document.body.style.color = '#d5d5d5';
-document.body.style.margin = 0;
-document.body.style.padding = 0;
 
 console.group('standard');
 
@@ -185,6 +178,7 @@ console.log(moizedLastTwo(foo, bar, baz));
 console.log(moizedLastTwo(null, bar, baz));
 
 console.log(moizedLastTwo.cacheSnapshot);
+console.log(moizedLastTwo.options);
 
 console.groupEnd('transform args');
 
@@ -198,14 +192,4 @@ class App extends PureComponent {
   }
 }
 
-const renderApp = (container) => {
-  render(<App />, container);
-};
-
-const div = document.createElement('div');
-
-div.id = 'app-container';
-
-renderApp(div);
-
-document.body.appendChild(div);
+export default App;

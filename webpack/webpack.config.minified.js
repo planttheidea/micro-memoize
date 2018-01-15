@@ -6,6 +6,8 @@ const OptimizeJsPlugin = require('optimize-js-plugin');
 const defaultConfig = require('./webpack.config');
 
 module.exports = Object.assign({}, defaultConfig, {
+  bail: true,
+
   devtool: undefined,
 
   output: Object.assign({}, defaultConfig.output, {
@@ -37,6 +39,13 @@ module.exports = Object.assign({}, defaultConfig, {
         sequences: true,
         unused: true,
         warnings: false
+      },
+      mangle: {
+        safari10: true
+      },
+      output: {
+        ascii_only: true,
+        comments: false
       },
       sourceMap: false
     }),

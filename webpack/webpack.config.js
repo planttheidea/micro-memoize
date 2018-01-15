@@ -1,7 +1,10 @@
 'use strict';
 
+const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const eslintFriendlyFormatter = require('eslint-friendly-formatter');
 const path = require('path');
+const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
+const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 const webpack = require('webpack');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -35,12 +38,29 @@ module.exports = {
   },
 
   output: {
+    devtoolModuleFilenameTemplate({absoluteResourcePath}) {
+      return path.resolve(absoluteResourcePath).replace(/\\/g, '/');
+    },
     filename: 'micro-memoize.js',
     library: 'memoize',
     libraryTarget: 'umd',
     path: path.resolve(ROOT, 'dist'),
+    pathinfo: true,
     umdNamedDefine: true
   },
 
-  plugins: [new webpack.EnvironmentPlugin(['NODE_ENV'])]
+  performance: {
+    hints: false
+  },
+
+  plugins: [
+    new webpack.EnvironmentPlugin(['NODE_ENV']),
+    new webpack.NamedModulesPlugin(),
+    new CaseSensitivePathsPlugin(),
+    new WatchMissingNodeModulesPlugin(path.resolve(ROOT, 'node_modules'))
+  ],
+
+  resolve: {
+    plugins: [new ModuleScopePlugin(path.resolve(ROOT, 'src'))]
+  }
 };

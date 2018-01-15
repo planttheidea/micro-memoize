@@ -2,6 +2,7 @@
 
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
 
 const defaultConfig = require('./webpack.config');
 
@@ -12,8 +13,11 @@ module.exports = Object.assign({}, defaultConfig, {
   cache: true,
 
   devServer: {
+    clientLogLevel: 'none',
+    compress: true,
     contentBase: './dist',
     host: 'localhost',
+    hot: true,
     inline: true,
     lazy: false,
     noInfo: false,
@@ -25,7 +29,7 @@ module.exports = Object.assign({}, defaultConfig, {
     }
   },
 
-  entry: [path.resolve(ROOT, 'DEV_ONLY', 'App.js')],
+  entry: ['react-hot-loader/patch', path.resolve(ROOT, 'DEV_ONLY', 'index.js')],
 
   module: Object.assign({}, defaultConfig.module, {
     rules: defaultConfig.module.rules.map((rule) => {
@@ -33,6 +37,7 @@ module.exports = Object.assign({}, defaultConfig, {
         ? Object.assign({}, rule, {
           include: rule.include.concat([path.resolve(ROOT, 'DEV_ONLY')]),
           options: {
+            plugins: ['react-hot-loader/babel'],
             presets: ['react']
           }
         })
@@ -44,5 +49,5 @@ module.exports = Object.assign({}, defaultConfig, {
     publicPath: `http://localhost:${PORT}/`
   }),
 
-  plugins: defaultConfig.plugins.concat([new HtmlWebpackPlugin()])
+  plugins: [...defaultConfig.plugins, new HtmlWebpackPlugin(), new webpack.HotModuleReplacementPlugin()]
 });

@@ -163,7 +163,7 @@ memoized.cache.values.push('cached');
 console.log(memoized('one', 'two')); // 'cached'
 ```
 
-`moize` offers a variety of convenience methods for this manual `cache` manipulation, and while `micro-memoize` allows all the same capabilities by exposing the `cache`, it does not provide any convenience methods.
+**HOTE**: `moize` offers a variety of convenience methods for this manual `cache` manipulation, and while `micro-memoize` allows all the same capabilities by exposing the `cache`, it does not provide any convenience methods.
 
 #### cacheSnapshot
 
