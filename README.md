@@ -15,7 +15,8 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
   * [isMemoized](#ismemoized)
   * [options](#options)
 * [Benchmarks](#benchmarks)
-  * [Single parameter](#single-parameter)
+  * [Single parameter (primitive only)](#single-parameter-primitive-only)
+  * [Single parameter (complex object)](#single-parameter-complex-object)
   * [Multiple parameters (primitives only)](#multiple-parameters-primitives-only)
   * [Multiple parameters (complex objects)](#multiple-parameters-complex-objects)
 * [Browser support](#browser-support)
@@ -194,7 +195,7 @@ Each benchmark was performed using the default configuration of the library, wit
 
 #### Single parameter (primitive only)
 
-This is usually what benchmarks target for ... its the least-likely use-case, but the easiest to optimize, often at the expense of more valid use-cases.
+This is usually what benchmarks target for ... its the least-likely use-case, but the easiest to optimize, often at the expense of more common use-cases.
 
 |                   | Operations / second | Relative margin of error |
 | ----------------- | ------------------- | ------------------------ |
