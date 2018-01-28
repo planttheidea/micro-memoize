@@ -84,21 +84,17 @@ const fibonacciMultiplePrimitive = (number, isComplete) => {
   );
 };
 
-const fibonacciMultipleObject = (number, check) => {
+const fibonacciMultipleObject = (object, check) => {
   if (check.isComplete) {
-    return number;
+    return object.number;
   }
 
-  const firstValue = number - 1;
-  const secondValue = number - 2;
+  const firstValue = object.number - 1;
+  const secondValue = object.number - 2;
 
   return (
-    fibonacciMultipleObject(firstValue, {
-      isComplete: firstValue < 2
-    }) +
-    fibonacciMultipleObject(secondValue, {
-      isComplete: secondValue < 2
-    })
+    fibonacciMultipleObject({number: firstValue}, {isComplete: firstValue < 2}) +
+    fibonacciMultipleObject({number: secondValue}, {isComplete: secondValue < 2})
   );
 };
 
@@ -299,7 +295,9 @@ const runMultiplePrimitiveSuite = () => {
 
 const runMultipleObjectSuite = () => {
   const fibonacciSuite = new Benchmark.Suite('Multiple parameters (Object)');
-  const fibonacciNumber = 35;
+  const fibonacciNumber = {
+    number: 35
+  };
   const isComplete = {
     isComplete: false
   };
