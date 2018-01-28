@@ -61,8 +61,14 @@ const onComplete = () => {
   showResults(orderedBenchmarkResults);
 };
 
-const fibonacci = (number) => {
-  return number < 2 ? number : fibonacci(number - 1) + fibonacci(number - 2);
+const fibonacciSinglePrimitive = (number) => {
+  return number < 2 ? number : fibonacciSinglePrimitive(number - 1) + fibonacciSinglePrimitive(number - 2);
+};
+
+const fibonacciSingleObject = (object) => {
+  return object.number < 2
+    ? object.number
+    : fibonacciSingleObject({number: object.number - 1}) + fibonacciSingleObject({number: object.number - 2});
 };
 
 const fibonacciMultiplePrimitive = (number, isComplete) => {
@@ -102,20 +108,20 @@ const fibonacciMultipleDeepEqual = ({number}) => {
     : fibonacciMultipleDeepEqual({number: number - 1}) + fibonacciMultipleDeepEqual({number: number - 2});
 };
 
-const runSingleParameterSuite = () => {
-  const fibonacciSuite = new Benchmark.Suite('Single parameter');
+const runSinglePrimitiveSuite = () => {
+  const fibonacciSuite = new Benchmark.Suite('Single parameter primitive');
   const fibonacciNumber = 35;
 
-  const mUnderscore = underscore(fibonacci);
-  const mLodash = lodash(fibonacci);
-  const mRamda = ramda(fibonacci);
-  const mMemoizee = memoizee(fibonacci);
-  const mFastMemoize = fastMemoize(fibonacci);
-  const mAddyOsmani = addyOsmani(fibonacci);
-  const mMemoizerific = memoizerific(Infinity)(fibonacci);
-  const mLruMemoize = lruMemoize(Infinity)(fibonacci);
-  const mMoize = moize(fibonacci);
-  const mMicroMemoize = microMemoize(fibonacci);
+  const mUnderscore = underscore(fibonacciSinglePrimitive);
+  const mLodash = lodash(fibonacciSinglePrimitive);
+  const mRamda = ramda(fibonacciSinglePrimitive);
+  const mMemoizee = memoizee(fibonacciSinglePrimitive);
+  const mFastMemoize = fastMemoize(fibonacciSinglePrimitive);
+  const mAddyOsmani = addyOsmani(fibonacciSinglePrimitive);
+  const mMemoizerific = memoizerific(Infinity)(fibonacciSinglePrimitive);
+  const mLruMemoize = lruMemoize(Infinity)(fibonacciSinglePrimitive);
+  const mMoize = moize(fibonacciSinglePrimitive);
+  const mMicroMemoize = microMemoize(fibonacciSinglePrimitive);
 
   return new Promise((resolve) => {
     fibonacciSuite
@@ -151,7 +157,75 @@ const runSingleParameterSuite = () => {
       })
       .on('start', () => {
         console.log(''); // eslint-disable-line no-console
-        console.log('Starting cycles for functions with a single parameter...'); // eslint-disable-line no-console
+        console.log('Starting cycles for functions with a single primitive parameter...'); // eslint-disable-line no-console
+
+        results = [];
+
+        spinner.start();
+      })
+      .on('cycle', onCycle)
+      .on('complete', () => {
+        onComplete();
+        resolve();
+      })
+      .run({
+        async: true
+      });
+  });
+};
+
+const runSingleObjectSuite = () => {
+  const fibonacciSuite = new Benchmark.Suite('Single parameter object');
+  const fibonacciNumber = {
+    number: 35
+  };
+
+  const mUnderscore = underscore(fibonacciSingleObject);
+  const mLodash = lodash(fibonacciSingleObject);
+  const mRamda = ramda(fibonacciSingleObject);
+  const mMemoizee = memoizee(fibonacciSingleObject);
+  const mFastMemoize = fastMemoize(fibonacciSingleObject);
+  const mAddyOsmani = addyOsmani(fibonacciSingleObject);
+  const mMemoizerific = memoizerific(Infinity)(fibonacciSingleObject);
+  const mLruMemoize = lruMemoize(Infinity)(fibonacciSingleObject);
+  const mMoize = moize(fibonacciSingleObject);
+  const mMicroMemoize = microMemoize(fibonacciSingleObject);
+
+  return new Promise((resolve) => {
+    fibonacciSuite
+      .add('addy-osmani', () => {
+        mAddyOsmani(fibonacciNumber);
+      })
+      .add('fast-memoize', () => {
+        mFastMemoize(fibonacciNumber);
+      })
+      .add('lodash', () => {
+        mLodash(fibonacciNumber);
+      })
+      .add('lru-memoize', () => {
+        mLruMemoize(fibonacciNumber);
+      })
+      .add('memoizee', () => {
+        mMemoizee(fibonacciNumber);
+      })
+      .add('memoizerific', () => {
+        mMemoizerific(fibonacciNumber);
+      })
+      .add('micro-memoize', () => {
+        mMicroMemoize(fibonacciNumber);
+      })
+      .add('moize', () => {
+        mMoize(fibonacciNumber);
+      })
+      .add('ramda', () => {
+        mRamda(fibonacciNumber);
+      })
+      .add('underscore', () => {
+        mUnderscore(fibonacciNumber);
+      })
+      .on('start', () => {
+        console.log(''); // eslint-disable-line no-console
+        console.log('Starting cycles for functions with a single object parameter...'); // eslint-disable-line no-console
 
         results = [];
 
@@ -330,7 +404,8 @@ const runAlternativeOptionsSuite = () => {
 
 // runAlternativeOptionsSuite();
 
-runSingleParameterSuite()
+runSinglePrimitiveSuite()
+  .then(runSingleObjectSuite)
   .then(runMultiplePrimitiveSuite)
   .then(runMultipleObjectSuite)
   .then(runAlternativeOptionsSuite);

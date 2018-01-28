@@ -36,8 +36,8 @@ export default function memoize(fn, options = {}) {
    * @param {...Array<any>} key the arguments passed, which create a unique cache key
    * @returns {any} the value of the method called with the arguments
    */
-  function memoized(...key) {
-    const keyIndex = getKeyIndex(cache.keys, key);
+  function memoized() {
+    const keyIndex = getKeyIndex(cache.keys, arguments);
 
     if (~keyIndex) {
       orderByLru(cache.keys, keyIndex);
@@ -48,8 +48,8 @@ export default function memoize(fn, options = {}) {
         cache.values.pop();
       }
 
-      cache.keys.unshift(key);
-      cache.values.unshift(fn.apply(this, key));
+      cache.keys.unshift([...arguments]);
+      cache.values.unshift(fn.apply(this, cache.keys[0]));
     }
 
     return cache.values[0];
