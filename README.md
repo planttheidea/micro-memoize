@@ -15,7 +15,8 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
   * [isMemoized](#ismemoized)
   * [options](#options)
 * [Benchmarks](#benchmarks)
-  * [Single parameter](#single-parameter)
+  * [Single parameter (primitive only)](#single-parameter-primitive-only)
+  * [Single parameter (complex object)](#single-parameter-complex-object)
   * [Multiple parameters (primitives only)](#multiple-parameters-primitives-only)
   * [Multiple parameters (complex objects)](#multiple-parameters-complex-objects)
 * [Browser support](#browser-support)
@@ -24,9 +25,7 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
 
 ## Summary
 
-As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (959 _bytes_ minified+gzipped).
-
-It also is the fastest memoization library I've benchmarked (even faster than `moize`) in all supported scenarios.
+As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (970 _bytes_ minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
 
 ## Usage
 
@@ -185,48 +184,76 @@ The [`options`](#options) passed when creating the memoized method.
 
 ## Benchmarks
 
-All values provided are the number of operations per second (ops/sec) calculated by the [Benchmark suite](https://benchmarkjs.com/). Note that `underscore`, `lodash`, and `ramda` do not support mulitple-parameter memoization, so they are not included in those benchmarks.
+All values provided are the number of operations per second (ops/sec) calculated by the [Benchmark suite](https://benchmarkjs.com/). Note that `underscore`, `lodash`, and `ramda` do not support mulitple-parameter memoization (which is where `micro-memoize` really shines), so they are not included in those benchmarks.
 
-Each benchmark was performed using the default configuration of the library, with a fibonacci calculation based on a starting parameter of `35`, and in the case of multiple parameters a second parameter (`boolean` for primitives, `object` for complex objects) was used.
+Each benchmark was performed using the default configuration of the library, with a fibonacci calculation based on the following parameters:
 
-#### Single parameter
+* Single primitive = `35`
+* Single object = `{number: 35}`
+* Multiple primitives = `35, true`
+* Multiple objects = `{number: 35}, {isComplete: true}`
 
-|                    | Operations / second | Relative margin of error |
-|--------------------|---------------------|--------------------------|
-| **micro-memoize**  | **42,418,881**      | **0.63%**                |
-| fast-memoize       | 39,213,355          | 0.57%                    |
-| moize              | 29,118,565          | 0.72%                    |
-| lodash             | 24,144,216          | 0.52%                    |
-| underscore         | 22,867,768          | 0.94%                    |
-| memoizee           | 16,130,060          | 0.69%                    |
-| lru-memoize        |  8,850,221          | 1.13%                    |
-| Addy Osmani        |  6,400,200          | 0.67%                    |
-| memoizerific       |  4,767,238          | 0.82%                    |
-| ramda              |  1,038,438          | 0.79%                    |
+#### Single parameter (primitive only)
+
+This is usually what benchmarks target for ... its the least-likely use-case, but the easiest to optimize, often at the expense of more common use-cases.
+
+|                   | Operations / second | Relative margin of error |
+| ----------------- | ------------------- | ------------------------ |
+| fast-memoize      | 96,959,024          | 0.74%                    |
+| **micro-memoize** | **57,510,942**      | **0.66%**                |
+| moize             | 29,460,085          | 0.83%                    |
+| lodash            | 28,973,928          | 0.68%                    |
+| underscore        | 19,345,813          | 0.87%                    |
+| memoizee          | 15,283,483          | 0.96%                    |
+| lru-memoize       | 8,296,286           | 0.75%                    |
+| Addy Osmani       | 5,732,939           | 0.69%                    |
+| memoizerific      | 5,316,747           | 0.56%                    |
+| ramda             | 1,099,910           | 0.69%                    |
+
+#### Single parameter (complex object)
+
+This is what most memoization libraries target as the primary use-case, as it removes the complexities of multiple arguments but allows for usage with one to many values.
+
+|                   | Operations / second | Relative margin of error |
+| ----------------- | ------------------- | ------------------------ |
+| **micro-memoize** | **45,942,468**      | **0.70%**                |
+| moize             | 26,015,006          | 0.70%                    |
+| lodash            | 22,151,880          | 0.68%                    |
+| memoizee          | 9,546,656           | 0.54%                    |
+| underscore        | 8,233,769           | 0.82%                    |
+| lru-memoize       | 6,788,336           | 0.79%                    |
+| memoizerific      | 4,965,703           | 0.70%                    |
+| Addy Osmani       | 1,695,875           | 0.80%                    |
+| fast-memoize      | 1,329,404           | 0.66%                    |
+| ramda             | 193,824             | 0.94%                    |
 
 #### Multiple parameters (primitives only)
 
-|                    | Operations / second | Relative margin of error |
-|--------------------|---------------------|--------------------------|
-| **micro-memoize**  | **28,103,063**      | **0.78%**                |
-| moize              | 20,589,607          | 0.93%                    |
-| memoizee           |  9,282,774          | 0.61%                    |
-| lru-memoize        |  6,674,788          | 1.49%                    |
-| memoizerific       |  3,535,136          | 0.88%                    |
-| Addy Osmani        |  3,205,031          | 0.98%                    |
-| fast-memoize       |  1,039,039          | 0.71%                    |
+This is a very common use-case for function calls, but can be more difficult to optimize because you need to account for multiple possibilities ... did the number of arguments change, are there default arguments, etc.
+
+|                   | Operations / second | Relative margin of error |
+| ----------------- | ------------------- | ------------------------ |
+| **micro-memoize** | **37,808,515**      | **0.70%**                |
+| moize             | 18,215,090          | 0.65%                    |
+| memoizee          | 9,306,676           | 0.66%                    |
+| lru-memoize       | 6,117,472           | 0.84%                    |
+| memoizerific      | 3,922,988           | 0.67%                    |
+| Addy Osmani       | 3,073,420           | 0.71%                    |
+| fast-memoize      | 1,081,967           | 0.79%                    |
 
 #### Multiple parameters (complex objects)
 
-|                    | Operations / second | Relative margin of error |
-|--------------------|---------------------|--------------------------|
-| **micro-memoize**  | **28,504,863**      | **0.88%**                |
-| moize              | 21,126,388          | 0.79%                    |
-| memoizee           |  7,145,023          | 0.61%                    |
-| lru-memoize        |  6,623,210          | 1.57%                    |
-| memoizerific       |  3,011,415          | 0.86%                    |
-| Addy Osmani        |  1,471,939          | 1.03%                    |
-| fast-memoize       |    882,447          | 0.69%                    |
+This is the most robust use-case, with the same complexities as multiple primitives but managing bulkier objects with additional edge scenarios (destructured with defaults, for example).
+
+|                   | Operations / second | Relative margin of error |
+| ----------------- | ------------------- | ------------------------ |
+| **micro-memoize** | **36,624,360**      | **0.88%**                |
+| moize             | 18,128,088          | 0.87%                    |
+| memoizee          | 6,895,779           | 0.66%                    |
+| lru-memoize       | 6,021,713           | 0.84%                    |
+| memoizerific      | 4,147,039           | 0.79%                    |
+| Addy Osmani       | 940,425             | 0.74%                    |
+| fast-memoize      | 704,226             | 0.68%                    |
 
 ## Browser support
 
@@ -246,6 +273,7 @@ Each benchmark was performed using the default configuration of the library, wit
 ## Development
 
 Standard stuff, clone the repo and `npm install` dependencies. The npm scripts available:
+
 * `build` => run webpack to build development `dist` file with NODE_ENV=development
 * `build:minifed` => run webpack to build production `dist` file with NODE_ENV=production
 * `dev` => run webpack dev server to run example app (playground!)
