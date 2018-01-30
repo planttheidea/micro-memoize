@@ -1,5 +1,7 @@
 // utils
-import {createGetKeyIndex, isSameValueZero, orderByLru} from './utils';
+import {createGetKeyIndex, createGetTransformedKey, isSameValueZero, orderByLru} from './utils';
+
+const slice = [].slice;
 
 /**
  * @function memoize
@@ -19,9 +21,10 @@ export default function memoize(fn, options = {}) {
     return fn;
   }
 
-  const {isEqual = isSameValueZero, maxSize = 1} = options;
+  const {isEqual = isSameValueZero, maxSize = 1, transformKey} = options;
 
   const getKeyIndex = createGetKeyIndex(isEqual);
+  const getTransformedKey = transformKey ? createGetTransformedKey(transformKey) : null;
   const cache = {
     keys: [],
     values: []
@@ -37,7 +40,8 @@ export default function memoize(fn, options = {}) {
    * @returns {any} the value of the method called with the arguments
    */
   function memoized() {
-    const keyIndex = getKeyIndex(cache.keys, arguments);
+    const args = getTransformedKey ? getTransformedKey(slice.call(arguments)) : arguments;
+    const keyIndex = getKeyIndex(cache.keys, args);
 
     if (~keyIndex) {
       orderByLru(cache.keys, keyIndex);
@@ -48,8 +52,8 @@ export default function memoize(fn, options = {}) {
         cache.values.pop();
       }
 
-      cache.keys.unshift([...arguments]);
-      cache.values.unshift(fn.apply(this, cache.keys[0]));
+      cache.keys.unshift(getTransformedKey ? args : slice.call(args));
+      cache.values.unshift(fn.apply(this, arguments));
     }
 
     return cache.values[0];

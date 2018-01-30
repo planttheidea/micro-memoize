@@ -49,6 +49,23 @@ export const createGetKeyIndex = (isEqual) => {
   };
 };
 
+export const createGetTransformedKey = (transformKey) => {
+  /**
+   * @function getTransformedKey
+   *
+   * @description
+   * get the transformed key based on the args passed
+   *
+   * @param {Array<*>} args the args to transform into a key
+   * @returns {Array<*>} the transformed key
+   */
+  return (args) => {
+    const key = transformKey(args);
+
+    return Array.isArray(key) ? key : [key];
+  };
+};
+
 /**
  * @function isSameValueZero
  *
