@@ -110,5 +110,5 @@
     "transpile:es": "BABEL_ENV=es babel src --out-dir es",
     "transpile:lib": "BABEL_ENV=lib babel src --out-dir lib"
   },
-  "version": "1.0.1"
+  "version": "1.1.0"
 }
