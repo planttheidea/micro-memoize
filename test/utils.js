@@ -73,6 +73,38 @@ test('if getKeyIndex will return -1 if no match is found', (t) => {
   t.is(result, -1);
 });
 
+test('if getTransformedKey will return the transformed key itself when it is an array', (t) => {
+  const transformKey = (args) => {
+    const [one, two] = args;
+
+    return [two, one];
+  };
+
+  const getTransformedKey = utils.createGetTransformedKey(transformKey);
+
+  const args = ['one', 'two'];
+
+  const result = getTransformedKey(args);
+
+  t.deepEqual(result, [...args].reverse());
+});
+
+test('if getTransformedKey will return the transformed key in an array when it is not an array', (t) => {
+  const transformKey = (args) => {
+    const [one, two] = args;
+
+    return JSON.stringify([two, one]);
+  };
+
+  const getTransformedKey = utils.createGetTransformedKey(transformKey);
+
+  const args = ['one', 'two'];
+
+  const result = getTransformedKey(args);
+
+  t.deepEqual(result, [JSON.stringify([...args].reverse())]);
+});
+
 test('if isSameValueZero will return true when the objects are equal', (t) => {
   const object1 = {};
   const object2 = object1;

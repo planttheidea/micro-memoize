@@ -125,3 +125,86 @@ test('if memoize will return the memoized function that will use the custom isEq
     ]
   });
 });
+
+test('if memoize will return the memoized function that will use the transformKey method', (t) => {
+  let callCount = 0;
+
+  const fn = (one, two) => {
+    callCount++;
+
+    return {one, two};
+  };
+
+  const memoized = memoize(fn, {
+    transformKey(args) {
+      return JSON.stringify(args);
+    }
+  });
+
+  const fnArg1 = () => {};
+  const fnArg2 = () => {};
+  const fnArg3 = () => {};
+
+  t.deepEqual(memoized({one: 'one'}, fnArg1), {one: {one: 'one'}, two: fnArg1});
+  t.deepEqual(memoized({one: 'one'}, fnArg2), {one: {one: 'one'}, two: fnArg1});
+  t.deepEqual(memoized({one: 'one'}, fnArg3), {one: {one: 'one'}, two: fnArg1});
+
+  t.is(callCount, 1);
+
+  t.deepEqual(memoized.cache, {
+    keys: [['[{"one":"one"},null]']],
+    values: [
+      {
+        one: {one: 'one'},
+        two: fnArg1
+      }
+    ]
+  });
+});
+
+test('if memoize will return the memoized function that will use the transformKey method with a custom isEqual', (t) => {
+  let callCount = 0;
+
+  const fn = (one, two) => {
+    callCount++;
+
+    return {one, two};
+  };
+
+  const memoized = memoize(fn, {
+    isEqual(key1, key2) {
+      return key1.args === key2.args;
+    },
+    transformKey(args) {
+      return {
+        args: JSON.stringify(args)
+      };
+    }
+  });
+
+  const fnArg1 = () => {};
+  const fnArg2 = () => {};
+  const fnArg3 = () => {};
+
+  t.deepEqual(memoized({one: 'one'}, fnArg1), {one: {one: 'one'}, two: fnArg1});
+  t.deepEqual(memoized({one: 'one'}, fnArg2), {one: {one: 'one'}, two: fnArg1});
+  t.deepEqual(memoized({one: 'one'}, fnArg3), {one: {one: 'one'}, two: fnArg1});
+
+  t.is(callCount, 1);
+
+  t.deepEqual(memoized.cache, {
+    keys: [
+      [
+        {
+          args: '[{"one":"one"},null]'
+        }
+      ]
+    ],
+    values: [
+      {
+        one: {one: 'one'},
+        two: fnArg1
+      }
+    ]
+  });
+});

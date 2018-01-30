@@ -2,7 +2,7 @@ import React, {PureComponent} from 'react';
 import Bluebird from 'bluebird';
 import {deepEqual, shallowEqual} from 'fast-equals';
 
-import moize from '../src';
+import memoize from '../src';
 
 console.group('standard');
 
@@ -16,7 +16,7 @@ const method = function(one, two) {
   return [one, two].join(' ');
 };
 
-const memoized = moize(method);
+const memoized = memoize(method);
 
 memoized(foo, bar);
 memoized(bar, foo);
@@ -35,7 +35,7 @@ console.log(memoized.cache);
 
 console.group('standard with larger cache size');
 
-const memoizedLargerCache = moize(method, {maxSize: 5});
+const memoizedLargerCache = memoize(method, {maxSize: 5});
 
 memoizedLargerCache(foo, bar);
 memoizedLargerCache(bar, foo);
@@ -54,7 +54,7 @@ const isEqualMaxArgs = (originalKey, newKey) => {
   return originalKey[0] === newKey[0];
 };
 
-const memoizedMax = moize(method, {isEqual: isEqualMaxArgs});
+const memoizedMax = memoize(method, {isEqual: isEqualMaxArgs});
 
 memoizedMax(foo, bar);
 memoizedMax(foo, 'baz');
@@ -69,7 +69,7 @@ const deepEqualMethod = ({one, two}) => {
   return [one, two];
 };
 
-const deepEqualMemoized = moize(deepEqualMethod, {
+const deepEqualMemoized = memoize(deepEqualMethod, {
   isEqual: deepEqual
 });
 
@@ -102,8 +102,8 @@ const promiseMethodRejected = (number) => {
   });
 };
 
-const memoizedPromise = moize(promiseMethod);
-const memoizedPromiseRejected = moize(promiseMethodRejected);
+const memoizedPromise = memoize(promiseMethod);
+const memoizedPromiseRejected = memoize(promiseMethodRejected);
 
 memoizedPromiseRejected(3)
   .then((value) => {
@@ -150,7 +150,7 @@ const withDefault = (foo, bar = 'default') => {
 
   return `${foo} ${bar}`;
 };
-const moizedWithDefault = moize(withDefault, {maxSize: 5});
+const moizedWithDefault = memoize(withDefault, {maxSize: 5});
 
 console.log(moizedWithDefault(foo));
 console.log(moizedWithDefault(foo, bar));
@@ -158,29 +158,30 @@ console.log(moizedWithDefault(foo));
 
 console.groupEnd('with default parameters');
 
-console.group('transform args');
+console.group('transform key');
 
-const isEqualTransformArgs = (originalKey, newKey) => {
-  return !newKey || shallowEqual(originalKey.slice(1), newKey.slice(1));
+const noFns = (one, two, three) => {
+  console.log('transform key called');
+
+  return {one, two, three};
 };
 
-const onlyLastTwo = (one, two, three) => {
-  console.log('only last two fired');
-
-  return [two, three];
-};
-
-const moizedLastTwo = moize(onlyLastTwo, {
-  isEqual: isEqualTransformArgs
+const memoizedNoFns = memoize(noFns, {
+  isEqual(key1, key2) {
+    return key1 === key2;
+  },
+  transformKey(args) {
+    return JSON.stringify(args);
+  }
 });
 
-console.log(moizedLastTwo(foo, bar, baz));
-console.log(moizedLastTwo(null, bar, baz));
+console.log(memoizedNoFns('one', 'two', function three() {}));
+console.log(memoizedNoFns('one', 'two', function four() {}));
+console.log(memoizedNoFns('one', 'two', function five() {}));
 
-console.log(moizedLastTwo.cacheSnapshot);
-console.log(moizedLastTwo.options);
+console.log(memoizedNoFns.cache);
 
-console.groupEnd('transform args');
+console.groupEnd('transform key');
 
 class App extends PureComponent {
   render() {
