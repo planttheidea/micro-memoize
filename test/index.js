@@ -1,5 +1,6 @@
 // test
 import test from 'ava';
+import sinon from 'sinon';
 import {deepEqual} from 'fast-equals';
 
 // src
@@ -207,4 +208,39 @@ test('if memoize will return the memoized function that will use the transformKe
       }
     ]
   });
+});
+
+test('if memoize will return a memoized method that will auto-remove the key from cache if isPromise is true and the promise is rejected', async (t) => {
+  const timeout = 200;
+
+  const error = new Error('boom');
+
+  const fn = async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, timeout);
+    });
+
+    throw error;
+  };
+
+  const memoized = memoize(fn, {isPromise: true});
+
+  const spy = sinon.spy();
+
+  memoized('foo').catch(spy);
+
+  t.is(memoized.cacheSnapshot.keys.length, 1);
+  t.is(memoized.cacheSnapshot.values.length, 1);
+
+  await new Promise((resolve) => {
+    setTimeout(resolve, timeout + 50);
+  });
+
+  t.deepEqual(memoized.cacheSnapshot, {
+    keys: [],
+    values: []
+  });
+
+  t.true(spy.calledOnce);
+  t.true(spy.calledWith(error));
 });

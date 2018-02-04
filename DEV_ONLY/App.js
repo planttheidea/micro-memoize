@@ -102,14 +102,15 @@ const promiseMethodRejected = (number) => {
   });
 };
 
-const memoizedPromise = memoize(promiseMethod);
-const memoizedPromiseRejected = memoize(promiseMethodRejected);
+const memoizedPromise = memoize(promiseMethod, {isPromise: true});
+const memoizedPromiseRejected = memoize(promiseMethodRejected, {isPromise: true});
 
 memoizedPromiseRejected(3)
   .then((value) => {
     console.log(value);
   })
   .catch((error) => {
+    console.log(memoizedPromiseRejected.cacheSnapshot);
     console.error(error);
   });
 
@@ -118,6 +119,7 @@ memoizedPromiseRejected(3)
     console.log(value);
   })
   .catch((error) => {
+    console.log(memoizedPromiseRejected.cacheSnapshot);
     console.error(error);
   });
 
@@ -126,6 +128,7 @@ memoizedPromiseRejected(3)
     console.log(value);
   })
   .catch((error) => {
+    console.log(memoizedPromiseRejected.cacheSnapshot);
     console.error(error);
   });
 

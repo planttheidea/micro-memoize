@@ -1,5 +1,10 @@
 # micro-memoize CHANGELOG
 
+## 1.2.0
+
+* Add [`isPromise`](README.md#ispromise) option
+* Add typings for Flowtype and TypeScript
+
 ## 1.1.0
 
 * Add [`transformKey`](README.md#transformkey) option

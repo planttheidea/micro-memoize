@@ -1,6 +1,7 @@
 {
   "env": {
     "development": {
+      "plugins": ["syntax-flow", "transform-flow-strip-types"],
       "presets": [
         [
           "env",
@@ -13,6 +14,7 @@
       ]
     },
     "es": {
+      "plugins": ["syntax-flow", "transform-flow-strip-types"],
       "presets": [
         [
           "env",
@@ -25,6 +27,7 @@
       ]
     },
     "lib": {
+      "plugins": ["syntax-flow", "transform-flow-strip-types"],
       "presets": [
         [
           "env",
@@ -36,6 +39,7 @@
       ]
     },
     "production": {
+      "plugins": ["syntax-flow", "transform-flow-strip-types"],
       "presets": [
         [
           "env",
@@ -48,6 +52,7 @@
       ]
     },
     "test": {
+      "plugins": ["syntax-flow", "transform-flow-strip-types", "transform-runtime"],
       "presets": [
         [
           "env",

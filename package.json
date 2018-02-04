@@ -3,25 +3,12 @@
   "ava": {
     "babel": "inherit",
     "failFast": true,
-    "files": [
-      "test/*.js"
-    ],
-    "require": [
-      "babel-register"
-    ],
-    "source": [
-      "src/*.js"
-    ],
+    "files": ["test/*.js"],
+    "require": ["babel-register"],
+    "source": ["src/*.js"],
     "verbose": true
   },
-  "browserslist": [
-    "defaults",
-    "Explorer >= 9",
-    "Safari >= 6",
-    "Opera >= 15",
-    "iOS >= 8",
-    "Android >= 4"
-  ],
+  "browserslist": ["defaults", "Explorer >= 9", "Safari >= 6", "Opera >= 15", "iOS >= 8", "Android >= 4"],
   "bugs": {
     "url": "https://github.com/planttheidea/micro-memoize/issues"
   },
@@ -32,6 +19,9 @@
     "babel-core": "^6.26.0",
     "babel-eslint": "^8.2.1",
     "babel-loader": "^7.1.2",
+    "babel-plugin-syntax-flow": "^6.18.0",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
@@ -45,6 +35,7 @@
     "eslint-loader": "^1.9.0",
     "fast-equals": "^1.0.6",
     "fast-memoize": "^2.2.8",
+    "flow-babel-webpack-plugin": "^1.1.1",
     "hash-it": "^3.1.2",
     "html-webpack-plugin": "^2.30.1",
     "in-publish": "^2.0.0",
@@ -100,9 +91,11 @@
     "build:minified": "NODE_ENV=production webpack --progress --colors --config=webpack/webpack.config.minified.js",
     "clean": "rimraf lib && rimraf es && rimraf dist",
     "dev": "NODE_ENV=development webpack-dev-server --progress --colors --config=webpack/webpack.config.dev.js",
+    "flow": "flow check src",
     "lint": "eslint --max-warnings 0 src",
     "prepublish": "if in-publish; then npm run prepublish:compile; fi",
-    "prepublish:compile": "npm run lint && npm run test:coverage && npm run clean && npm run transpile:lib && npm run transpile:es && npm run build && npm run build:minified",
+    "prepublish:compile":
+      "npm run lint && npm run flow && npm run test:coverage && npm run clean && npm run transpile:lib && npm run transpile:es && npm run build && npm run build:minified",
     "start": "npm run dev",
     "test": "NODE_PATH=. NODE_ENV=test ava",
     "test:coverage": "nyc --cache npm test",
@@ -110,5 +103,6 @@
     "transpile:es": "BABEL_ENV=es babel src --out-dir es",
     "transpile:lib": "BABEL_ENV=lib babel src --out-dir lib"
   },
+  "types": "./index.d.ts",
   "version": "1.1.0"
 }

@@ -1,4 +1,9 @@
-export const createAreKeysEqual = (isEqual) => {
+// @flow
+
+// types
+import type {Cache} from './types';
+
+export const createAreKeysEqual = (isEqual: Function): Function => {
   /**
    * @function areKeysEqual
    *
@@ -9,12 +14,12 @@ export const createAreKeysEqual = (isEqual) => {
    * @param {Array<any>} keys2 the keys array to test
    * @returns {boolean} are the keys shallowly equal
    */
-  return (keys1, keys2) => {
+  return (keys1: Array<any>, keys2: Array<any>): boolean => {
     if (keys1.length !== keys2.length) {
       return false;
     }
 
-    for (let index = 0; index < keys1.length; index++) {
+    for (let index: number = 0; index < keys1.length; index++) {
       if (!isEqual(keys1[index], keys2[index])) {
         return false;
       }
@@ -24,8 +29,8 @@ export const createAreKeysEqual = (isEqual) => {
   };
 };
 
-export const createGetKeyIndex = (isEqual) => {
-  const areKeysEqual = createAreKeysEqual(isEqual);
+export const createGetKeyIndex = (isEqual: Function): Function => {
+  const areKeysEqual: Function = createAreKeysEqual(isEqual);
 
   /**
    * @function getKeyIndex
@@ -38,8 +43,8 @@ export const createGetKeyIndex = (isEqual) => {
    *
    * @returns {number} the index of the matching key value, or -1
    */
-  return (allKeys, keysToMatch) => {
-    for (let index = 0; index < allKeys.length; index++) {
+  return (allKeys: Array<Array<any>>, keysToMatch: Array<any>): number => {
+    for (let index: number = 0; index < allKeys.length; index++) {
       if (areKeysEqual(allKeys[index], keysToMatch)) {
         return index;
       }
@@ -49,7 +54,7 @@ export const createGetKeyIndex = (isEqual) => {
   };
 };
 
-export const createGetTransformedKey = (transformKey) => {
+export const createGetTransformedKey = (transformKey: Function): Function => {
   /**
    * @function getTransformedKey
    *
@@ -59,8 +64,8 @@ export const createGetTransformedKey = (transformKey) => {
    * @param {Array<*>} args the args to transform into a key
    * @returns {Array<*>} the transformed key
    */
-  return (args) => {
-    const key = transformKey(args);
+  return (args: Object): Array<any> => {
+    const key: any = transformKey(args);
 
     return Array.isArray(key) ? key : [key];
   };
@@ -74,10 +79,9 @@ export const createGetTransformedKey = (transformKey) => {
  *
  * @param {any} object1 the first object to compare
  * @param {any} object2 the second object to compare
- *
  * @returns {boolean} are the two objects equal
  */
-export const isSameValueZero = (object1, object2) => {
+export const isSameValueZero = (object1: any, object2: any): boolean => {
   return object1 === object2 || (object1 !== object1 && object2 !== object2);
 };
 
@@ -90,11 +94,11 @@ export const isSameValueZero = (object1, object2) => {
  * @param {Array<any>} array the array to order
  * @param {number} itemIndex the index of the item to move to the front
  */
-export const orderByLru = (array, itemIndex) => {
+export const orderByLru = (array: Array<any>, itemIndex: number): void => {
   if (itemIndex) {
-    const value = array[itemIndex];
+    const value: any = array[itemIndex];
 
-    let index = itemIndex;
+    let index: number = itemIndex;
 
     while (index--) {
       array[index + 1] = array[index];
@@ -102,4 +106,27 @@ export const orderByLru = (array, itemIndex) => {
 
     array[0] = value;
   }
+};
+
+/**
+ * @function setPromiseCatch
+ *
+ * @description
+ * update the promise method to auto-remove from cache if rejected
+ *
+ * @param {Cache} cache the cache object
+ * @param {Array<any>} key the key to remove upon promise rejection
+ * @param {function} getKeyIndex the method to retrieve the key index
+ */
+export const setPromiseCatch = (cache: Cache, key: Array<any>, getKeyIndex: Function): void => {
+  cache.values[0] = cache.values[0].catch((error: Error) => {
+    const keyIndex: number = getKeyIndex(cache.keys, key);
+
+    if (~keyIndex) {
+      cache.keys.splice(keyIndex, 1);
+      cache.values.splice(keyIndex, 1);
+    }
+
+    throw error;
+  });
 };

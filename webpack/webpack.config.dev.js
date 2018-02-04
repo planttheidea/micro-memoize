@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const FlowBabelWebpackPlugin = require('flow-babel-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 
@@ -49,5 +50,10 @@ module.exports = Object.assign({}, defaultConfig, {
     publicPath: `http://localhost:${PORT}/`
   }),
 
-  plugins: [...defaultConfig.plugins, new HtmlWebpackPlugin(), new webpack.HotModuleReplacementPlugin()]
+  plugins: [
+    ...defaultConfig.plugins,
+    new HtmlWebpackPlugin(),
+    new webpack.HotModuleReplacementPlugin(),
+    new FlowBabelWebpackPlugin()
+  ]
 });
