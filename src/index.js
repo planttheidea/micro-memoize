@@ -6,7 +6,7 @@ import type {Cache, Options} from './types';
 // utils
 import {createGetKeyIndex, createGetTransformedKey, isSameValueZero, orderByLru, setPromiseCatch} from './utils';
 
-const slice = [].slice;
+const slice: Function = [].slice;
 
 /**
  * @function memoize

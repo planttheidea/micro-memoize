@@ -3,25 +3,12 @@
   "ava": {
     "babel": "inherit",
     "failFast": true,
-    "files": [
-      "test/*.js"
-    ],
-    "require": [
-      "babel-register"
-    ],
-    "source": [
-      "src/*.js"
-    ],
+    "files": ["test/*.js"],
+    "require": ["babel-register"],
+    "source": ["src/*.js"],
     "verbose": true
   },
-  "browserslist": [
-    "defaults",
-    "Explorer >= 9",
-    "Safari >= 6",
-    "Opera >= 15",
-    "iOS >= 8",
-    "Android >= 4"
-  ],
+  "browserslist": ["defaults", "Explorer >= 9", "Safari >= 6", "Opera >= 15", "iOS >= 8", "Android >= 4"],
   "bugs": {
     "url": "https://github.com/planttheidea/micro-memoize/issues"
   },
@@ -105,10 +92,10 @@
     "clean": "rimraf lib && rimraf es && rimraf dist",
     "dev": "NODE_ENV=development webpack-dev-server --progress --colors --config=webpack/webpack.config.dev.js",
     "flow": "flow check src",
-    "flow:generate": "flowgen ./index.d.ts --output-file flow-typed/micro-memoize.js",
     "lint": "eslint --max-warnings 0 src",
     "prepublish": "if in-publish; then npm run prepublish:compile; fi",
-    "prepublish:compile": "npm run lint && npm run test:coverage && npm run clean && npm run transpile:lib && npm run transpile:es && npm run build && npm run build:minified",
+    "prepublish:compile":
+      "npm run lint && npm run flow && npm run test:coverage && npm run clean && npm run transpile:lib && npm run transpile:es && npm run build && npm run build:minified",
     "start": "npm run dev",
     "test": "NODE_PATH=. NODE_ENV=test ava",
     "test:coverage": "nyc --cache npm test",
