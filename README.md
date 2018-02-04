@@ -10,6 +10,7 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
   * [isEqual](#isequal)
   * [isPromise](#ispromise)
   * [maxSize](#maxsize)
+  * [onCacheChange](#oncachechange)
   * [transformKey](#transformkey)
 * [Additional properties](#additional-properties)
   * [cache](#cache)
@@ -27,7 +28,7 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
 
 ## Summary
 
-As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
+As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1.1kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
 
 ## Usage
 
@@ -163,6 +164,38 @@ console.log(memoized('four', 'five')); // ['four', 'five'], drops ['one', 'two']
 ```
 
 **NOTE**: The default for `micro-memoize` differs from the default implementation of `moize`. `moize` will store an infinite number of results unless restricted, whereas `micro-memoize` will only store the most recent result. In this way, the default implementation of `micro-memoize` operates more like [`moize.simple`](https://github.com/planttheidea/moize#moizesimple).
+
+#### onCacheChange
+
+`function(cache: Cache): void`, _defaults to noop_
+
+Callback method that fires whenever the cache is added to or the order is updated. This is mainly to allow for higher-order caching managers that use `micro-memoize` to perform superset functionality on the `cache` object.
+
+```javascript
+const fn = (one, two) => {
+  return [one, two];
+};
+
+const memoized = memoize(fn, {
+  onCacheChange(cache) {
+    console.log('cache has changed');
+  }
+});
+
+memoized('foo', 'bar'); // cache has changed
+memoized('foo', 'bar');
+memoized('foo', 'bar');
+
+memoized('bar', 'foo'); // cache has changed
+memoized('bar', 'foo');
+memoized('bar', 'foo');
+
+memoized('foo', 'bar'); // cache has changed
+memoized('foo', 'bar');
+memoized('foo', 'bar');
+```
+
+**NOTE**: This method is not fired when the `cache` is manually manipulated, only when changed via calling the memoized method.
 
 #### transformKey
 

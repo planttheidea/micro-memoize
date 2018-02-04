@@ -9,5 +9,6 @@ export type Options = {
   isEqual: Function,
   isPromise: boolean,
   maxSize: number,
+  onCacheChange: Function,
   transformKey: ?Function
 };

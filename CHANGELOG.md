@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 1.3.0
+
+* Add [`onCacheChange`](README.md#oncachechange) option
+
 ## 1.2.0
 
 * Add [`isPromise`](README.md#ispromise) option

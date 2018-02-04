@@ -5,6 +5,7 @@ import {deepEqual} from 'fast-equals';
 
 // src
 import memoize from 'src/index';
+import * as utils from 'src/utils';
 
 test('if memoize will return the function if already memoized', (t) => {
   const fn = () => {};
@@ -39,7 +40,16 @@ test('if memoize will return the memoized function', (t) => {
 
   t.true(memoized.isMemoized);
 
-  t.deepEqual(memoized.options, {});
+  const {onCacheChange, ...testableOptions} = memoized.options;
+
+  t.deepEqual(testableOptions, {
+    isEqual: utils.isSameValueZero,
+    isPromise: false,
+    maxSize: 1,
+    transformKey: undefined
+  });
+  t.is(typeof onCacheChange, 'function');
+  t.is(onCacheChange('foo'), undefined);
 
   new Array(1000).fill('').forEach(() => {
     t.deepEqual(memoized('one', 'two'), {one: 'one', two: 'two'});
@@ -61,8 +71,9 @@ test('if memoize will return the memoized function that can have multiple cached
 
     return {one, two};
   };
+  const maxSize = 3;
 
-  const memoized = memoize(fn, {maxSize: 3});
+  const memoized = memoize(fn, {maxSize});
 
   t.deepEqual(memoized.cache, {
     keys: [],
@@ -76,7 +87,7 @@ test('if memoize will return the memoized function that can have multiple cached
 
   t.true(memoized.isMemoized);
 
-  t.deepEqual(memoized.options, {maxSize: 3});
+  t.is(memoized.options.maxSize, maxSize);
 
   t.deepEqual(memoized('one', 'two'), {one: 'one', two: 'two'});
   t.deepEqual(memoized('two', 'three'), {one: 'two', two: 'three'});
@@ -103,6 +114,8 @@ test('if memoize will return the memoized function that will use the custom isEq
   };
 
   const memoized = memoize(fn, {isEqual: deepEqual});
+
+  t.is(memoized.options.isEqual, deepEqual);
 
   t.deepEqual(memoized({deep: {value: 'value'}}, {other: {deep: {value: 'value'}}}), {
     one: {deep: {value: 'value'}},
@@ -135,12 +148,15 @@ test('if memoize will return the memoized function that will use the transformKe
 
     return {one, two};
   };
+  const transformKey = function(args) {
+    return JSON.stringify(args);
+  };
 
   const memoized = memoize(fn, {
-    transformKey(args) {
-      return JSON.stringify(args);
-    }
+    transformKey
   });
+
+  t.is(memoized.options.transformKey, transformKey);
 
   const fnArg1 = () => {};
   const fnArg2 = () => {};
@@ -171,17 +187,22 @@ test('if memoize will return the memoized function that will use the transformKe
 
     return {one, two};
   };
+  const isEqual = function(key1, key2) {
+    return key1.args === key2.args;
+  };
+  const transformKey = function(args) {
+    return {
+      args: JSON.stringify(args)
+    };
+  };
 
   const memoized = memoize(fn, {
-    isEqual(key1, key2) {
-      return key1.args === key2.args;
-    },
-    transformKey(args) {
-      return {
-        args: JSON.stringify(args)
-      };
-    }
+    isEqual,
+    transformKey
   });
+
+  t.is(memoized.options.isEqual, isEqual);
+  t.is(memoized.options.transformKey, transformKey);
 
   const fnArg1 = () => {};
   const fnArg2 = () => {};
@@ -222,8 +243,11 @@ test('if memoize will return a memoized method that will auto-remove the key fro
 
     throw error;
   };
+  const isPromise = true;
 
-  const memoized = memoize(fn, {isPromise: true});
+  const memoized = memoize(fn, {isPromise});
+
+  t.is(memoized.options.isPromise, isPromise);
 
   const spy = sinon.spy();
 
@@ -243,4 +267,64 @@ test('if memoize will return a memoized method that will auto-remove the key fro
 
   t.true(spy.calledOnce);
   t.true(spy.calledWith(error));
+});
+
+test('if memoize will fire the onCacheChange method passed with the cache when it is added to', (t) => {
+  const fn = (one, two) => {
+    return {one, two};
+  };
+  const onCacheChange = sinon.spy();
+
+  const memoized = memoize(fn, {onCacheChange});
+
+  t.is(memoized.options.onCacheChange, onCacheChange);
+
+  memoized('foo');
+
+  t.true(onCacheChange.calledOnce);
+  t.deepEqual(onCacheChange.args[0], [memoized.cache]);
+});
+
+test('if memoize will fire the onCacheChange method passed with the cache when it is updated', (t) => {
+  const fn = (one, two) => {
+    return {one, two};
+  };
+  const onCacheChange = sinon.spy();
+
+  const memoized = memoize(fn, {maxSize: 2, onCacheChange});
+
+  t.is(memoized.options.onCacheChange, onCacheChange);
+
+  memoized('foo', 'bar');
+
+  t.true(onCacheChange.calledOnce);
+  t.deepEqual(onCacheChange.args[0], [{keys: [['foo', 'bar']], values: [{one: 'foo', two: 'bar'}]}]);
+
+  memoized('bar', 'foo');
+
+  t.true(onCacheChange.calledTwice);
+  t.deepEqual(onCacheChange.args[1], [
+    {keys: [['bar', 'foo'], ['foo', 'bar']], values: [{one: 'bar', two: 'foo'}, {one: 'foo', two: 'bar'}]}
+  ]);
+
+  memoized('bar', 'foo');
+
+  t.true(onCacheChange.calledTwice);
+  t.deepEqual(onCacheChange.args[1], [
+    {keys: [['bar', 'foo'], ['foo', 'bar']], values: [{one: 'bar', two: 'foo'}, {one: 'foo', two: 'bar'}]}
+  ]);
+
+  memoized('foo', 'bar');
+
+  t.true(onCacheChange.calledThrice);
+  t.deepEqual(onCacheChange.args[2], [
+    {keys: [['foo', 'bar'], ['bar', 'foo']], values: [{one: 'foo', two: 'bar'}, {one: 'bar', two: 'foo'}]}
+  ]);
+
+  memoized('foo', 'bar');
+
+  t.true(onCacheChange.calledThrice);
+  t.deepEqual(onCacheChange.args[2], [
+    {keys: [['foo', 'bar'], ['bar', 'foo']], values: [{one: 'foo', two: 'bar'}, {one: 'bar', two: 'foo'}]}
+  ]);
 });
