@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 1.3.2
+
+* Make additional properties (`cache`, `cacheSnapshot`, `isMemoized`, `options`) configurable for higher-order memoization library usage
+
 ## 1.3.1
 
 * Only reorder keys when matching cache entry is not first key

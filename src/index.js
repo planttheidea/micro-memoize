@@ -78,11 +78,13 @@ export default function memoize(fn: Function, options: Options) {
     memoized,
     ({
       cache: {
+        configurable: true,
         get() {
           return cache;
         }
       },
       cacheSnapshot: {
+        configurable: true,
         get() {
           return {
             keys: [...cache.keys],
@@ -91,11 +93,13 @@ export default function memoize(fn: Function, options: Options) {
         }
       },
       isMemoized: {
+        configurable: true,
         get() {
           return true;
         }
       },
       options: {
+        configurable: true,
         get() {
           return {
             isEqual,
