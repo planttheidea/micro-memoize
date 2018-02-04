@@ -259,7 +259,7 @@ The [`options`](#options) passed when creating the memoized method.
 
 All values provided are the number of operations per second (ops/sec) calculated by the [Benchmark suite](https://benchmarkjs.com/). Note that `underscore`, `lodash`, and `ramda` do not support mulitple-parameter memoization (which is where `micro-memoize` really shines), so they are not included in those benchmarks.
 
-Each benchmark was performed on NodeJS version `8.9.4` using the default configuration of the library, with a fibonacci calculation based on the following parameters:
+Benchmarks was performed on an i7 8-core Arch Linux laptop with 16GB of memory using NodeJS version `8.9.4`. The default configuration of each library was tested with a fibonacci calculation based on the following parameters:
 
 * Single primitive = `35`
 * Single object = `{number: 35}`
