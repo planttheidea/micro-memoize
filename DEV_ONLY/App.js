@@ -35,7 +35,12 @@ console.log(memoized.cache);
 
 console.group('standard with larger cache size');
 
-const memoizedLargerCache = memoize(method, {maxSize: 5});
+const memoizedLargerCache = memoize(method, {
+  onCacheChange(cache) {
+    console.log([...cache.keys]);
+  },
+  maxSize: 5
+});
 
 memoizedLargerCache(foo, bar);
 memoizedLargerCache(bar, foo);
