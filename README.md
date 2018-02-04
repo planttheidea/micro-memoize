@@ -8,6 +8,7 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
 * [Usage](#usage)
 * [Options](#options)
   * [isEqual](#isequal)
+  * [isPromise](#ispromise)
   * [maxSize](#maxsize)
   * [transformKey](#transformkey)
 * [Additional properties](#additional-properties)
@@ -26,7 +27,7 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
 
 ## Summary
 
-As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (<1kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
+As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
 
 ## Usage
 
@@ -106,6 +107,36 @@ console.log(
 ```
 
 **NOTE**: The default method tests for [SameValueZero](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero) equality, which is summarized as strictly equal while also considering `NaN` equal to `NaN`.
+
+#### isPromise
+
+`boolean`, _defaults to `boolean`_
+
+Identifies the value returned from the method as a `Promise`, which will trigger auto-removal from cache if the `Promise` is rejected. This should work with any promise library that creates a `catch` function on the promise object created.
+
+```javascript
+const fn = async (one, two) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      reject(new Error({one, two}));
+    }, 500);
+  });
+};
+
+const memoized = memoize(fn, {isPromise: true});
+
+memoized('one', 'two');
+
+console.log(memoized.cacheSnapshot.keys); // [['one', 'two']]
+console.log(memoized.cacheSnapshot.values); // [Promise]
+
+setTimeout(() => {
+  console.log(memoized.cacheSnapshot.keys); // []
+  console.log(memoized.cacheSnapshot.values); // []
+}, 1000);
+```
+
+**NOTE**: If you don't want rejections to auto-remove the entry from cache, set `isPromise` to `false` (or just not set it).
 
 #### maxSize
 
@@ -228,7 +259,7 @@ The [`options`](#options) passed when creating the memoized method.
 
 All values provided are the number of operations per second (ops/sec) calculated by the [Benchmark suite](https://benchmarkjs.com/). Note that `underscore`, `lodash`, and `ramda` do not support mulitple-parameter memoization (which is where `micro-memoize` really shines), so they are not included in those benchmarks.
 
-Each benchmark was performed using the default configuration of the library, with a fibonacci calculation based on the following parameters:
+Each benchmark was performed on NodeJS version `8.9.4` using the default configuration of the library, with a fibonacci calculation based on the following parameters:
 
 * Single primitive = `35`
 * Single object = `{number: 35}`
@@ -241,16 +272,16 @@ This is usually what benchmarks target for ... its the least-likely use-case, bu
 
 |                   | Operations / second | Relative margin of error |
 | ----------------- | ------------------- | ------------------------ |
-| fast-memoize      | 98,161,022          | 0.77%                    |
-| **micro-memoize** | **62,256,972**      | **0.62%**                |
-| moize             | 30,230,276          | 0.92%                    |
-| lodash            | 28,795,426          | 0.57%                    |
-| underscore        | 20,143,898          | 0.83%                    |
-| memoizee          | 14,488,076          | 0.62%                    |
-| lru-memoize       | 8,290,365           | 0.89%                    |
-| Addy Osmani       | 5,949,673           | 0.41%                    |
-| memoizerific      | 5,424,207           | 0.69%                    |
-| ramda             | 1,123,124           | 0.71%                    |
+| fast-memoize      | 119,718,907         | 0.53%                    |
+| **micro-memoize** | **75,755,597**      | **0.95%**                |
+| moize             | 32,458,401          | 1.10%                    |
+| lodash            | 26,653,074          | 0.69%                    |
+| underscore        | 24,061,584          | 1.29%                    |
+| memoizee          | 15,879,536          | 1.20%                    |
+| lru-memoize       | 7,741,622           | 1.55%                    |
+| Addy Osmani       | 6,404,093           | 0.76%                    |
+| memoizerific      | 5,598,961           | 0.72%                    |
+| ramda             | 1,049,845           | 0.67%                    |
 
 #### Single parameter (complex object)
 
@@ -258,16 +289,16 @@ This is what most memoization libraries target as the primary use-case, as it re
 
 |                   | Operations / second | Relative margin of error |
 | ----------------- | ------------------- | ------------------------ |
-| **micro-memoize** | **49,719,450**      | **0.72%**                |
-| moize             | 27,195,523          | 0.59%                    |
-| lodash            | 22,892,582          | 0.53%                    |
-| memoizee          | 9,650,599           | 1.47%                    |
-| underscore        | 8,544,163           | 0.64%                    |
-| lru-memoize       | 6,818,686           | 0.89%                    |
-| memoizerific      | 5,129,356           | 0.68%                    |
-| Addy Osmani       | 1,763,456           | 0.63%                    |
-| fast-memoize      | 1,354,299           | 0.64%                    |
-| ramda             | 210,629             | 0.86%                    |
+| **micro-memoize** | **59,420,299**      | **1.07%**                |
+| moize             | 31,638,535          | 1.28%                    |
+| memoizee          | 11,602,462          | 0.91%                    |
+| underscore        | 8,008,104           | 0.69%                    |
+| lodash            | 7,492,133           | 0.71%                    |
+| lru-memoize       | 6,857,335           | 0.76%                    |
+| memoizerific      | 4,149,715           | 0.66%                    |
+| Addy Osmani       | 1,653,080           | 0.65%                    |
+| fast-memoize      | 1,389,359           | 0.63%                    |
+| ramda             | 202,891             | 0.92%                    |
 
 #### Multiple parameters (primitives only)
 
@@ -275,13 +306,13 @@ This is a very common use-case for function calls, but can be more difficult to 
 
 |                   | Operations / second | Relative margin of error |
 | ----------------- | ------------------- | ------------------------ |
-| **micro-memoize** | **40,461,050**      | **0.88%**                |
-| moize             | 19,480,229          | 0.59%                    |
-| memoizee          | 9,293,394           | 0.50%                    |
-| lru-memoize       | 6,457,376           | 0.71%                    |
-| memoizerific      | 4,046,717           | 0.68%                    |
-| Addy Osmani       | 3,137,434           | 0.58%                    |
-| fast-memoize      | 1,123,373           | 0.57%                    |
+| **micro-memoize** | **48,688,157**      | **0.97%**                |
+| moize             | 24,249,539          | 0.97%                    |
+| memoizee          | 10,475,078          | 1.27%                    |
+| lru-memoize       | 6,283,782           | 1.22%                    |
+| memoizerific      | 4,335,184           | 0.57%                    |
+| Addy Osmani       | 3,089,544           | 0.64%                    |
+| fast-memoize      | 1,136,783           | 0.71%                    |
 
 #### Multiple parameters (complex objects)
 
@@ -289,13 +320,13 @@ This is the most robust use-case, with the same complexities as multiple primiti
 
 |                   | Operations / second | Relative margin of error |
 | ----------------- | ------------------- | ------------------------ |
-| **micro-memoize** | **40,112,733**      | **0.61%**                |
-| moize             | 18,240,986          | 0.61%                    |
-| memoizee          | 7,357,338           | 0.54%                    |
-| lru-memoize       | 6,372,293           | 0.66%                    |
-| memoizerific      | 4,363,436           | 0.58%                    |
-| Addy Osmani       | 912,491             | 0.64%                    |
-| fast-memoize      | 717,827             | 0.61%                    |
+| **micro-memoize** | **47,746,243**      | **0.69%**                |
+| moize             | 23,651,406          | 1.07%                    |
+| memoizee          | 7,285,213           | 0.82%                    |
+| lru-memoize       | 6,249,360           | 0.75%                    |
+| memoizerific      | 3,376,969           | 0.55%                    |
+| Addy Osmani       | 901,307             | 0.78%                    |
+| fast-memoize      | 752,356             | 0.57%                    |
 
 ## Browser support
 
