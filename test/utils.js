@@ -143,3 +143,85 @@ test('if orderByLru will place the itemIndex first in order when non-zero', (t) 
 
   t.deepEqual(array, ['second', 'first', 'third']);
 });
+
+test('if setPromiseCatch will remove the key from cache when the promise is rejected', async (t) => {
+  const timeout = 200;
+
+  const fn = async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, timeout);
+    });
+
+    throw new Error('boom');
+  };
+  const key = ['foo'];
+  const value = fn();
+
+  const cache = {
+    keys: [key],
+    values: [value]
+  };
+  const getKeyIndex = () => {
+    return 0;
+  };
+
+  utils.setPromiseCatch(cache, key, getKeyIndex);
+
+  // this is just to prevent the unhandled rejection noise
+  cache.values[0].catch(() => {});
+
+  t.is(cache.keys.length, 1);
+  t.is(cache.values.length, 1);
+  t.not(cache.values[0], value);
+
+  await new Promise((resolve) => {
+    setTimeout(resolve, timeout + 50);
+  });
+
+  t.deepEqual(cache, {
+    keys: [],
+    values: []
+  });
+});
+
+test('if setPromiseCatch will not remove the key from cache when the promise is rejected but the key no longer exists', async (t) => {
+  const timeout = 200;
+
+  const fn = async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, timeout);
+    });
+
+    throw new Error('boom');
+  };
+  const key = ['foo'];
+  const value = fn();
+
+  const cache = {
+    keys: [key],
+    values: [value]
+  };
+  const getKeyIndex = () => {
+    return -1;
+  };
+
+  utils.setPromiseCatch(cache, key, getKeyIndex);
+
+  const newValue = cache.values[0];
+
+  // this is just to prevent the unhandled rejection noise
+  newValue.catch(() => {});
+
+  t.is(cache.keys.length, 1);
+  t.is(cache.values.length, 1);
+  t.not(cache.values[0], value);
+
+  await new Promise((resolve) => {
+    setTimeout(resolve, timeout + 50);
+  });
+
+  t.deepEqual(cache, {
+    keys: [key],
+    values: [newValue]
+  });
+});
