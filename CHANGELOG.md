@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 1.3.1
+
+* Only reorder keys when matching cache entry is not first key
+
 ## 1.3.0
 
 * Add [`onCacheChange`](README.md#oncachechange) option

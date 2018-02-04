@@ -50,14 +50,7 @@ export default function memoize(fn: Function, options: Options) {
     const args: Array<any> | Object = getTransformedKey ? getTransformedKey(slice.call(arguments)) : arguments;
     const keyIndex: number = getKeyIndex(cache.keys, args);
 
-    if (~keyIndex) {
-      orderByLru(cache.keys, keyIndex);
-      orderByLru(cache.values, keyIndex);
-
-      if (keyIndex) {
-        onCacheChange(cache);
-      }
-    } else {
+    if (!~keyIndex) {
       if (cache.keys.length >= maxSize) {
         cache.keys.pop();
         cache.values.pop();
@@ -69,6 +62,11 @@ export default function memoize(fn: Function, options: Options) {
       if (isPromise) {
         setPromiseCatch(cache, cache.keys[0], getKeyIndex);
       }
+
+      onCacheChange(cache);
+    } else if (keyIndex) {
+      orderByLru(cache.keys, keyIndex);
+      orderByLru(cache.values, keyIndex);
 
       onCacheChange(cache);
     }
