@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 1.3.0
+
+* Add [`onCacheHit`](README.md#oncachehit) option
+
 ## 1.4.0
 
 * Add `options` as second parameter to `onCacheChanged`

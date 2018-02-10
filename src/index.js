@@ -4,10 +4,16 @@
 import type {Cache, Options} from './types';
 
 // utils
-import {createGetKeyIndex, createGetTransformedKey, isSameValueZero, orderByLru, setPromiseCatch} from './utils';
+import {
+  createGetKeyIndex,
+  createGetTransformedKey,
+  isSameValueZero,
+  onCacheChangeOrHitNoOp,
+  orderByLru,
+  setPromiseCatch
+} from './utils';
 
 const slice: Function = [].slice;
-const onCacheChangeNoOp = (cacheIgnored: any, optionsIgnored: any): void => {}; // eslint-disable-line no-unused-vars
 
 /**
  * @function memoize
@@ -27,7 +33,14 @@ export default function memoize(fn: Function, options: Options) {
     return fn;
   }
 
-  const {isEqual = isSameValueZero, isPromise = false, maxSize = 1, onCacheChange = onCacheChangeNoOp, transformKey} =
+  const {
+    isEqual = isSameValueZero,
+    isPromise = false,
+    maxSize = 1,
+    onCacheChange = onCacheChangeOrHitNoOp,
+    onCacheHit = onCacheChangeOrHitNoOp,
+    transformKey
+  } =
     options || {};
 
   const normalizedOptions = {
@@ -35,6 +48,7 @@ export default function memoize(fn: Function, options: Options) {
     isPromise,
     maxSize,
     onCacheChange,
+    onCacheHit,
     transformKey
   };
 
@@ -58,7 +72,16 @@ export default function memoize(fn: Function, options: Options) {
     const args: Array<any> | Object = getTransformedKey ? getTransformedKey(slice.call(arguments)) : arguments;
     const keyIndex: number = getKeyIndex(cache.keys, args);
 
-    if (!~keyIndex) {
+    if (~keyIndex) {
+      if (keyIndex) {
+        orderByLru(cache.keys, keyIndex);
+        orderByLru(cache.values, keyIndex);
+
+        onCacheChange(cache, normalizedOptions);
+      }
+
+      onCacheHit(cache, normalizedOptions);
+    } else {
       if (cache.keys.length >= maxSize) {
         cache.keys.pop();
         cache.values.pop();
@@ -70,11 +93,6 @@ export default function memoize(fn: Function, options: Options) {
       if (isPromise) {
         setPromiseCatch(cache, cache.keys[0], getKeyIndex);
       }
-
-      onCacheChange(cache, normalizedOptions);
-    } else if (keyIndex) {
-      orderByLru(cache.keys, keyIndex);
-      orderByLru(cache.values, keyIndex);
 
       onCacheChange(cache, normalizedOptions);
     }

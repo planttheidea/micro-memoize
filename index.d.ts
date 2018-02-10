@@ -8,6 +8,7 @@ interface Options {
   isPromise?: boolean;
   maxSize?: number;
   onCacheChange?: (cache: Cache, options: Options) => void;
+  onCacheHit?: (cache: Cache, options: Options) => void;
   transformKey?: (args: any[]) => any;
 }
 

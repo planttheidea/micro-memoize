@@ -11,6 +11,7 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
   * [isPromise](#ispromise)
   * [maxSize](#maxsize)
   * [onCacheChange](#oncachechange)
+  * [onCacheHit](#oncachehit)
   * [transformKey](#transformkey)
 * [Additional properties](#additional-properties)
   * [cache](#cache)
@@ -28,7 +29,7 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
 
 ## Summary
 
-As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1.1kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
+As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1.2kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
 
 ## Usage
 
@@ -194,6 +195,40 @@ memoized('bar', 'foo');
 memoized('foo', 'bar'); // cache has changed
 memoized('foo', 'bar');
 memoized('foo', 'bar');
+```
+
+**NOTE**: This method is not fired when the `cache` is manually manipulated, only when changed via calling the memoized method.
+
+#### onCacheHit
+
+`function(cache: Cache, options: Options): void`, _defaults to noop_
+
+Callback method that fires whenever the cache is hit, whether the order is updated or not. This is mainly to allow for higher-order caching managers that use `micro-memoize` to perform superset functionality on the `cache` object.
+
+```javascript
+const fn = (one, two) => {
+  return [one, two];
+};
+
+const memoized = memoize(fn, {
+  maxSize: 2,
+  onCacheHit(cache, options) {
+    console.log('cache was hit: ', cache);
+    console.log('memoized method has the following options applied: ', options);
+  }
+});
+
+memoized('foo', 'bar');
+memoized('foo', 'bar'); // cache was hit
+memoized('foo', 'bar'); // cache was hit
+
+memoized('bar', 'foo');
+memoized('bar', 'foo'); // cache was hit
+memoized('bar', 'foo'); // cache was hit
+
+memoized('foo', 'bar'); // cache was hit
+memoized('foo', 'bar'); // cache was hit
+memoized('foo', 'bar'); // cache was hit
 ```
 
 **NOTE**: This method is not fired when the `cache` is manually manipulated, only when changed via calling the memoized method.

@@ -85,6 +85,10 @@ export const isSameValueZero = (object1: any, object2: any): boolean => {
   return object1 === object2 || (object1 !== object1 && object2 !== object2);
 };
 
+/* eslint-disable no-unused-vars */
+export const onCacheChangeOrHitNoOp = (cacheIgnored: any, optionsIgnored: any): void => {};
+/* eslint-enable */
+
 /**
  * @function orderByLru
  *
