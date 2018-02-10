@@ -7,7 +7,7 @@ import type {Cache, Options} from './types';
 import {createGetKeyIndex, createGetTransformedKey, isSameValueZero, orderByLru, setPromiseCatch} from './utils';
 
 const slice: Function = [].slice;
-const onCacheChangeNoOp = (cacheIgnored: any): void => {}; // eslint-disable-line no-unused-vars
+const onCacheChangeNoOp = (cacheIgnored: any, optionsIgnored: any): void => {}; // eslint-disable-line no-unused-vars
 
 /**
  * @function memoize
@@ -29,6 +29,14 @@ export default function memoize(fn: Function, options: Options) {
 
   const {isEqual = isSameValueZero, isPromise = false, maxSize = 1, onCacheChange = onCacheChangeNoOp, transformKey} =
     options || {};
+
+  const normalizedOptions = {
+    isEqual,
+    isPromise,
+    maxSize,
+    onCacheChange,
+    transformKey
+  };
 
   const getKeyIndex: Function = createGetKeyIndex(isEqual);
   const getTransformedKey: ?Function = transformKey ? createGetTransformedKey(transformKey) : null;
@@ -63,12 +71,12 @@ export default function memoize(fn: Function, options: Options) {
         setPromiseCatch(cache, cache.keys[0], getKeyIndex);
       }
 
-      onCacheChange(cache);
+      onCacheChange(cache, normalizedOptions);
     } else if (keyIndex) {
       orderByLru(cache.keys, keyIndex);
       orderByLru(cache.values, keyIndex);
 
-      onCacheChange(cache);
+      onCacheChange(cache, normalizedOptions);
     }
 
     return cache.values[0];
@@ -101,13 +109,7 @@ export default function memoize(fn: Function, options: Options) {
       options: {
         configurable: true,
         get() {
-          return {
-            isEqual,
-            isPromise,
-            maxSize,
-            onCacheChange,
-            transformKey
-          };
+          return normalizedOptions;
         }
       }
     }: Object)
