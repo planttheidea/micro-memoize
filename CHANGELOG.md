@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 1.4.0
+
+* Add `options` as second parameter to `onCacheChanged`
+
 ## 1.3.2
 
 * Make additional properties (`cache`, `cacheSnapshot`, `isMemoized`, `options`) configurable for higher-order memoization library usage

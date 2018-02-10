@@ -167,7 +167,7 @@ console.log(memoized('four', 'five')); // ['four', 'five'], drops ['one', 'two']
 
 #### onCacheChange
 
-`function(cache: Cache): void`, _defaults to noop_
+`function(cache: Cache, options: Options): void`, _defaults to noop_
 
 Callback method that fires whenever the cache is added to or the order is updated. This is mainly to allow for higher-order caching managers that use `micro-memoize` to perform superset functionality on the `cache` object.
 
@@ -177,8 +177,9 @@ const fn = (one, two) => {
 };
 
 const memoized = memoize(fn, {
-  onCacheChange(cache) {
-    console.log('cache has changed');
+  onCacheChange(cache, options) {
+    console.log('cache has changed: ', cache);
+    console.log('memoized method has the following options applied: ', options);
   }
 });
 
@@ -305,16 +306,16 @@ This is usually what benchmarks target for ... its the least-likely use-case, bu
 
 |                   | Operations / second | Relative margin of error |
 | ----------------- | ------------------- | ------------------------ |
-| fast-memoize      | 119,718,907         | 0.53%                    |
-| **micro-memoize** | **75,755,597**      | **0.95%**                |
-| moize             | 32,458,401          | 1.10%                    |
-| lodash            | 26,653,074          | 0.69%                    |
-| underscore        | 24,061,584          | 1.29%                    |
-| memoizee          | 15,879,536          | 1.20%                    |
-| lru-memoize       | 7,741,622           | 1.55%                    |
-| Addy Osmani       | 6,404,093           | 0.76%                    |
-| memoizerific      | 5,598,961           | 0.72%                    |
-| ramda             | 1,049,845           | 0.67%                    |
+| fast-memoize      | 216,253,916         | 0.52%                    |
+| **micro-memoize** | **73,773,206**      | **0.72%**                |
+| moize             | 32,876,461          | 1.32%                    |
+| lodash            | 26,120,451          | 0.63%                    |
+| underscore        | 24,182,719          | 0.91%                    |
+| memoizee          | 15,985,593          | 0.71%                    |
+| lru-memoize       | 8,081,640           | 1.38%                    |
+| Addy Osmani       | 6,316,808           | 0.71%                    |
+| memoizerific      | 5,575,876           | 0.72%                    |
+| ramda             | 1,075,505           | 0.74%                    |
 
 #### Single parameter (complex object)
 
@@ -322,16 +323,15 @@ This is what most memoization libraries target as the primary use-case, as it re
 
 |                   | Operations / second | Relative margin of error |
 | ----------------- | ------------------- | ------------------------ |
-| **micro-memoize** | **59,420,299**      | **1.07%**                |
-| moize             | 31,638,535          | 1.28%                    |
-| memoizee          | 11,602,462          | 0.91%                    |
-| underscore        | 8,008,104           | 0.69%                    |
-| lodash            | 7,492,133           | 0.71%                    |
-| lru-memoize       | 6,857,335           | 0.76%                    |
-| memoizerific      | 4,149,715           | 0.66%                    |
-| Addy Osmani       | 1,653,080           | 0.65%                    |
-| fast-memoize      | 1,389,359           | 0.63%                    |
-| ramda             | 202,891             | 0.92%                    |
+| **micro-memoize** | **57,195,925**      | **1.17%**                |
+| memoizee          | 11,602,482          | 0.73%                    |
+| underscore        | 7,787,524           | 0.76%                    |
+| lodash            | 7,785,492           | 0.58%                    |
+| lru-memoize       | 6,839,520           | 0.91%                    |
+| memoizerific      | 4,279,061           | 0.67%                    |
+| Addy Osmani       | 1,637,983           | 2.07%                    |
+| fast-memoize      | 1,392,560           | 0.59%                    |
+| ramda             | 213,542             | 0.78%                    |
 
 #### Multiple parameters (primitives only)
 
@@ -339,13 +339,12 @@ This is a very common use-case for function calls, but can be more difficult to 
 
 |                   | Operations / second | Relative margin of error |
 | ----------------- | ------------------- | ------------------------ |
-| **micro-memoize** | **48,688,157**      | **0.97%**                |
-| moize             | 24,249,539          | 0.97%                    |
-| memoizee          | 10,475,078          | 1.27%                    |
-| lru-memoize       | 6,283,782           | 1.22%                    |
-| memoizerific      | 4,335,184           | 0.57%                    |
-| Addy Osmani       | 3,089,544           | 0.64%                    |
-| fast-memoize      | 1,136,783           | 0.71%                    |
+| **micro-memoize** | **47,354,287**      | **0.73%**                |
+| memoizee          | 10,021,023          | 0.69%                    |
+| lru-memoize       | 6,312,064           | 0.75%                    |
+| memoizerific      | 4,545,738           | 0.92%                    |
+| Addy Osmani       | 3,282,267           | 0.63%                    |
+| fast-memoize      | 1,178,468           | 0.70%                    |
 
 #### Multiple parameters (complex objects)
 
@@ -353,13 +352,12 @@ This is the most robust use-case, with the same complexities as multiple primiti
 
 |                   | Operations / second | Relative margin of error |
 | ----------------- | ------------------- | ------------------------ |
-| **micro-memoize** | **47,746,243**      | **0.69%**                |
-| moize             | 23,651,406          | 1.07%                    |
-| memoizee          | 7,285,213           | 0.82%                    |
-| lru-memoize       | 6,249,360           | 0.75%                    |
-| memoizerific      | 3,376,969           | 0.55%                    |
-| Addy Osmani       | 901,307             | 0.78%                    |
-| fast-memoize      | 752,356             | 0.57%                    |
+| **micro-memoize** | **46,643,491**      | **0.76%**                |
+| memoizee          | 7,270,755           | 0.71%                    |
+| lru-memoize       | 6,292,754           | 0.84%                    |
+| memoizerific      | 3,427,550           | 0.78%                    |
+| Addy Osmani       | 926,721             | 0.67%                    |
+| fast-memoize      | 783,907             | 0.79%                    |
 
 ## Browser support
 

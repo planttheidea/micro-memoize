@@ -47,7 +47,7 @@
     "eslint-friendly-formatter": "^3.0.0",
     "eslint-loader": "^1.9.0",
     "fast-equals": "^1.0.6",
-    "fast-memoize": "^2.2.8",
+    "fast-memoize": "^2.3.0",
     "flow-babel-webpack-plugin": "^1.1.1",
     "hash-it": "^3.1.2",
     "html-webpack-plugin": "^2.30.1",
@@ -69,7 +69,7 @@
     "rimraf": "^2.6.2",
     "sinon": "^4.2.2",
     "underscore": "^1.8.3",
-    "webpack": "^3.10.0",
+    "webpack": "^3.11.0",
     "webpack-dev-server": "^2.11.1"
   },
   "homepage": "https://github.com/planttheidea/micro-memoize#readme",

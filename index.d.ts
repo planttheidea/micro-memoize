@@ -7,7 +7,7 @@ interface Options {
   isEqual?: (firstValue: any, secondValue: any) => boolean;
   isPromise?: boolean;
   maxSize?: number;
-  onCacheChange?: (cache: Cache) => void;
+  onCacheChange?: (cache: Cache, options: Options) => void;
   transformKey?: (args: any[]) => any;
 }
 
