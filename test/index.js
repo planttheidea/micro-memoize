@@ -40,16 +40,14 @@ test('if memoize will return the memoized function', (t) => {
 
   t.true(memoized.isMemoized);
 
-  const {onCacheChange, ...testableOptions} = memoized.options;
-
-  t.deepEqual(testableOptions, {
+  t.deepEqual(memoized.options, {
     isEqual: utils.isSameValueZero,
     isPromise: false,
     maxSize: 1,
+    onCacheHit: utils.onCacheChangeOrHitNoOp,
+    onCacheChange: utils.onCacheChangeOrHitNoOp,
     transformKey: undefined
   });
-  t.is(typeof onCacheChange, 'function');
-  t.is(onCacheChange('foo'), undefined);
 
   new Array(1000).fill('').forEach(() => {
     t.deepEqual(memoized('one', 'two'), {one: 'one', two: 'two'});
@@ -289,6 +287,7 @@ test('if memoize will fire the onCacheChange method passed with the cache when i
       isPromise: false,
       maxSize: 1,
       onCacheChange,
+      onCacheHit: utils.onCacheChangeOrHitNoOp,
       transformKey: undefined
     }
   ]);
@@ -315,6 +314,7 @@ test('if memoize will fire the onCacheChange method passed with the cache when i
       isPromise: false,
       maxSize,
       onCacheChange,
+      onCacheHit: utils.onCacheChangeOrHitNoOp,
       transformKey: undefined
     }
   ]);
@@ -329,6 +329,7 @@ test('if memoize will fire the onCacheChange method passed with the cache when i
       isPromise: false,
       maxSize,
       onCacheChange,
+      onCacheHit: utils.onCacheChangeOrHitNoOp,
       transformKey: undefined
     }
   ]);
@@ -343,6 +344,7 @@ test('if memoize will fire the onCacheChange method passed with the cache when i
       isPromise: false,
       maxSize,
       onCacheChange,
+      onCacheHit: utils.onCacheChangeOrHitNoOp,
       transformKey: undefined
     }
   ]);
@@ -357,6 +359,7 @@ test('if memoize will fire the onCacheChange method passed with the cache when i
       isPromise: false,
       maxSize,
       onCacheChange,
+      onCacheHit: utils.onCacheChangeOrHitNoOp,
       transformKey: undefined
     }
   ]);
@@ -371,6 +374,87 @@ test('if memoize will fire the onCacheChange method passed with the cache when i
       isPromise: false,
       maxSize,
       onCacheChange,
+      onCacheHit: utils.onCacheChangeOrHitNoOp,
+      transformKey: undefined
+    }
+  ]);
+});
+
+test('if memoize will not fire the onCacheHit method passed with the cache when it is added to', (t) => {
+  const fn = (one, two) => {
+    return {one, two};
+  };
+  const onCacheHit = sinon.spy();
+
+  const memoized = memoize(fn, {onCacheHit});
+
+  t.is(memoized.options.onCacheHit, onCacheHit);
+
+  memoized('foo');
+
+  t.true(onCacheHit.notCalled);
+});
+
+test('if memoize will fire the onCacheHit method passed with the cache when it is updated', (t) => {
+  const fn = (one, two) => {
+    return {one, two};
+  };
+  const onCacheHit = sinon.spy();
+  const maxSize = 2;
+
+  const memoized = memoize(fn, {maxSize, onCacheHit});
+
+  t.is(memoized.options.onCacheHit, onCacheHit);
+
+  memoized('foo', 'bar');
+
+  t.true(onCacheHit.notCalled);
+
+  memoized('bar', 'foo');
+
+  t.true(onCacheHit.notCalled);
+
+  memoized('bar', 'foo');
+
+  t.true(onCacheHit.calledOnce);
+  t.deepEqual(onCacheHit.args[0], [
+    {keys: [['bar', 'foo'], ['foo', 'bar']], values: [{one: 'bar', two: 'foo'}, {one: 'foo', two: 'bar'}]},
+    {
+      isEqual: utils.isSameValueZero,
+      isPromise: false,
+      maxSize,
+      onCacheChange: utils.onCacheChangeOrHitNoOp,
+      onCacheHit,
+      transformKey: undefined
+    }
+  ]);
+
+  memoized('foo', 'bar');
+
+  t.true(onCacheHit.calledTwice);
+  t.deepEqual(onCacheHit.args[1], [
+    {keys: [['foo', 'bar'], ['bar', 'foo']], values: [{one: 'foo', two: 'bar'}, {one: 'bar', two: 'foo'}]},
+    {
+      isEqual: utils.isSameValueZero,
+      isPromise: false,
+      maxSize,
+      onCacheChange: utils.onCacheChangeOrHitNoOp,
+      onCacheHit,
+      transformKey: undefined
+    }
+  ]);
+
+  memoized('foo', 'bar');
+
+  t.true(onCacheHit.calledThrice);
+  t.deepEqual(onCacheHit.args[2], [
+    {keys: [['foo', 'bar'], ['bar', 'foo']], values: [{one: 'foo', two: 'bar'}, {one: 'bar', two: 'foo'}]},
+    {
+      isEqual: utils.isSameValueZero,
+      isPromise: false,
+      maxSize,
+      onCacheChange: utils.onCacheChangeOrHitNoOp,
+      onCacheHit,
       transformKey: undefined
     }
   ]);
