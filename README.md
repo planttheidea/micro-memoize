@@ -10,6 +10,7 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
   * [isEqual](#isequal)
   * [isPromise](#ispromise)
   * [maxSize](#maxsize)
+  * [onCacheAdd](#oncacheadd)
   * [onCacheChange](#oncachechange)
   * [onCacheHit](#oncachehit)
   * [transformKey](#transformkey)
@@ -29,28 +30,28 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
 
 ## Summary
 
-As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1.2kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
+As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1.3kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
 
 ## Usage
 
 ```javascript
 // ES2015+
-import memoize from 'micro-memoize';
+import memoize from "micro-memoize";
 
 // CommonJS
-const memoize = require('micro-memoize').default;
+const memoize = require("micro-memoize").default;
 
 // old-school
 const memoize = window.memoize;
 
 const assembleToObject = (one, two) => {
-  return {one, two};
+  return { one, two };
 };
 
 const memoized = memoize(assembleToObject);
 
-console.log(memoized('one', 'two')); // {one: 'one', two: 'two'}
-console.log(memoized('one', 'two')); // pulled from cache, {one: 'one', two: 'two'}
+console.log(memoized("one", "two")); // {one: 'one', two: 'two'}
+console.log(memoized("one", "two")); // pulled from cache, {one: 'one', two: 'two'}
 ```
 
 ## Options
@@ -68,27 +69,27 @@ Common use-cases:
 * Serialization of arguments
 
 ```javascript
-import {deepEqual} from 'fast-equals';
+import { deepEqual } from "fast-equals";
 
-const deepObject = (object) => {
+const deepObject = object => {
   return {
     foo: object.foo,
     bar: object.bar
   };
 };
 
-const memoizedDeepObject = memoize(deepObject, {isEqual: deepEqual});
+const memoizedDeepObject = memoize(deepObject, { isEqual: deepEqual });
 
 console.log(
   memoizedDeepObject({
     foo: {
-      deep: 'foo'
+      deep: "foo"
     },
     bar: {
-      deep: 'bar'
+      deep: "bar"
     },
     baz: {
-      deep: 'baz'
+      deep: "baz"
     }
   })
 ); // {foo: {deep: 'foo'}, bar: {deep: 'bar'}}
@@ -96,13 +97,13 @@ console.log(
 console.log(
   memoizedDeepObject({
     foo: {
-      deep: 'foo'
+      deep: "foo"
     },
     bar: {
-      deep: 'bar'
+      deep: "bar"
     },
     baz: {
-      deep: 'baz'
+      deep: "baz"
     }
   })
 ); // pulled from cache
@@ -120,14 +121,14 @@ Identifies the value returned from the method as a `Promise`, which will trigger
 const fn = async (one, two) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      reject(new Error({one, two}));
+      reject(new Error({ one, two }));
     }, 500);
   });
 };
 
-const memoized = memoize(fn, {isPromise: true});
+const memoized = memoize(fn, { isPromise: true });
 
-memoized('one', 'two');
+memoized("one", "two");
 
 console.log(memoized.cacheSnapshot.keys); // [['one', 'two']]
 console.log(memoized.cacheSnapshot.values); // [Promise]
@@ -151,26 +152,59 @@ const manyPossibleArgs = (one, two) => {
   return [one, two];
 };
 
-const memoized = memoize(manyPossibleArgs, {maxSize: 3});
+const memoized = memoize(manyPossibleArgs, { maxSize: 3 });
 
-console.log(memoized('one', 'two')); // ['one', 'two']
-console.log(memoized('two', 'three')); // ['two', 'three']
-console.log(memoized('three', 'four')); // ['three', 'four']
+console.log(memoized("one", "two")); // ['one', 'two']
+console.log(memoized("two", "three")); // ['two', 'three']
+console.log(memoized("three", "four")); // ['three', 'four']
 
-console.log(memoized('one', 'two')); // pulled from cache
-console.log(memoized('two', 'three')); // pulled from cache
-console.log(memoized('three', 'four')); // pulled from cache
+console.log(memoized("one", "two")); // pulled from cache
+console.log(memoized("two", "three")); // pulled from cache
+console.log(memoized("three", "four")); // pulled from cache
 
-console.log(memoized('four', 'five')); // ['four', 'five'], drops ['one', 'two'] from cache
+console.log(memoized("four", "five")); // ['four', 'five'], drops ['one', 'two'] from cache
 ```
 
 **NOTE**: The default for `micro-memoize` differs from the default implementation of `moize`. `moize` will store an infinite number of results unless restricted, whereas `micro-memoize` will only store the most recent result. In this way, the default implementation of `micro-memoize` operates more like [`moize.simple`](https://github.com/planttheidea/moize#moizesimple).
+
+#### onCacheAdd
+
+`function(cache: Cache, options: Options): void`, _defaults to noop_
+
+Callback method that executes whenever the cache is added to. This is mainly to allow for higher-order caching managers that use `micro-memoize` to perform superset functionality on the `cache` object.
+
+```javascript
+const fn = (one, two) => {
+  return [one, two];
+};
+
+const memoized = memoize(fn, {
+  onCacheAdd(cache, options) {
+    console.log("cache has been added to: ", cache);
+    console.log("memoized method has the following options applied: ", options);
+  }
+});
+
+memoized("foo", "bar"); // cache has been added to
+memoized("foo", "bar");
+memoized("foo", "bar");
+
+memoized("bar", "foo"); // cache has been added to
+memoized("bar", "foo");
+memoized("bar", "foo");
+
+memoized("foo", "bar");
+memoized("foo", "bar");
+memoized("foo", "bar");
+```
+
+**NOTE**: This method is not executed when the `cache` is manually manipulated, only when changed via calling the memoized method.
 
 #### onCacheChange
 
 `function(cache: Cache, options: Options): void`, _defaults to noop_
 
-Callback method that fires whenever the cache is added to or the order is updated. This is mainly to allow for higher-order caching managers that use `micro-memoize` to perform superset functionality on the `cache` object.
+Callback method that executes whenever the cache is added to or the order is updated. This is mainly to allow for higher-order caching managers that use `micro-memoize` to perform superset functionality on the `cache` object.
 
 ```javascript
 const fn = (one, two) => {
@@ -179,31 +213,31 @@ const fn = (one, two) => {
 
 const memoized = memoize(fn, {
   onCacheChange(cache, options) {
-    console.log('cache has changed: ', cache);
-    console.log('memoized method has the following options applied: ', options);
+    console.log("cache has changed: ", cache);
+    console.log("memoized method has the following options applied: ", options);
   }
 });
 
-memoized('foo', 'bar'); // cache has changed
-memoized('foo', 'bar');
-memoized('foo', 'bar');
+memoized("foo", "bar"); // cache has changed
+memoized("foo", "bar");
+memoized("foo", "bar");
 
-memoized('bar', 'foo'); // cache has changed
-memoized('bar', 'foo');
-memoized('bar', 'foo');
+memoized("bar", "foo"); // cache has changed
+memoized("bar", "foo");
+memoized("bar", "foo");
 
-memoized('foo', 'bar'); // cache has changed
-memoized('foo', 'bar');
-memoized('foo', 'bar');
+memoized("foo", "bar"); // cache has changed
+memoized("foo", "bar");
+memoized("foo", "bar");
 ```
 
-**NOTE**: This method is not fired when the `cache` is manually manipulated, only when changed via calling the memoized method.
+**NOTE**: This method is not executed when the `cache` is manually manipulated, only when changed via calling the memoized method. When the execution of other cache listeners (`onCacheAdd`, `onCacheHit`) is applicable, this method will execute after those methods.
 
 #### onCacheHit
 
 `function(cache: Cache, options: Options): void`, _defaults to noop_
 
-Callback method that fires whenever the cache is hit, whether the order is updated or not. This is mainly to allow for higher-order caching managers that use `micro-memoize` to perform superset functionality on the `cache` object.
+Callback method that executes whenever the cache is hit, whether the order is updated or not. This is mainly to allow for higher-order caching managers that use `micro-memoize` to perform superset functionality on the `cache` object.
 
 ```javascript
 const fn = (one, two) => {
@@ -213,25 +247,25 @@ const fn = (one, two) => {
 const memoized = memoize(fn, {
   maxSize: 2,
   onCacheHit(cache, options) {
-    console.log('cache was hit: ', cache);
-    console.log('memoized method has the following options applied: ', options);
+    console.log("cache was hit: ", cache);
+    console.log("memoized method has the following options applied: ", options);
   }
 });
 
-memoized('foo', 'bar');
-memoized('foo', 'bar'); // cache was hit
-memoized('foo', 'bar'); // cache was hit
+memoized("foo", "bar");
+memoized("foo", "bar"); // cache was hit
+memoized("foo", "bar"); // cache was hit
 
-memoized('bar', 'foo');
-memoized('bar', 'foo'); // cache was hit
-memoized('bar', 'foo'); // cache was hit
+memoized("bar", "foo");
+memoized("bar", "foo"); // cache was hit
+memoized("bar", "foo"); // cache was hit
 
-memoized('foo', 'bar'); // cache was hit
-memoized('foo', 'bar'); // cache was hit
-memoized('foo', 'bar'); // cache was hit
+memoized("foo", "bar"); // cache was hit
+memoized("foo", "bar"); // cache was hit
+memoized("foo", "bar"); // cache was hit
 ```
 
-**NOTE**: This method is not fired when the `cache` is manually manipulated, only when changed via calling the memoized method.
+**NOTE**: This method is not executed when the `cache` is manually manipulated, only when changed via calling the memoized method.
 
 #### transformKey
 
@@ -248,8 +282,8 @@ const memoized = memoize(ignoreFunctionArgs, {
   transformKey: JSON.stringify
 });
 
-console.log(memoized('one', () => {})); // ['one', () => {}]
-console.log(memoized('one', () => {})); // pulled from cache, ['one', () => {}]
+console.log(memoized("one", () => {})); // ['one', () => {}]
+console.log(memoized("one", () => {})); // pulled from cache, ['one', () => {}]
 ```
 
 If your transformed keys require something other than `SameValueZero` equality, you can combine `transformKey` with [`isEqual`](#isequal) for completely custom key creation and comparison.
@@ -270,8 +304,8 @@ const memoized = memoize(ignoreFunctionArgs, {
   }
 });
 
-console.log(memoized('one', () => {})); // ['one', () => {}]
-console.log(memoized('one', () => {})); // pulled from cache, ['one', () => {}]
+console.log(memoized("one", () => {})); // ['one', () => {}]
+console.log(memoized("one", () => {})); // pulled from cache, ['one', () => {}]
 ```
 
 ## Additional properties
@@ -293,15 +327,15 @@ The exposure of this object is to allow for manual manipulation of keys/values (
 
 ```javascript
 const method = (one, two) => {
-  return {one, two};
+  return { one, two };
 };
 
 const memoized = memoize(method);
 
-memoized.cache.keys.push(['one', 'two']);
-memoized.cache.values.push('cached');
+memoized.cache.keys.push(["one", "two"]);
+memoized.cache.values.push("cached");
 
-console.log(memoized('one', 'two')); // 'cached'
+console.log(memoized("one", "two")); // 'cached'
 ```
 
 **HOTE**: `moize` offers a variety of convenience methods for this manual `cache` manipulation, and while `micro-memoize` allows all the same capabilities by exposing the `cache`, it does not provide any convenience methods.
@@ -397,7 +431,7 @@ This is the most robust use-case, with the same complexities as multiple primiti
 ## Browser support
 
 * Chrome (all versions)
-* Firefox (all versions)
+* executefox (all versions)
 * Edge (all versions)
 * Opera 15+
 * IE 9+

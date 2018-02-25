@@ -1,5 +1,10 @@
 # micro-memoize CHANGELOG
 
+## 1.6.0
+
+* Add [`onCacheAdd`](README.md#oncacheadd) option
+* Pass through unused properties in `options` for higher-order memoization library usage
+
 ## 1.5.0
 
 * Add [`onCacheHit`](README.md#oncachehit) option

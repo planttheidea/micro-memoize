@@ -8,7 +8,7 @@ import {
   createGetKeyIndex,
   createGetTransformedKey,
   isSameValueZero,
-  onCacheChangeOrHitNoOp,
+  onCacheOperation,
   orderByLru,
   setPromiseCatch
 } from './utils';
@@ -37,20 +37,23 @@ export default function memoize(fn: Function, options: Options) {
     isEqual = isSameValueZero,
     isPromise = false,
     maxSize = 1,
-    onCacheChange = onCacheChangeOrHitNoOp,
-    onCacheHit = onCacheChangeOrHitNoOp,
-    transformKey
+    onCacheAdd = onCacheOperation,
+    onCacheChange = onCacheOperation,
+    onCacheHit = onCacheOperation,
+    transformKey,
+    ...extraOptions
   } =
     options || {};
 
-  const normalizedOptions = {
+  const normalizedOptions = Object.assign({}, extraOptions, {
     isEqual,
     isPromise,
     maxSize,
+    onCacheAdd,
     onCacheChange,
     onCacheHit,
     transformKey
-  };
+  });
 
   const getKeyIndex: Function = createGetKeyIndex(isEqual);
   const getTransformedKey: ?Function = transformKey ? createGetTransformedKey(transformKey) : null;
@@ -73,14 +76,14 @@ export default function memoize(fn: Function, options: Options) {
     const keyIndex: number = getKeyIndex(cache.keys, args);
 
     if (~keyIndex) {
+      onCacheHit(cache, normalizedOptions);
+
       if (keyIndex) {
         orderByLru(cache.keys, keyIndex);
         orderByLru(cache.values, keyIndex);
 
         onCacheChange(cache, normalizedOptions);
       }
-
-      onCacheHit(cache, normalizedOptions);
     } else {
       if (cache.keys.length >= maxSize) {
         cache.keys.pop();
@@ -94,6 +97,7 @@ export default function memoize(fn: Function, options: Options) {
         setPromiseCatch(cache, cache.keys[0], getKeyIndex);
       }
 
+      onCacheAdd(cache, normalizedOptions);
       onCacheChange(cache, normalizedOptions);
     }
 
