@@ -86,7 +86,7 @@ export const isSameValueZero = (object1: any, object2: any): boolean => {
 };
 
 /* eslint-disable no-unused-vars */
-export const onCacheChangeOrHitNoOp = (cacheIgnored: any, optionsIgnored: any): void => {};
+export const onCacheOperation = (cacheIgnored: any, optionsIgnored: any): void => {};
 /* eslint-enable */
 
 /**

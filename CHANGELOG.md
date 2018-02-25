@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 1.6.0
+
+* Add [`onCacheAdd`](README.md#oncacheadd) option
+
 ## 1.5.0
 
 * Add [`onCacheHit`](README.md#oncachehit) option
