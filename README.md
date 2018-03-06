@@ -375,16 +375,15 @@ This is usually what benchmarks target for ... its the least-likely use-case, bu
 
 |                   | Operations / second | Relative margin of error |
 | ----------------- | ------------------- | ------------------------ |
-| fast-memoize      | 216,253,916         | 0.52%                    |
-| **micro-memoize** | **73,773,206**      | **0.72%**                |
-| moize             | 32,876,461          | 1.32%                    |
-| lodash            | 26,120,451          | 0.63%                    |
-| underscore        | 24,182,719          | 0.91%                    |
-| memoizee          | 15,985,593          | 0.71%                    |
-| lru-memoize       | 8,081,640           | 1.38%                    |
-| Addy Osmani       | 6,316,808           | 0.71%                    |
-| memoizerific      | 5,575,876           | 0.72%                    |
-| ramda             | 1,075,505           | 0.74%                    |
+| fast-memoize      | 219,525,943         | 0.56%                    |
+| **micro-memoize** | **76,004,234**      | **1.12%**                |
+| lodash            | 26,920,988          | 0.65%                    |
+| underscore        | 24,126,335          | 0.73%                    |
+| memoizee          | 16,575,237          | 0.74%                    |
+| lru-memoize       | 8,016,237           | 1.58%                    |
+| Addy Osmani       | 6,476,533           | 0.96%                    |
+| memoizerific      | 5,511,233           | 0.78%                    |
+| ramda             | 1,107,319           | 0.68%                    |
 
 #### Single parameter (complex object)
 
@@ -392,15 +391,15 @@ This is what most memoization libraries target as the primary use-case, as it re
 
 |                   | Operations / second | Relative margin of error |
 | ----------------- | ------------------- | ------------------------ |
-| **micro-memoize** | **57,195,925**      | **1.17%**                |
-| memoizee          | 11,602,482          | 0.73%                    |
-| underscore        | 7,787,524           | 0.76%                    |
-| lodash            | 7,785,492           | 0.58%                    |
-| lru-memoize       | 6,839,520           | 0.91%                    |
-| memoizerific      | 4,279,061           | 0.67%                    |
-| Addy Osmani       | 1,637,983           | 2.07%                    |
-| fast-memoize      | 1,392,560           | 0.59%                    |
-| ramda             | 213,542             | 0.78%                    |
+| **micro-memoize** | **60,533,096**      | **0.68%**                |
+| memoizee          | 11,601,186          | 0.82%                    |
+| lodash            | 8,017,634           | 0.77%                    |
+| underscore        | 7,910,175           | 0.76%                    |
+| lru-memoize       | 6,878,249           | 1.12%                    |
+| memoizerific      | 4.377,062           | 0.74%                    |
+| Addy Osmani       | 1,829,256           | 0.74%                    |
+| fast-memoize      | 1,468,272           | 0.67%                    |
+| ramda             | 213,118             | 0.84%                    |
 
 #### Multiple parameters (primitives only)
 
@@ -408,12 +407,12 @@ This is a very common use-case for function calls, but can be more difficult to 
 
 |                   | Operations / second | Relative margin of error |
 | ----------------- | ------------------- | ------------------------ |
-| **micro-memoize** | **47,354,287**      | **0.73%**                |
-| memoizee          | 10,021,023          | 0.69%                    |
-| lru-memoize       | 6,312,064           | 0.75%                    |
-| memoizerific      | 4,545,738           | 0.92%                    |
-| Addy Osmani       | 3,282,267           | 0.63%                    |
-| fast-memoize      | 1,178,468           | 0.70%                    |
+| **micro-memoize** | **49,690,821**      | **1.26%**                |
+| memoizee          | 10,425,265          | 0.76%                    |
+| lru-memoize       | 6,165,918           | 0.76%                    |
+| memoizerific      | 4,587,050           | 0.72%                    |
+| Addy Osmani       | 3,409,941           | 0.67%                    |
+| fast-memoize      | 1,214,616           | 0.66%                    |
 
 #### Multiple parameters (complex objects)
 
@@ -421,12 +420,12 @@ This is the most robust use-case, with the same complexities as multiple primiti
 
 |                   | Operations / second | Relative margin of error |
 | ----------------- | ------------------- | ------------------------ |
-| **micro-memoize** | **46,643,491**      | **0.76%**                |
-| memoizee          | 7,270,755           | 0.71%                    |
-| lru-memoize       | 6,292,754           | 0.84%                    |
-| memoizerific      | 3,427,550           | 0.78%                    |
-| Addy Osmani       | 926,721             | 0.67%                    |
-| fast-memoize      | 783,907             | 0.79%                    |
+| **micro-memoize** | **47,300,339**      | **1.20%**                |
+| memoizee          | 7,487,582           | 0.73%                    |
+| lru-memoize       | 6,287,893           | 1.15%                    |
+| memoizerific      | 3,537,690           | 0.75%                    |
+| Addy Osmani       | 936,273             | 0.70%                    |
+| fast-memoize      | 808,141             | 0.68%                    |
 
 ## Browser support
 
