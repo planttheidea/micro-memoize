@@ -72,7 +72,7 @@ export default function memoize(fn: Function, options: Options) {
    * @returns {any} the value of the method called with the arguments
    */
   function memoized(): any {
-    const args: Array<any> | Object = getTransformedKey ? getTransformedKey(slice.call(arguments)) : arguments;
+    const args: Array<any> | Object = getTransformedKey ? getTransformedKey(slice.call(arguments, 0)) : arguments;
     const keyIndex: number = getKeyIndex(cache.keys, args);
 
     if (~keyIndex) {
@@ -90,7 +90,7 @@ export default function memoize(fn: Function, options: Options) {
         cache.values.pop();
       }
 
-      cache.keys.unshift(getTransformedKey ? args : slice.call(args));
+      cache.keys.unshift(getTransformedKey ? args : slice.call(args, 0));
       cache.values.unshift(fn.apply(this, arguments));
 
       if (isPromise) {

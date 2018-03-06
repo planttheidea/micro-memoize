@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 1.6.1
+
+* Optimize `slice` calls for key storage (performance)
+
 ## 1.6.0
 
 * Add [`onCacheAdd`](README.md#oncacheadd) option
