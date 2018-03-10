@@ -96,20 +96,17 @@ export const onCacheOperation = (cacheIgnored: any, optionsIgnored: any): void =
  * order the array based on a Least-Recently-Used basis
  *
  * @param {Array<any>} array the array to order
- * @param {number} itemIndex the index of the item to move to the front
+ * @param {any} value the value to assign at the beginning of the array
+ * @param {number} startingIndex the index of the item to move to the front
  */
-export const orderByLru = (array: Array<any>, itemIndex: number): void => {
-  if (itemIndex) {
-    const value: any = array[itemIndex];
+export const orderByLru = (array: Array<any>, value: any, startingIndex: number) => {
+  let index: number = startingIndex;
 
-    let index: number = itemIndex;
-
-    while (index--) {
-      array[index + 1] = array[index];
-    }
-
-    array[0] = value;
+  while (index--) {
+    array[index + 1] = array[index];
   }
+
+  array[0] = value;
 };
 
 /**

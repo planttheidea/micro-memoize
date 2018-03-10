@@ -129,8 +129,9 @@ test('if isSameValueZero will return false when the objects are different', (t) 
 test('if orderByLru will do nothing if the itemIndex is 0', (t) => {
   const array = ['first', 'second', 'third'];
   const itemIndex = 0;
+  const value = array[itemIndex];
 
-  utils.orderByLru(array, itemIndex);
+  utils.orderByLru(array, value, itemIndex);
 
   t.deepEqual(array, ['first', 'second', 'third']);
 });
@@ -138,10 +139,21 @@ test('if orderByLru will do nothing if the itemIndex is 0', (t) => {
 test('if orderByLru will place the itemIndex first in order when non-zero', (t) => {
   const array = ['first', 'second', 'third'];
   const itemIndex = 1;
+  const value = array[itemIndex];
 
-  utils.orderByLru(array, itemIndex);
+  utils.orderByLru(array, value, itemIndex);
 
   t.deepEqual(array, ['second', 'first', 'third']);
+});
+
+test('if orderByLru will add the new item to the array when the itemIndex is the array length', (t) => {
+  const array = ['first', 'second', 'third'];
+  const itemIndex = array.length;
+  const value = 'new';
+
+  utils.orderByLru(array, value, itemIndex);
+
+  t.deepEqual(array, ['new', 'first', 'second', 'third']);
 });
 
 test('if setPromiseCatch will remove the key from cache when the promise is rejected', async (t) => {

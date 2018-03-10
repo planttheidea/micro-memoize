@@ -9,6 +9,7 @@ console.group('standard');
 const foo = 'foo';
 const bar = 'bar';
 const baz = 'baz';
+const quz = 'quz';
 
 const method = function(one, two) {
   console.log('standard method fired', one, two);
@@ -39,14 +40,15 @@ const memoizedLargerCache = memoize(method, {
   onCacheChange(cache) {
     console.log([...cache.keys]);
   },
-  maxSize: 5
+  maxSize: 3
 });
 
 memoizedLargerCache(foo, bar);
 memoizedLargerCache(bar, foo);
 memoizedLargerCache(bar, foo);
+memoizedLargerCache(foo, baz);
 memoizedLargerCache(foo, bar);
-memoizedLargerCache(foo, bar);
+memoizedLargerCache(baz, quz);
 
 console.log(memoizedLargerCache.cacheSnapshot);
 

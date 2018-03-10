@@ -79,8 +79,8 @@ export default function memoize(fn: Function, options: Options) {
       onCacheHit(cache, normalizedOptions);
 
       if (keyIndex) {
-        orderByLru(cache.keys, keyIndex);
-        orderByLru(cache.values, keyIndex);
+        orderByLru(cache.keys, cache.keys[keyIndex], keyIndex);
+        orderByLru(cache.values, cache.values[keyIndex], keyIndex);
 
         onCacheChange(cache, normalizedOptions);
       }
@@ -90,8 +90,8 @@ export default function memoize(fn: Function, options: Options) {
         cache.values.pop();
       }
 
-      cache.keys.unshift(getTransformedKey ? args : slice.call(args, 0));
-      cache.values.unshift(fn.apply(this, arguments));
+      orderByLru(cache.keys, getTransformedKey ? args : slice.call(args, 0), cache.keys.length);
+      orderByLru(cache.values, fn.apply(this, arguments), cache.values.length);
 
       if (isPromise) {
         setPromiseCatch(cache, cache.keys[0], getKeyIndex);
@@ -117,8 +117,8 @@ export default function memoize(fn: Function, options: Options) {
         configurable: true,
         get() {
           return {
-            keys: [...cache.keys],
-            values: [...cache.values]
+            keys: cache.keys.slice(0),
+            values: cache.values.slice(0)
           };
         }
       },
