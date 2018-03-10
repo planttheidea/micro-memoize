@@ -40,17 +40,17 @@
     "babel-preset-stage-2": "^6.24.1",
     "babel-register": "^6.26.0",
     "benchmark": "^2.1.4",
-    "case-sensitive-paths-webpack-plugin": "^2.1.1",
+    "case-sensitive-paths-webpack-plugin": "^2.1.2",
     "cli-table2": "^0.2.0",
     "eslint": "^4.18.2",
     "eslint-config-rapid7": "^2.11.1",
     "eslint-friendly-formatter": "^3.0.0",
     "eslint-loader": "^2.0.0",
-    "fast-equals": "^1.2.0",
+    "fast-equals": "^1.2.1",
     "fast-memoize": "^2.3.0",
     "flow-babel-webpack-plugin": "^1.1.1",
     "hash-it": "^3.1.2",
-    "html-webpack-plugin": "^2.30.1",
+    "html-webpack-plugin": "^3.0.6",
     "in-publish": "^2.0.0",
     "lodash": "^4.17.5",
     "lru-memoize": "^1.0.2",
@@ -67,10 +67,14 @@
     "react-dom": "^16.2.0",
     "react-hot-loader": "^4.0.0",
     "rimraf": "^2.6.2",
+    "rollup": "^0.56.5",
+    "rollup-plugin-babel": "^3.0.3",
+    "rollup-plugin-uglify": "^3.0.0",
     "sinon": "^4.4.2",
     "underscore": "^1.8.3",
-    "webpack": "^3.10.0",
-    "webpack-dev-server": "^2.11.1"
+    "webpack": "^4.1.1",
+    "webpack-cli": "^2.0.11",
+    "webpack-dev-server": "^3.1.1"
   },
   "homepage": "https://github.com/planttheidea/micro-memoize#readme",
   "keywords": [
@@ -100,14 +104,13 @@
   },
   "scripts": {
     "benchmark": "npm run transpile:lib -- --no-comments && node benchmark/index.js",
-    "build": "NODE_ENV=development webpack --progress --colors --config=webpack/webpack.config.js",
-    "build:minified": "NODE_ENV=production webpack --progress --colors --config=webpack/webpack.config.minified.js",
+    "build": "NODE_ENV=production rollup -c",
     "clean": "rimraf lib && rimraf es && rimraf dist",
-    "dev": "NODE_ENV=development webpack-dev-server --progress --colors --config=webpack/webpack.config.dev.js",
+    "dev": "NODE_ENV=development webpack-dev-server --progress --colors --config=webpack/webpack.config.js",
     "flow": "flow check src",
     "lint": "eslint --max-warnings 0 src",
     "prepublish": "if in-publish; then npm run prepublish:compile; fi",
-    "prepublish:compile": "npm run lint && npm run flow && npm run test:coverage && npm run clean && npm run transpile:lib && npm run transpile:es && npm run build && npm run build:minified",
+    "prepublish:compile": "npm run lint && npm run flow && npm run test:coverage && npm run clean && npm run transpile:lib && npm run transpile:es && npm run build",
     "start": "npm run dev",
     "test": "NODE_PATH=. NODE_ENV=test ava",
     "test:coverage": "nyc --cache npm test",
@@ -116,5 +119,5 @@
     "transpile:lib": "BABEL_ENV=lib babel src --out-dir lib"
   },
   "types": "./index.d.ts",
-  "version": "1.6.1"
+  "version": "1.6.2"
 }

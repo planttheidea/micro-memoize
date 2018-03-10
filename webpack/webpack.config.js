@@ -1,18 +1,40 @@
 'use strict';
 
+const path = require('path');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const eslintFriendlyFormatter = require('eslint-friendly-formatter');
-const path = require('path');
+const FlowBabelWebpackPlugin = require('flow-babel-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
-const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 const webpack = require('webpack');
 
 const ROOT = path.resolve(__dirname, '..');
+const PORT = 3000;
 
 module.exports = {
+  cache: true,
+
+  devServer: {
+    clientLogLevel: 'none',
+    compress: true,
+    contentBase: './dist',
+    host: 'localhost',
+    inline: true,
+    lazy: false,
+    noInfo: false,
+    quiet: false,
+    port: PORT,
+    stats: {
+      colors: true,
+      progress: true
+    }
+  },
+
   devtool: '#source-map',
 
-  entry: [path.resolve(ROOT, 'src', 'index.js')],
+  entry: [path.resolve(ROOT, 'DEV_ONLY', 'index.js')],
+
+  mode: 'development',
 
   module: {
     rules: [
@@ -30,8 +52,12 @@ module.exports = {
         test: /\.js$/
       },
       {
-        include: [path.resolve(ROOT, 'src')],
+        include: [path.resolve(ROOT, 'src'), path.resolve(ROOT, 'DEV_ONLY')],
         loader: 'babel-loader',
+        options: {
+          plugins: ['react-hot-loader/babel'],
+          presets: ['react']
+        },
         test: /\.js$/
       }
     ]
@@ -46,18 +72,17 @@ module.exports = {
     libraryTarget: 'umd',
     path: path.resolve(ROOT, 'dist'),
     pathinfo: true,
+    publicPath: `http://localhost:${PORT}/`,
     umdNamedDefine: true
-  },
-
-  performance: {
-    hints: false
   },
 
   plugins: [
     new webpack.EnvironmentPlugin(['NODE_ENV']),
     new webpack.NamedModulesPlugin(),
     new CaseSensitivePathsPlugin(),
-    new WatchMissingNodeModulesPlugin(path.resolve(ROOT, 'node_modules'))
+    new HtmlWebpackPlugin(),
+    new webpack.HotModuleReplacementPlugin(),
+    new FlowBabelWebpackPlugin()
   ],
 
   resolve: {
