@@ -5,6 +5,7 @@ import type {Cache, Options} from './types';
 
 // utils
 import {
+  cloneArray,
   createGetKeyIndex,
   createGetTransformedKey,
   isSameValueZero,
@@ -12,8 +13,6 @@ import {
   orderByLru,
   setPromiseCatch
 } from './utils';
-
-const slice: Function = [].slice;
 
 /**
  * @function memoize
@@ -72,7 +71,7 @@ export default function memoize(fn: Function, options: Options) {
    * @returns {any} the value of the method called with the arguments
    */
   function memoized(): any {
-    const args: Array<any> | Object = getTransformedKey ? getTransformedKey(slice.call(arguments, 0)) : arguments;
+    const args: Array<any> | Object = getTransformedKey ? getTransformedKey(cloneArray(arguments)) : arguments;
     const keyIndex: number = getKeyIndex(cache.keys, args);
 
     if (~keyIndex) {
@@ -90,7 +89,7 @@ export default function memoize(fn: Function, options: Options) {
         cache.values.pop();
       }
 
-      orderByLru(cache.keys, getTransformedKey ? args : slice.call(args, 0), cache.keys.length);
+      orderByLru(cache.keys, getTransformedKey ? args : cloneArray(args), cache.keys.length);
       orderByLru(cache.values, fn.apply(this, arguments), cache.values.length);
 
       if (isPromise) {
@@ -117,8 +116,8 @@ export default function memoize(fn: Function, options: Options) {
         configurable: true,
         get() {
           return {
-            keys: cache.keys.slice(0),
-            values: cache.values.slice(0)
+            keys: cloneArray(cache.keys),
+            values: cloneArray(cache.values)
           };
         }
       },

@@ -237,3 +237,12 @@ test('if setPromiseCatch will not remove the key from cache when the promise is 
     values: [newValue]
   });
 });
+
+test('if cloneArray will clone the array shallowly', (t) => {
+  const original = ['foo', {bar: 'baz'}];
+
+  const result = utils.cloneArray(original);
+
+  t.not(result, original);
+  t.deepEqual(result, original);
+});
