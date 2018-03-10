@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 1.6.3
+
+* Replace native `slice` usages with `cloneArray` utility
+
 ## 1.6.2
 
 * Convert `dist` files to be built using [`rollup`](https://github.com/rollup/rollup) instead of webpack

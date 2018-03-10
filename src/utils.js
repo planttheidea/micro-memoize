@@ -3,6 +3,25 @@
 // types
 import type {Cache} from './types';
 
+/**
+ * @function cloneArray
+ *
+ * @description
+ * clone the array-like object and return the new array
+ *
+ * @param {Array<any>|Arguments} arrayLike the array-like object to clone
+ * @returns {Array<any>} the clone of the array
+ */
+export const cloneArray = (arrayLike: Array<any> | Object): Array<any> => {
+  const array: Array<any> = new Array(arrayLike.length);
+
+  for (let index: number = 0; index < arrayLike.length; index++) {
+    array[index] = arrayLike[index];
+  }
+
+  return array;
+};
+
 export const createAreKeysEqual = (isEqual: Function): Function => {
   /**
    * @function areKeysEqual
