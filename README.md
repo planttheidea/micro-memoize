@@ -115,7 +115,10 @@ console.log(
 
 `boolean`, _defaults to `boolean`_
 
-Identifies the value returned from the method as a `Promise`, which will trigger auto-removal from cache if the `Promise` is rejected. This should work with any promise library that creates a `catch` function on the promise object created.
+Identifies the value returned from the method as a `Promise`, which will result in one of two possible scenarios:
+
+* If the promise is resolved, it will fire the `onCacheHit` and `onCacheChange` options
+* If the promise is rejected, it will trigger auto-removal from cache
 
 ```javascript
 const fn = async (one, two) => {
@@ -139,7 +142,7 @@ setTimeout(() => {
 }, 1000);
 ```
 
-**NOTE**: If you don't want rejections to auto-remove the entry from cache, set `isPromise` to `false` (or just not set it).
+**NOTE**: If you don't want rejections to auto-remove the entry from cache, set `isPromise` to `false` (or simply do not set it), but be aware this will also remove the cache listeners that fire on successful resolution.
 
 #### maxSize
 

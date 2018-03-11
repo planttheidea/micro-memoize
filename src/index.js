@@ -11,7 +11,7 @@ import {
   isSameValueZero,
   onCacheOperation,
   orderByLru,
-  setPromiseCatch
+  setPromiseHandler
 } from './utils';
 
 /**
@@ -93,7 +93,7 @@ export default function memoize(fn: Function, options: Options) {
       orderByLru(cache.values, fn.apply(this, arguments), cache.values.length);
 
       if (isPromise) {
-        setPromiseCatch(cache, cache.keys[0], getKeyIndex);
+        setPromiseHandler(cache, normalizedOptions, getKeyIndex);
       }
 
       onCacheAdd(cache, normalizedOptions);

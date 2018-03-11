@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 1.7.0
+
+* Fire `onCacheHit` and `onCacheChange` when promise functions successfully resolve
+
 ## 1.6.3
 
 * Replace native `slice` usages with `cloneArray` utility
