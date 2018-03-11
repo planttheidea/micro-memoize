@@ -101,7 +101,11 @@ test('if getTransformedKey will return the transformed key in an array when it i
 
   const args = ['one', 'two'];
 
-  const result = getTransformedKey(args);
+  const result = getTransformedKey(
+    (function() {
+      return arguments;
+    })(...args)
+  );
 
   t.deepEqual(result, [JSON.stringify([...args].reverse())]);
 });
@@ -168,6 +172,8 @@ test('if setPromiseHandler will fire cache callbacks if resolved', async (t) => 
     return 'resolved';
   };
   const key = ['foo'];
+  const memoized = () => {};
+
   const value = fn();
 
   const cache = {
@@ -175,14 +181,12 @@ test('if setPromiseHandler will fire cache callbacks if resolved', async (t) => 
     values: [value]
   };
   const options = {
+    isEqual: utils.isSameValueZero,
     onCacheChange: sinon.spy(),
     onCacheHit: sinon.spy()
   };
-  const getKeyIndex = () => {
-    return 0;
-  };
 
-  utils.setPromiseHandler(cache, options, getKeyIndex);
+  utils.setPromiseHandler(cache, options, memoized);
 
   // this is just to prevent the unhandled rejection noise
   cache.values[0].catch(() => {});
@@ -200,10 +204,10 @@ test('if setPromiseHandler will fire cache callbacks if resolved', async (t) => 
   t.not(cache.values[0], value);
 
   t.true(options.onCacheHit.calledOnce);
-  t.true(options.onCacheHit.calledWith(cache, options));
+  t.true(options.onCacheHit.calledWith(cache, options, memoized));
 
   t.true(options.onCacheChange.calledOnce);
-  t.true(options.onCacheChange.calledWith(cache, options));
+  t.true(options.onCacheChange.calledWith(cache, options, memoized));
 });
 
 test('if setPromiseHandler will remove the key from cache when the promise is rejected', async (t) => {
@@ -224,14 +228,13 @@ test('if setPromiseHandler will remove the key from cache when the promise is re
     values: [value]
   };
   const options = {
+    isEqual: utils.isSameValueZero,
     onCacheChange: sinon.spy(),
     onCacheHit: sinon.spy()
   };
-  const getKeyIndex = () => {
-    return 0;
-  };
+  const memoized = () => {};
 
-  utils.setPromiseHandler(cache, options, getKeyIndex);
+  utils.setPromiseHandler(cache, options, memoized);
 
   // this is just to prevent the unhandled rejection noise
   cache.values[0].catch(() => {});
@@ -272,14 +275,13 @@ test('if setPromiseHandler will not remove the key from cache when the promise i
     values: [value]
   };
   const options = {
+    isEqual: utils.isSameValueZero,
     onCacheChange: sinon.spy(),
     onCacheHit: sinon.spy()
   };
-  const getKeyIndex = () => {
-    return -1;
-  };
+  const memoized = () => {};
 
-  utils.setPromiseHandler(cache, options, getKeyIndex);
+  utils.setPromiseHandler(cache, options, memoized);
 
   const newValue = cache.values[0];
 
@@ -290,13 +292,16 @@ test('if setPromiseHandler will not remove the key from cache when the promise i
   t.is(cache.values.length, 1);
   t.not(cache.values[0], value);
 
+  cache.keys = [];
+  cache.values = [];
+
   await new Promise((resolve) => {
     setTimeout(resolve, timeout + 50);
   });
 
   t.deepEqual(cache, {
-    keys: [key],
-    values: [newValue]
+    keys: [],
+    values: []
   });
 
   t.true(options.onCacheHit.notCalled);

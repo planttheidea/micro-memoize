@@ -61,6 +61,8 @@ export default function memoize(fn: Function, options: Options) {
     values: []
   };
 
+  const {keys, values} = cache;
+
   /**
    * @function memoized
    *
@@ -72,35 +74,35 @@ export default function memoize(fn: Function, options: Options) {
    */
   function memoized(): any {
     const args: Array<any> | Object = getTransformedKey ? getTransformedKey(cloneArray(arguments)) : arguments;
-    const keyIndex: number = getKeyIndex(cache.keys, args);
+    const keyIndex: number = getKeyIndex(keys, args);
 
     if (~keyIndex) {
-      onCacheHit(cache, normalizedOptions);
+      onCacheHit(cache, normalizedOptions, memoized);
 
       if (keyIndex) {
-        orderByLru(cache.keys, cache.keys[keyIndex], keyIndex);
-        orderByLru(cache.values, cache.values[keyIndex], keyIndex);
+        orderByLru(keys, keys[keyIndex], keyIndex);
+        orderByLru(values, values[keyIndex], keyIndex);
 
-        onCacheChange(cache, normalizedOptions);
+        onCacheChange(cache, normalizedOptions, memoized);
       }
     } else {
-      if (cache.keys.length >= maxSize) {
-        cache.keys.pop();
-        cache.values.pop();
+      if (keys.length >= maxSize) {
+        keys.pop();
+        values.pop();
       }
 
-      orderByLru(cache.keys, getTransformedKey ? args : cloneArray(args), cache.keys.length);
-      orderByLru(cache.values, fn.apply(this, arguments), cache.values.length);
+      orderByLru(keys, getTransformedKey ? args : cloneArray(args), keys.length);
+      orderByLru(values, fn.apply(this, arguments), values.length);
 
       if (isPromise) {
         setPromiseHandler(cache, normalizedOptions, getKeyIndex);
       }
 
-      onCacheAdd(cache, normalizedOptions);
-      onCacheChange(cache, normalizedOptions);
+      onCacheAdd(cache, normalizedOptions, memoized);
+      onCacheChange(cache, normalizedOptions, memoized);
     }
 
-    return cache.values[0];
+    return values[0];
   }
 
   Object.defineProperties(

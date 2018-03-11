@@ -105,7 +105,7 @@ export const isSameValueZero = (object1: any, object2: any): boolean => {
 };
 
 /* eslint-disable no-unused-vars */
-export const onCacheOperation = (cacheIgnored: any, optionsIgnored: any): void => {};
+export const onCacheOperation = (cacheIgnored: Cache, optionsIgnored: Options, memoized: Function): void => {};
 /* eslint-enable */
 
 /**
@@ -136,20 +136,20 @@ export const orderByLru = (array: Array<any>, value: any, startingIndex: number)
  *
  * @param {Cache} cache the cache object
  * @param {Options} options the options for the memoized function
- * @param {function} getKeyIndex the method to retrieve the key index
+ * @param {function} memoized the memoized function
  */
-export const setPromiseHandler = (cache: Cache, options: Options, getKeyIndex: Function): void => {
+export const setPromiseHandler = (cache: Cache, options: Options, memoized: Function): void => {
   const key: any = cache.keys[0];
 
   cache.values[0] = cache.values[0]
     .then((value: any): any => {
-      options.onCacheHit(cache, options);
-      options.onCacheChange(cache, options);
+      options.onCacheHit(cache, options, memoized);
+      options.onCacheChange(cache, options, memoized);
 
       return value;
     })
     .catch((error: Error) => {
-      const keyIndex: number = getKeyIndex(cache.keys, key);
+      const keyIndex: number = createGetKeyIndex(options.isEqual)(cache.keys, key);
 
       if (~keyIndex) {
         cache.keys.splice(keyIndex, 1);

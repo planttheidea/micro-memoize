@@ -6,19 +6,21 @@
  * perf tests: http://bit.ly/q3zpG3
  * Released under an MIT license.
  */
-module.exports = function memoize( fn ) {
-  return function () {
-    var args = Array.prototype.slice.call(arguments),
-      hash = "",
-      i = args.length;
+module.exports = function memoize(fn) {
+  return function(...args) {
+    let index = args.length,
+        hash = '',
+        currentArg = null;
+
     currentArg = null;
-    while (i--) {
-      currentArg = args[i];
-      hash += (currentArg === Object(currentArg)) ?
-        JSON.stringify(currentArg) : currentArg;
+
+    while (index--) {
+      currentArg = args[index];
+      hash += currentArg === Object(currentArg) ? JSON.stringify(currentArg) : currentArg;
+
       fn.memoize || (fn.memoize = {});
     }
-    return (hash in fn.memoize) ? fn.memoize[hash] :
-      fn.memoize[hash] = fn.apply(this, args);
+
+    return hash in fn.memoize ? fn.memoize[hash] : (fn.memoize[hash] = fn.apply(this, args));
   };
-}
+};

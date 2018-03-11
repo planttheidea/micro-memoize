@@ -1,5 +1,5 @@
 Arguments: 
-  /usr/bin/node /usr/bin/yarn dev
+  /usr/bin/node /usr/bin/yarn test
 
 PATH: 
   /usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl
@@ -135,7 +135,7 @@ npm manifest:
       "transpile:lib": "BABEL_ENV=lib babel src --out-dir lib"
     },
     "types": "./index.d.ts",
-    "version": "1.6.1"
+    "version": "1.7.0"
   }
 
 yarn manifest: 
@@ -8270,7 +8270,7 @@ Trace:
   Error: Command failed.
   Exit code: 1
   Command: sh
-  Arguments: -c NODE_ENV=development webpack-dev-server --progress --colors --config=webpack/webpack.config.js
+  Arguments: -c NODE_PATH=. NODE_ENV=test ava
   Directory: /home/tquetano/git/micro-memoize
   Output:
   

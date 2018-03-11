@@ -7,9 +7,9 @@ interface Options {
   isEqual?: (firstValue: any, secondValue: any) => boolean;
   isPromise?: boolean;
   maxSize?: number;
-  onCacheAdd?: (cache: Cache, options: Options) => void;
-  onCacheChange?: (cache: Cache, options: Options) => void;
-  onCacheHit?: (cache: Cache, options: Options) => void;
+  onCacheAdd?: (cache: Cache, options: Options, memoized: Function) => void;
+  onCacheChange?: (cache: Cache, options: Options, memoized: Function) => void;
+  onCacheHit?: (cache: Cache, options: Options, memoized: Function) => void;
   transformKey?: (args: any[]) => any;
 }
 

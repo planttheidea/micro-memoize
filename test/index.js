@@ -291,7 +291,8 @@ test('if memoize will fire the onCacheChange method passed with the cache when i
       onCacheChange,
       onCacheHit: utils.onCacheOperation,
       transformKey: undefined
-    }
+    },
+    memoized
   ]);
 });
 
@@ -319,7 +320,8 @@ test('if memoize will fire the onCacheChange method passed with the cache when i
       onCacheChange,
       onCacheHit: utils.onCacheOperation,
       transformKey: undefined
-    }
+    },
+    memoized
   ]);
 
   memoized('bar', 'foo');
@@ -335,7 +337,8 @@ test('if memoize will fire the onCacheChange method passed with the cache when i
       onCacheChange,
       onCacheHit: utils.onCacheOperation,
       transformKey: undefined
-    }
+    },
+    memoized
   ]);
 
   memoized('bar', 'foo');
@@ -351,7 +354,8 @@ test('if memoize will fire the onCacheChange method passed with the cache when i
       onCacheChange,
       onCacheHit: utils.onCacheOperation,
       transformKey: undefined
-    }
+    },
+    memoized
   ]);
 
   memoized('foo', 'bar');
@@ -367,7 +371,8 @@ test('if memoize will fire the onCacheChange method passed with the cache when i
       onCacheChange,
       onCacheHit: utils.onCacheOperation,
       transformKey: undefined
-    }
+    },
+    memoized
   ]);
 
   memoized('foo', 'bar');
@@ -383,7 +388,8 @@ test('if memoize will fire the onCacheChange method passed with the cache when i
       onCacheChange,
       onCacheHit: utils.onCacheOperation,
       transformKey: undefined
-    }
+    },
+    memoized
   ]);
 });
 
@@ -434,7 +440,8 @@ test('if memoize will fire the onCacheHit method passed with the cache when it i
       onCacheChange: utils.onCacheOperation,
       onCacheHit,
       transformKey: undefined
-    }
+    },
+    memoized
   ]);
 
   memoized('foo', 'bar');
@@ -450,7 +457,8 @@ test('if memoize will fire the onCacheHit method passed with the cache when it i
       onCacheChange: utils.onCacheOperation,
       onCacheHit,
       transformKey: undefined
-    }
+    },
+    memoized
   ]);
 
   memoized('foo', 'bar');
@@ -466,7 +474,8 @@ test('if memoize will fire the onCacheHit method passed with the cache when it i
       onCacheChange: utils.onCacheOperation,
       onCacheHit,
       transformKey: undefined
-    }
+    },
+    memoized
   ]);
 });
 
@@ -513,7 +522,8 @@ test('if memoize will fire the onCacheAdd method passed with the cache when it i
       onCacheChange: utils.onCacheOperation,
       onCacheHit: utils.onCacheOperation,
       transformKey: undefined
-    }
+    },
+    memoized
   ]);
 
   memoized('bar', 'foo');
@@ -529,7 +539,8 @@ test('if memoize will fire the onCacheAdd method passed with the cache when it i
       onCacheChange: utils.onCacheOperation,
       onCacheHit: utils.onCacheOperation,
       transformKey: undefined
-    }
+    },
+    memoized
   ]);
 
   memoized('bar', 'foo');
@@ -545,7 +556,8 @@ test('if memoize will fire the onCacheAdd method passed with the cache when it i
       onCacheChange: utils.onCacheOperation,
       onCacheHit: utils.onCacheOperation,
       transformKey: undefined
-    }
+    },
+    memoized
   ]);
 
   memoized('foo', 'bar');
@@ -561,7 +573,8 @@ test('if memoize will fire the onCacheAdd method passed with the cache when it i
       onCacheChange: utils.onCacheOperation,
       onCacheHit: utils.onCacheOperation,
       transformKey: undefined
-    }
+    },
+    memoized
   ]);
 
   memoized('foo', 'bar');
@@ -577,6 +590,7 @@ test('if memoize will fire the onCacheAdd method passed with the cache when it i
       onCacheChange: utils.onCacheOperation,
       onCacheHit: utils.onCacheOperation,
       transformKey: undefined
-    }
+    },
+    memoized
   ]);
 });
