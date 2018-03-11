@@ -2,7 +2,7 @@
 
 ## 1.8.0
 
-* Include the memoized function itself as the thir parameter to `onCacheAdd`, `onCacheChange`, and `onCacheHit` firings
+* Include the memoized function itself as the third parameter to `onCacheAdd`, `onCacheChange`, and `onCacheHit` firings
 
 ## 1.7.0
 
