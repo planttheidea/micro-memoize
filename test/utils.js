@@ -1,5 +1,6 @@
 // test
 import test from 'ava';
+import sinon from 'sinon';
 
 // src
 import * as utils from 'src/utils';
@@ -156,7 +157,56 @@ test('if orderByLru will add the new item to the array when the itemIndex is the
   t.deepEqual(array, ['new', 'first', 'second', 'third']);
 });
 
-test('if setPromiseCatch will remove the key from cache when the promise is rejected', async (t) => {
+test('if setPromiseHandler will fire cache callbacks if resolved', async (t) => {
+  const timeout = 200;
+
+  const fn = async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, timeout);
+    });
+
+    return 'resolved';
+  };
+  const key = ['foo'];
+  const value = fn();
+
+  const cache = {
+    keys: [key],
+    values: [value]
+  };
+  const options = {
+    onCacheChange: sinon.spy(),
+    onCacheHit: sinon.spy()
+  };
+  const getKeyIndex = () => {
+    return 0;
+  };
+
+  utils.setPromiseHandler(cache, options, getKeyIndex);
+
+  // this is just to prevent the unhandled rejection noise
+  cache.values[0].catch(() => {});
+
+  t.is(cache.keys.length, 1);
+  t.is(cache.values.length, 1);
+  t.not(cache.values[0], value);
+
+  await new Promise((resolve) => {
+    setTimeout(resolve, timeout + 50);
+  });
+
+  t.is(cache.keys.length, 1);
+  t.is(cache.values.length, 1);
+  t.not(cache.values[0], value);
+
+  t.true(options.onCacheHit.calledOnce);
+  t.true(options.onCacheHit.calledWith(cache, options));
+
+  t.true(options.onCacheChange.calledOnce);
+  t.true(options.onCacheChange.calledWith(cache, options));
+});
+
+test('if setPromiseHandler will remove the key from cache when the promise is rejected', async (t) => {
   const timeout = 200;
 
   const fn = async () => {
@@ -173,11 +223,15 @@ test('if setPromiseCatch will remove the key from cache when the promise is reje
     keys: [key],
     values: [value]
   };
+  const options = {
+    onCacheChange: sinon.spy(),
+    onCacheHit: sinon.spy()
+  };
   const getKeyIndex = () => {
     return 0;
   };
 
-  utils.setPromiseCatch(cache, key, getKeyIndex);
+  utils.setPromiseHandler(cache, options, getKeyIndex);
 
   // this is just to prevent the unhandled rejection noise
   cache.values[0].catch(() => {});
@@ -194,9 +248,13 @@ test('if setPromiseCatch will remove the key from cache when the promise is reje
     keys: [],
     values: []
   });
+
+  t.true(options.onCacheHit.notCalled);
+
+  t.true(options.onCacheChange.notCalled);
 });
 
-test('if setPromiseCatch will not remove the key from cache when the promise is rejected but the key no longer exists', async (t) => {
+test('if setPromiseHandler will not remove the key from cache when the promise is rejected but the key no longer exists', async (t) => {
   const timeout = 200;
 
   const fn = async () => {
@@ -213,11 +271,15 @@ test('if setPromiseCatch will not remove the key from cache when the promise is 
     keys: [key],
     values: [value]
   };
+  const options = {
+    onCacheChange: sinon.spy(),
+    onCacheHit: sinon.spy()
+  };
   const getKeyIndex = () => {
     return -1;
   };
 
-  utils.setPromiseCatch(cache, key, getKeyIndex);
+  utils.setPromiseHandler(cache, options, getKeyIndex);
 
   const newValue = cache.values[0];
 
@@ -236,6 +298,10 @@ test('if setPromiseCatch will not remove the key from cache when the promise is 
     keys: [key],
     values: [newValue]
   });
+
+  t.true(options.onCacheHit.notCalled);
+
+  t.true(options.onCacheChange.notCalled);
 });
 
 test('if cloneArray will clone the array shallowly', (t) => {

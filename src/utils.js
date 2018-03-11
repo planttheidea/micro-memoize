@@ -1,7 +1,7 @@
 // @flow
 
 // types
-import type {Cache} from './types';
+import type {Cache, Options} from './types';
 
 /**
  * @function cloneArray
@@ -129,24 +129,33 @@ export const orderByLru = (array: Array<any>, value: any, startingIndex: number)
 };
 
 /**
- * @function setPromiseCatch
+ * @function setPromiseHandler
  *
  * @description
- * update the promise method to auto-remove from cache if rejected
+ * update the promise method to auto-remove from cache if rejected, and if resolved then fire cache hit / changed
  *
  * @param {Cache} cache the cache object
- * @param {Array<any>} key the key to remove upon promise rejection
+ * @param {Options} options the options for the memoized function
  * @param {function} getKeyIndex the method to retrieve the key index
  */
-export const setPromiseCatch = (cache: Cache, key: Array<any>, getKeyIndex: Function): void => {
-  cache.values[0] = cache.values[0].catch((error: Error) => {
-    const keyIndex: number = getKeyIndex(cache.keys, key);
+export const setPromiseHandler = (cache: Cache, options: Options, getKeyIndex: Function): void => {
+  const key: any = cache.keys[0];
 
-    if (~keyIndex) {
-      cache.keys.splice(keyIndex, 1);
-      cache.values.splice(keyIndex, 1);
-    }
+  cache.values[0] = cache.values[0]
+    .then((value: any): any => {
+      options.onCacheHit(cache, options);
+      options.onCacheChange(cache, options);
 
-    throw error;
-  });
+      return value;
+    })
+    .catch((error: Error) => {
+      const keyIndex: number = getKeyIndex(cache.keys, key);
+
+      if (~keyIndex) {
+        cache.keys.splice(keyIndex, 1);
+        cache.values.splice(keyIndex, 1);
+      }
+
+      throw error;
+    });
 };
