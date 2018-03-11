@@ -119,5 +119,5 @@
     "transpile:lib": "BABEL_ENV=lib babel src --out-dir lib"
   },
   "types": "./index.d.ts",
-  "version": "1.7.0"
+  "version": "1.8.0"
 }
