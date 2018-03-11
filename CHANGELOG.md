@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 1.8.1
+
+* Fix `getKeyIndex` being passed as `memoize` for promises
+
 ## 1.8.0
 
 * Include the memoized function itself as the third parameter to `onCacheAdd`, `onCacheChange`, and `onCacheHit` firings

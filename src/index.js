@@ -95,7 +95,7 @@ export default function memoize(fn: Function, options: Options) {
       orderByLru(values, fn.apply(this, arguments), values.length);
 
       if (isPromise) {
-        setPromiseHandler(cache, normalizedOptions, getKeyIndex);
+        setPromiseHandler(cache, normalizedOptions, memoized);
       }
 
       onCacheAdd(cache, normalizedOptions, memoized);
