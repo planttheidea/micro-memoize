@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 1.8.0
+
+* Include the memoized function itself as the thir parameter to `onCacheAdd`, `onCacheChange`, and `onCacheHit` firings
+
 ## 1.7.0
 
 * Fire `onCacheHit` and `onCacheChange` when promise functions successfully resolve

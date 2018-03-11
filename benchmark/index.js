@@ -12,7 +12,6 @@ const fastMemoize = require('fast-memoize');
 const addyOsmani = require('./addy-osmani');
 const memoizerific = require('memoizerific');
 const lruMemoize = require('lru-memoize').default;
-const moize = require('moize');
 const microMemoize = require('../lib').default;
 
 const deepEquals = require('lodash').isEqual;
@@ -116,7 +115,6 @@ const runSinglePrimitiveSuite = () => {
   const mAddyOsmani = addyOsmani(fibonacciSinglePrimitive);
   const mMemoizerific = memoizerific(Infinity)(fibonacciSinglePrimitive);
   const mLruMemoize = lruMemoize(Infinity)(fibonacciSinglePrimitive);
-  const mMoize = moize(fibonacciSinglePrimitive);
   const mMicroMemoize = microMemoize(fibonacciSinglePrimitive);
 
   return new Promise((resolve) => {
@@ -141,9 +139,6 @@ const runSinglePrimitiveSuite = () => {
       })
       .add('micro-memoize', () => {
         mMicroMemoize(fibonacciNumber);
-      })
-      .add('moize', () => {
-        mMoize(fibonacciNumber);
       })
       .add('ramda', () => {
         mRamda(fibonacciNumber);
@@ -184,7 +179,6 @@ const runSingleObjectSuite = () => {
   const mAddyOsmani = addyOsmani(fibonacciSingleObject);
   const mMemoizerific = memoizerific(Infinity)(fibonacciSingleObject);
   const mLruMemoize = lruMemoize(Infinity)(fibonacciSingleObject);
-  const mMoize = moize(fibonacciSingleObject);
   const mMicroMemoize = microMemoize(fibonacciSingleObject);
 
   return new Promise((resolve) => {
@@ -209,9 +203,6 @@ const runSingleObjectSuite = () => {
       })
       .add('micro-memoize', () => {
         mMicroMemoize(fibonacciNumber);
-      })
-      .add('moize', () => {
-        mMoize(fibonacciNumber);
       })
       .add('ramda', () => {
         mRamda(fibonacciNumber);
@@ -248,7 +239,6 @@ const runMultiplePrimitiveSuite = () => {
   const mAddyOsmani = addyOsmani(fibonacciMultiplePrimitive);
   const mMemoizerific = memoizerific(Infinity)(fibonacciMultiplePrimitive);
   const mLruMemoize = lruMemoize(Infinity)(fibonacciMultiplePrimitive);
-  const mMoize = moize(fibonacciMultiplePrimitive);
   const mMicroMemoize = microMemoize(fibonacciMultiplePrimitive);
 
   return new Promise((resolve) => {
@@ -256,11 +246,11 @@ const runMultiplePrimitiveSuite = () => {
       .add('addy-osmani', () => {
         mAddyOsmani(fibonacciNumber, isComplete);
       })
-      .add('lru-memoize', () => {
-        mLruMemoize(fibonacciNumber, isComplete);
-      })
       .add('fast-memoize', () => {
         mFastMemoize(fibonacciNumber, isComplete);
+      })
+      .add('lru-memoize', () => {
+        mLruMemoize(fibonacciNumber, isComplete);
       })
       .add('memoizee', () => {
         mMemoizee(fibonacciNumber, isComplete);
@@ -270,9 +260,6 @@ const runMultiplePrimitiveSuite = () => {
       })
       .add('micro-memoize', () => {
         mMicroMemoize(fibonacciNumber, isComplete);
-      })
-      .add('moize', () => {
-        mMoize(fibonacciNumber, isComplete);
       })
       .on('start', () => {
         console.log(''); // eslint-disable-line no-console
@@ -307,7 +294,6 @@ const runMultipleObjectSuite = () => {
   const mAddyOsmani = addyOsmani(fibonacciMultipleObject);
   const mMemoizerific = memoizerific(Infinity)(fibonacciMultipleObject);
   const mLruMemoize = lruMemoize(Infinity)(fibonacciMultipleObject);
-  const mMoize = moize(fibonacciMultipleObject);
   const mMicroMemoize = microMemoize(fibonacciMultipleObject);
 
   return new Promise((resolve) => {
@@ -315,11 +301,11 @@ const runMultipleObjectSuite = () => {
       .add('addy-osmani', () => {
         mAddyOsmani(fibonacciNumber, isComplete);
       })
-      .add('lru-memoize', () => {
-        mLruMemoize(fibonacciNumber, isComplete);
-      })
       .add('fast-memoize', () => {
         mFastMemoize(fibonacciNumber, isComplete);
+      })
+      .add('lru-memoize', () => {
+        mLruMemoize(fibonacciNumber, isComplete);
       })
       .add('memoizee', () => {
         mMemoizee(fibonacciNumber, isComplete);
@@ -329,9 +315,6 @@ const runMultipleObjectSuite = () => {
       })
       .add('micro-memoize', () => {
         mMicroMemoize(fibonacciNumber, isComplete);
-      })
-      .add('moize', () => {
-        mMoize(fibonacciNumber, isComplete);
       })
       .on('start', () => {
         console.log(''); // eslint-disable-line no-console

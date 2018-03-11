@@ -9,8 +9,8 @@ export type Options = {
   isEqual: Function,
   isPromise: boolean,
   maxSize: number,
-  onCacheAdd: Function,
-  onCacheChange: Function,
-  onCacheHit: Function,
+  onCacheAdd: (cache: Cache, options: Options, memoized: Function) => void,
+  onCacheChange: (cache: Cache, options: Options, memoized: Function) => void,
+  onCacheHit: (cache: Cache, options: Options, memoized: Function) => void,
   transformKey: ?Function
 };
