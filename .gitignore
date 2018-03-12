@@ -5,3 +5,4 @@ dist
 es
 node_modules
 lib
+*.log
