@@ -11,6 +11,7 @@
 **NEW FEATURES**
 
 * `isMatchingKey` will matching on entire key vs `isEqual`, which does an iterative comparison of arguments in order
+* Add `size` property to `cache`
 
 ## 1.8.1
 

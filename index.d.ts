@@ -1,5 +1,6 @@
 interface Cache = {
   keys: Array<any>,
+  size: number,
   values: Array<any>
 };
 

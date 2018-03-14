@@ -1,6 +1,7 @@
 declare module 'micro-memoize' {
   declare type Cache = {
     keys: Array<any>,
+    size: number,
     values: Array<any>
   };
 
