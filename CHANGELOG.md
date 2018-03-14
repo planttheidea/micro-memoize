@@ -1,5 +1,17 @@
 # micro-memoize CHANGELOG
 
+## 2.0.0
+
+* Add [`isMatchingKey`](#ismatchingkey) method to provide match test on entire key vs iterative equality
+
+**BREAKING CHANGES**
+
+* The return value from `transformKey` must be an `Array` (would previously coalesce it for you)
+
+**NEW FEATURES**
+
+* `isMatchingKey` will matching on entire key vs `isEqual`, which does an iterative comparison of arguments in order
+
 ## 1.8.1
 
 * Fix `getKeyIndex` being passed as `memoize` for promises

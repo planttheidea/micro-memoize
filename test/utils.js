@@ -74,40 +74,27 @@ test('if getKeyIndex will return -1 if no match is found', (t) => {
   t.is(result, -1);
 });
 
-test('if getTransformedKey will return the transformed key itself when it is an array', (t) => {
-  const transformKey = (args) => {
-    const [one, two] = args;
+test('if getKeyIndex will use the isMatchingKey method if passed', (t) => {
+  const isEqual = (o1, o2) => {
+    return o1 === o2;
+  };
+  const isMatchingKey = (o1, o2) => {
+    const existingKey = o1[0];
+    const key = o2[0];
 
-    return [two, one];
+    return (
+      existingKey.hasOwnProperty('foo') && key.hasOwnProperty('foo') && (existingKey.bar === 'bar' || key.bar === 'baz')
+    );
   };
 
-  const getTransformedKey = utils.createGetTransformedKey(transformKey);
+  const getKeyIndex = utils.createGetKeyIndex(isEqual, isMatchingKey);
 
-  const args = ['one', 'two'];
+  const allKeys = [[{foo: 'foo', bar: 'bar'}]];
+  const keysToMatch = [{foo: 'bar', bar: 'baz'}];
 
-  const result = getTransformedKey(args);
+  const result = getKeyIndex(allKeys, keysToMatch);
 
-  t.deepEqual(result, [...args].reverse());
-});
-
-test('if getTransformedKey will return the transformed key in an array when it is not an array', (t) => {
-  const transformKey = (args) => {
-    const [one, two] = args;
-
-    return JSON.stringify([two, one]);
-  };
-
-  const getTransformedKey = utils.createGetTransformedKey(transformKey);
-
-  const args = ['one', 'two'];
-
-  const result = getTransformedKey(
-    (function() {
-      return arguments;
-    })(...args)
-  );
-
-  t.deepEqual(result, [JSON.stringify([...args].reverse())]);
+  t.is(result, 0);
 });
 
 test('if isSameValueZero will return true when the objects are equal', (t) => {

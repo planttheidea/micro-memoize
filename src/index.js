@@ -4,15 +4,7 @@
 import type {Cache, Options} from './types';
 
 // utils
-import {
-  cloneArray,
-  createGetKeyIndex,
-  createGetTransformedKey,
-  isSameValueZero,
-  onCacheOperation,
-  orderByLru,
-  setPromiseHandler
-} from './utils';
+import {cloneArray, createGetKeyIndex, isSameValueZero, onCacheOperation, orderByLru, setPromiseHandler} from './utils';
 
 /**
  * @function memoize
@@ -34,6 +26,7 @@ export default function memoize(fn: Function, options: Options) {
 
   const {
     isEqual = isSameValueZero,
+    isMatchingKey,
     isPromise = false,
     maxSize = 1,
     onCacheAdd = onCacheOperation,
@@ -46,6 +39,7 @@ export default function memoize(fn: Function, options: Options) {
 
   const normalizedOptions = Object.assign({}, extraOptions, {
     isEqual,
+    isMatchingKey,
     isPromise,
     maxSize,
     onCacheAdd,
@@ -54,13 +48,16 @@ export default function memoize(fn: Function, options: Options) {
     transformKey
   });
 
-  const getKeyIndex: Function = createGetKeyIndex(isEqual);
-  const getTransformedKey: ?Function = transformKey ? createGetTransformedKey(transformKey) : null;
+  const getKeyIndex: Function = createGetKeyIndex(isEqual, isMatchingKey);
+  const shouldCloneArguments: boolean = !!(transformKey || isMatchingKey);
+
   const cache: Cache = {
     keys: [],
+    get size() {
+      return cache.keys.length;
+    },
     values: []
   };
-
   const {keys, values} = cache;
 
   /**
@@ -73,8 +70,9 @@ export default function memoize(fn: Function, options: Options) {
    * @returns {any} the value of the method called with the arguments
    */
   function memoized(): any {
-    const args: Array<any> | Object = getTransformedKey ? getTransformedKey(cloneArray(arguments)) : arguments;
-    const keyIndex: number = getKeyIndex(keys, args);
+    const args: Array<any> | Object = shouldCloneArguments ? cloneArray(arguments) : arguments;
+    const key: Array<any> | Object = transformKey ? transformKey(args) : args;
+    const keyIndex: number = getKeyIndex(keys, key);
 
     if (~keyIndex) {
       onCacheHit(cache, normalizedOptions, memoized);
@@ -91,7 +89,7 @@ export default function memoize(fn: Function, options: Options) {
         values.pop();
       }
 
-      orderByLru(keys, getTransformedKey ? args : cloneArray(args), keys.length);
+      orderByLru(keys, shouldCloneArguments ? key : cloneArray(args), keys.length);
       orderByLru(values, fn.apply(this, arguments), values.length);
 
       if (isPromise) {
@@ -119,6 +117,7 @@ export default function memoize(fn: Function, options: Options) {
         get() {
           return {
             keys: cloneArray(cache.keys),
+            size: cache.size,
             values: cloneArray(cache.values)
           };
         }
