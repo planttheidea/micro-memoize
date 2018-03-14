@@ -48,8 +48,8 @@ export const createAreKeysEqual = (isEqual: Function): Function => {
   };
 };
 
-export const createGetKeyIndex = (isEqual: Function): Function => {
-  const areKeysEqual: Function = createAreKeysEqual(isEqual);
+export const createGetKeyIndex = (isEqual: Function, isMatchingKey: ?Function): Function => {
+  const areKeysEqual: Function = typeof isMatchingKey === 'function' ? isMatchingKey : createAreKeysEqual(isEqual);
 
   /**
    * @function getKeyIndex
@@ -70,23 +70,6 @@ export const createGetKeyIndex = (isEqual: Function): Function => {
     }
 
     return -1;
-  };
-};
-
-export const createGetTransformedKey = (transformKey: Function): Function => {
-  /**
-   * @function getTransformedKey
-   *
-   * @description
-   * get the transformed key based on the args passed
-   *
-   * @param {Array<*>} args the args to transform into a key
-   * @returns {Array<*>} the transformed key
-   */
-  return (args: Object): Array<any> => {
-    const key: any = transformKey(args);
-
-    return Array.isArray(key) ? key : [key];
   };
 };
 

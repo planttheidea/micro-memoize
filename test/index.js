@@ -30,11 +30,13 @@ test('if memoize will return the memoized function', (t) => {
 
   t.deepEqual(memoized.cache, {
     keys: [],
+    size: 0,
     values: []
   });
 
   t.deepEqual(memoized.cacheSnapshot, {
     keys: [],
+    size: 0,
     values: []
   });
 
@@ -42,6 +44,7 @@ test('if memoize will return the memoized function', (t) => {
 
   t.deepEqual(memoized.options, {
     isEqual: utils.isSameValueZero,
+    isMatchingKey: undefined,
     isPromise: false,
     maxSize: 1,
     onCacheAdd: utils.onCacheOperation,
@@ -58,6 +61,7 @@ test('if memoize will return the memoized function', (t) => {
 
   t.deepEqual(memoized.cache, {
     keys: [['one', 'two']],
+    size: 1,
     values: [{one: 'one', two: 'two'}]
   });
 });
@@ -76,11 +80,13 @@ test('if memoize will return the memoized function that can have multiple cached
 
   t.deepEqual(memoized.cache, {
     keys: [],
+    size: 0,
     values: []
   });
 
   t.deepEqual(memoized.cacheSnapshot, {
     keys: [],
+    size: 0,
     values: []
   });
 
@@ -99,6 +105,7 @@ test('if memoize will return the memoized function that can have multiple cached
 
   t.deepEqual(memoized.cache, {
     keys: [['three', 'four'], ['two', 'three'], ['four', 'five']],
+    size: 3,
     values: [{one: 'three', two: 'four'}, {one: 'two', two: 'three'}, {one: 'four', two: 'five'}]
   });
 });
@@ -130,6 +137,7 @@ test('if memoize will return the memoized function that will use the custom isEq
 
   t.deepEqual(memoized.cache, {
     keys: [[{deep: {value: 'value'}}, {other: {deep: {value: 'value'}}}]],
+    size: 1,
     values: [
       {
         one: {deep: {value: 'value'}},
@@ -148,7 +156,7 @@ test('if memoize will return the memoized function that will use the transformKe
     return {one, two};
   };
   const transformKey = function(args) {
-    return JSON.stringify(args);
+    return [JSON.stringify(args)];
   };
 
   const memoized = memoize(fn, {
@@ -169,6 +177,7 @@ test('if memoize will return the memoized function that will use the transformKe
 
   t.deepEqual(memoized.cache, {
     keys: [['[{"one":"one"},null]']],
+    size: 1,
     values: [
       {
         one: {one: 'one'},
@@ -190,9 +199,11 @@ test('if memoize will return the memoized function that will use the transformKe
     return key1.args === key2.args;
   };
   const transformKey = function(args) {
-    return {
-      args: JSON.stringify(args)
-    };
+    return [
+      {
+        args: JSON.stringify(args)
+      }
+    ];
   };
 
   const memoized = memoize(fn, {
@@ -221,6 +232,7 @@ test('if memoize will return the memoized function that will use the transformKe
         }
       ]
     ],
+    size: 1,
     values: [
       {
         one: {one: 'one'},
@@ -261,6 +273,7 @@ test('if memoize will return a memoized method that will auto-remove the key fro
 
   t.deepEqual(memoized.cacheSnapshot, {
     keys: [],
+    size: 0,
     values: []
   });
 
@@ -285,6 +298,7 @@ test('if memoize will fire the onCacheChange method passed with the cache when i
     memoized.cache,
     {
       isEqual: utils.isSameValueZero,
+      isMatchingKey: undefined,
       isPromise: false,
       maxSize: 1,
       onCacheAdd: utils.onCacheOperation,
@@ -311,9 +325,10 @@ test('if memoize will fire the onCacheChange method passed with the cache when i
 
   t.true(onCacheChange.calledOnce);
   t.deepEqual(onCacheChange.args[0], [
-    {keys: [['foo', 'bar']], values: [{one: 'foo', two: 'bar'}]},
+    {keys: [['foo', 'bar']], size: 1, values: [{one: 'foo', two: 'bar'}]},
     {
       isEqual: utils.isSameValueZero,
+      isMatchingKey: undefined,
       isPromise: false,
       maxSize,
       onCacheAdd: utils.onCacheOperation,
@@ -328,9 +343,10 @@ test('if memoize will fire the onCacheChange method passed with the cache when i
 
   t.true(onCacheChange.calledTwice);
   t.deepEqual(onCacheChange.args[1], [
-    {keys: [['bar', 'foo'], ['foo', 'bar']], values: [{one: 'bar', two: 'foo'}, {one: 'foo', two: 'bar'}]},
+    {keys: [['bar', 'foo'], ['foo', 'bar']], size: 2, values: [{one: 'bar', two: 'foo'}, {one: 'foo', two: 'bar'}]},
     {
       isEqual: utils.isSameValueZero,
+      isMatchingKey: undefined,
       isPromise: false,
       maxSize,
       onCacheAdd: utils.onCacheOperation,
@@ -345,9 +361,10 @@ test('if memoize will fire the onCacheChange method passed with the cache when i
 
   t.true(onCacheChange.calledTwice);
   t.deepEqual(onCacheChange.args[1], [
-    {keys: [['bar', 'foo'], ['foo', 'bar']], values: [{one: 'bar', two: 'foo'}, {one: 'foo', two: 'bar'}]},
+    {keys: [['bar', 'foo'], ['foo', 'bar']], size: 2, values: [{one: 'bar', two: 'foo'}, {one: 'foo', two: 'bar'}]},
     {
       isEqual: utils.isSameValueZero,
+      isMatchingKey: undefined,
       isPromise: false,
       maxSize,
       onCacheAdd: utils.onCacheOperation,
@@ -362,9 +379,10 @@ test('if memoize will fire the onCacheChange method passed with the cache when i
 
   t.true(onCacheChange.calledThrice);
   t.deepEqual(onCacheChange.args[2], [
-    {keys: [['foo', 'bar'], ['bar', 'foo']], values: [{one: 'foo', two: 'bar'}, {one: 'bar', two: 'foo'}]},
+    {keys: [['foo', 'bar'], ['bar', 'foo']], size: 2, values: [{one: 'foo', two: 'bar'}, {one: 'bar', two: 'foo'}]},
     {
       isEqual: utils.isSameValueZero,
+      isMatchingKey: undefined,
       isPromise: false,
       maxSize,
       onCacheAdd: utils.onCacheOperation,
@@ -379,9 +397,10 @@ test('if memoize will fire the onCacheChange method passed with the cache when i
 
   t.true(onCacheChange.calledThrice);
   t.deepEqual(onCacheChange.args[2], [
-    {keys: [['foo', 'bar'], ['bar', 'foo']], values: [{one: 'foo', two: 'bar'}, {one: 'bar', two: 'foo'}]},
+    {keys: [['foo', 'bar'], ['bar', 'foo']], size: 2, values: [{one: 'foo', two: 'bar'}, {one: 'bar', two: 'foo'}]},
     {
       isEqual: utils.isSameValueZero,
+      isMatchingKey: undefined,
       isPromise: false,
       maxSize,
       onCacheAdd: utils.onCacheOperation,
@@ -431,9 +450,10 @@ test('if memoize will fire the onCacheHit method passed with the cache when it i
 
   t.true(onCacheHit.calledOnce);
   t.deepEqual(onCacheHit.args[0], [
-    {keys: [['bar', 'foo'], ['foo', 'bar']], values: [{one: 'bar', two: 'foo'}, {one: 'foo', two: 'bar'}]},
+    {keys: [['bar', 'foo'], ['foo', 'bar']], size: 2, values: [{one: 'bar', two: 'foo'}, {one: 'foo', two: 'bar'}]},
     {
       isEqual: utils.isSameValueZero,
+      isMatchingKey: undefined,
       isPromise: false,
       maxSize,
       onCacheAdd: utils.onCacheOperation,
@@ -448,9 +468,10 @@ test('if memoize will fire the onCacheHit method passed with the cache when it i
 
   t.true(onCacheHit.calledTwice);
   t.deepEqual(onCacheHit.args[1], [
-    {keys: [['foo', 'bar'], ['bar', 'foo']], values: [{one: 'foo', two: 'bar'}, {one: 'bar', two: 'foo'}]},
+    {keys: [['foo', 'bar'], ['bar', 'foo']], size: 2, values: [{one: 'foo', two: 'bar'}, {one: 'bar', two: 'foo'}]},
     {
       isEqual: utils.isSameValueZero,
+      isMatchingKey: undefined,
       isPromise: false,
       maxSize,
       onCacheAdd: utils.onCacheOperation,
@@ -465,9 +486,10 @@ test('if memoize will fire the onCacheHit method passed with the cache when it i
 
   t.true(onCacheHit.calledThrice);
   t.deepEqual(onCacheHit.args[2], [
-    {keys: [['foo', 'bar'], ['bar', 'foo']], values: [{one: 'foo', two: 'bar'}, {one: 'bar', two: 'foo'}]},
+    {keys: [['foo', 'bar'], ['bar', 'foo']], size: 2, values: [{one: 'foo', two: 'bar'}, {one: 'bar', two: 'foo'}]},
     {
       isEqual: utils.isSameValueZero,
+      isMatchingKey: undefined,
       isPromise: false,
       maxSize,
       onCacheAdd: utils.onCacheOperation,
@@ -513,9 +535,10 @@ test('if memoize will fire the onCacheAdd method passed with the cache when it i
 
   t.true(onCacheAdd.calledOnce);
   t.deepEqual(onCacheAdd.args[0], [
-    {keys: [['foo', 'bar']], values: [{one: 'foo', two: 'bar'}]},
+    {keys: [['foo', 'bar']], size: 1, values: [{one: 'foo', two: 'bar'}]},
     {
       isEqual: utils.isSameValueZero,
+      isMatchingKey: undefined,
       isPromise: false,
       maxSize,
       onCacheAdd,
@@ -530,9 +553,10 @@ test('if memoize will fire the onCacheAdd method passed with the cache when it i
 
   t.true(onCacheAdd.calledTwice);
   t.deepEqual(onCacheAdd.args[1], [
-    {keys: [['bar', 'foo'], ['foo', 'bar']], values: [{one: 'bar', two: 'foo'}, {one: 'foo', two: 'bar'}]},
+    {keys: [['bar', 'foo'], ['foo', 'bar']], size: 2, values: [{one: 'bar', two: 'foo'}, {one: 'foo', two: 'bar'}]},
     {
       isEqual: utils.isSameValueZero,
+      isMatchingKey: undefined,
       isPromise: false,
       maxSize,
       onCacheAdd,
@@ -547,9 +571,10 @@ test('if memoize will fire the onCacheAdd method passed with the cache when it i
 
   t.true(onCacheAdd.calledTwice);
   t.deepEqual(onCacheAdd.args[1], [
-    {keys: [['bar', 'foo'], ['foo', 'bar']], values: [{one: 'bar', two: 'foo'}, {one: 'foo', two: 'bar'}]},
+    {keys: [['bar', 'foo'], ['foo', 'bar']], size: 2, values: [{one: 'bar', two: 'foo'}, {one: 'foo', two: 'bar'}]},
     {
       isEqual: utils.isSameValueZero,
+      isMatchingKey: undefined,
       isPromise: false,
       maxSize,
       onCacheAdd,
@@ -564,9 +589,10 @@ test('if memoize will fire the onCacheAdd method passed with the cache when it i
 
   t.true(onCacheAdd.calledTwice);
   t.deepEqual(onCacheAdd.args[1], [
-    {keys: [['foo', 'bar'], ['bar', 'foo']], values: [{one: 'foo', two: 'bar'}, {one: 'bar', two: 'foo'}]},
+    {keys: [['foo', 'bar'], ['bar', 'foo']], size: 2, values: [{one: 'foo', two: 'bar'}, {one: 'bar', two: 'foo'}]},
     {
       isEqual: utils.isSameValueZero,
+      isMatchingKey: undefined,
       isPromise: false,
       maxSize,
       onCacheAdd,
@@ -581,9 +607,10 @@ test('if memoize will fire the onCacheAdd method passed with the cache when it i
 
   t.true(onCacheAdd.calledTwice);
   t.deepEqual(onCacheAdd.args[1], [
-    {keys: [['foo', 'bar'], ['bar', 'foo']], values: [{one: 'foo', two: 'bar'}, {one: 'bar', two: 'foo'}]},
+    {keys: [['foo', 'bar'], ['bar', 'foo']], size: 2, values: [{one: 'foo', two: 'bar'}, {one: 'bar', two: 'foo'}]},
     {
       isEqual: utils.isSameValueZero,
+      isMatchingKey: undefined,
       isPromise: false,
       maxSize,
       onCacheAdd,

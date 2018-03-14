@@ -193,6 +193,26 @@ console.log(memoizedNoFns.cache);
 
 console.groupEnd('transform key');
 
+console.group('matching whole key');
+
+const matchingKeyMethod = function(object) {
+  return object.deeply.nested.number;
+};
+
+const matchingKeyMemoized = memoize(matchingKeyMethod, {
+  isMatchingKey: deepEqual
+});
+
+matchingKeyMemoized({deeply: {nested: {number: 35}}});
+matchingKeyMemoized({deeply: {nested: {number: 35}}});
+matchingKeyMemoized({deeply: {nested: {number: 35}}});
+matchingKeyMemoized({deeply: {nested: {number: 35}}});
+matchingKeyMemoized({deeply: {nested: {number: 35}}});
+
+console.log(matchingKeyMemoized.cache);
+
+console.groupEnd('matching whole key');
+
 class App extends PureComponent {
   render() {
     return (

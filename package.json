@@ -3,25 +3,12 @@
   "ava": {
     "babel": "inherit",
     "failFast": true,
-    "files": [
-      "test/*.js"
-    ],
-    "require": [
-      "babel-register"
-    ],
-    "source": [
-      "src/*.js"
-    ],
+    "files": ["test/*.js"],
+    "require": ["babel-register"],
+    "source": ["src/*.js"],
     "verbose": true
   },
-  "browserslist": [
-    "defaults",
-    "Explorer >= 9",
-    "Safari >= 6",
-    "Opera >= 15",
-    "iOS >= 8",
-    "Android >= 4"
-  ],
+  "browserslist": ["defaults", "Explorer >= 9", "Safari >= 6", "Opera >= 15", "iOS >= 8", "Android >= 4"],
   "bugs": {
     "url": "https://github.com/planttheidea/micro-memoize/issues"
   },
@@ -47,17 +34,17 @@
     "eslint-friendly-formatter": "^3.0.0",
     "eslint-loader": "^2.0.0",
     "fast-equals": "^1.2.1",
-    "fast-memoize": "^2.3.0",
+    "fast-memoize": "^2.3.2",
     "flow-babel-webpack-plugin": "^1.1.1",
     "hash-it": "^3.1.2",
     "html-webpack-plugin": "^3.0.6",
     "in-publish": "^2.0.0",
     "lodash": "^4.17.5",
     "lru-memoize": "^1.0.2",
+    "mem": "^3.0.0",
     "memoizee": "^0.4.12",
     "memoizerific": "^1.11.2",
-    "moize": "^4.0.4",
-    "nyc": "^11.4.1",
+    "nyc": "^11.6.0",
     "optimize-js-plugin": "^0.0.4",
     "ora": "^2.0.0",
     "prop-types": "^15.6.1",
@@ -70,7 +57,7 @@
     "rollup": "^0.56.5",
     "rollup-plugin-babel": "^3.0.3",
     "rollup-plugin-uglify": "^3.0.0",
-    "sinon": "^4.4.2",
+    "sinon": "^4.4.5",
     "underscore": "^1.8.3",
     "webpack": "^4.1.1",
     "webpack-cli": "^2.0.11",
@@ -104,13 +91,15 @@
   },
   "scripts": {
     "benchmark": "npm run transpile:lib -- --no-comments && node benchmark/index.js",
+    "benchmark:alternative": "npm run transpile:lib -- --no-comments && ALTERNATIVE=true node benchmark/index.js",
     "build": "NODE_ENV=production rollup -c",
     "clean": "rimraf lib && rimraf es && rimraf dist",
     "dev": "NODE_ENV=development webpack-dev-server --progress --colors --config=webpack/webpack.config.js",
     "flow": "flow check src",
     "lint": "eslint --max-warnings 0 src",
     "prepublish": "if in-publish; then npm run prepublish:compile; fi",
-    "prepublish:compile": "npm run lint && npm run flow && npm run test:coverage && npm run clean && npm run transpile:lib && npm run transpile:es && npm run build",
+    "prepublish:compile":
+      "npm run lint && npm run flow && npm run test:coverage && npm run clean && npm run transpile:lib && npm run transpile:es && npm run build",
     "start": "npm run dev",
     "test": "NODE_PATH=. NODE_ENV=test ava",
     "test:coverage": "nyc --cache npm test",

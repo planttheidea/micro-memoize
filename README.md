@@ -8,6 +8,7 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
 * [Usage](#usage)
 * [Options](#options)
   * [isEqual](#isequal)
+  * [isMatchingKey](#ismatchingkey)
   * [isPromise](#ispromise)
   * [maxSize](#maxsize)
   * [onCacheAdd](#oncacheadd)
@@ -60,13 +61,12 @@ console.log(memoized("one", "two")); // pulled from cache, {one: 'one', two: 'tw
 
 `function(object1: any, object2: any): boolean`, _defaults to `isSameValueZero`_
 
-Custom method to compare equality of keys, determining whether to pull from cache or not. This operates the same as [`equals`](https://github.com/planttheidea/moize#equals) from `moize`.
+Custom method to compare equality of keys, determining whether to pull from cache or not, by comparing each argument in order.
 
 Common use-cases:
 
 * Deep equality comparison
 * Limiting the arguments compared
-* Serialization of arguments
 
 ```javascript
 import { deepEqual } from "fast-equals";
@@ -110,6 +110,55 @@ console.log(
 ```
 
 **NOTE**: The default method tests for [SameValueZero](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero) equality, which is summarized as strictly equal while also considering `NaN` equal to `NaN`.
+
+#### isMatchingKey
+
+`function(object1: Array<any>, object2: Array<any>): boolean`
+
+Custom method to compare equality of keys, determining whether to pull from cache or not, by comparing the entire key.
+
+Common use-cases:
+
+* Comparing the shape of the key
+* Matching on values regardless of order
+* Serialization of arguments
+
+```javascript
+import { deepEqual } from "fast-equals";
+
+const deepObject = object => {
+  return {
+    foo: object.foo,
+    bar: object.bar
+  };
+};
+
+const memoizedShape = memoize(deepObject, {
+  isMatchingKey(object1, object2) {
+    return (
+      object1.hasOwnProperty("foo") &&
+      object2.hasOwnProperty("foo") &&
+      object1.bar === object2.bar
+    );
+  }
+});
+
+console.log(
+  memoizedShape({
+    foo: "foo",
+    bar: "bar",
+    baz: "baz"
+  })
+); // {foo: {deep: 'foo'}, bar: {deep: 'bar'}}
+
+console.log(
+  memoizedShape({
+    foo: "not foo",
+    bar: "bar",
+    baz: "baz"
+  })
+); // pulled from cache
+```
 
 #### isPromise
 
