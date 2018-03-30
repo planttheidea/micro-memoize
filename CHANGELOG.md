@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 2.0.1
+
+* Fix TypeScript typings (thanks [@Crecket](https://github.com/Crecket))
+
 ## 2.0.0
 
 * Add [`isMatchingKey`](#ismatchingkey) method to provide match test on entire key vs iterative equality
