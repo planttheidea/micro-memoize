@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 2.0.3
+
+* More TypeScript typings (thanks again [@rtorr](https://github.com/rtorr))
+
 ## 2.0.2
 
 * Fix TypeScript typings (thanks [@rtorr](https://github.com/rtorr))
