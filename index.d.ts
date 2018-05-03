@@ -1,8 +1,8 @@
 interface Cache {
-  keys: Array<any>,
-  size: number,
-  values: Array<any>
-};
+  keys: Array<any>;
+  size: number;
+  values: Array<any>;
+}
 
 interface Options {
   isEqual?: (firstValue: any, secondValue: any) => boolean;
