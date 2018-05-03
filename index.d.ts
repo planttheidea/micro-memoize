@@ -17,6 +17,4 @@ interface Options {
 
 type Fn = (...args: any[]) => any;
 
-declare function memoize<T extends Fn>(fn: T, options?: Options): T;
-
-export default memoize;
+export default function memoize<T extends Fn>(fn: T, options?: Options): T;
