@@ -1,10 +1,20 @@
 // @flow
 
 // types
-import type {Cache, Options} from './types';
+import type {
+  Cache,
+  Options
+} from './types';
 
 // utils
-import {cloneArray, createGetKeyIndex, isSameValueZero, onCacheOperation, orderByLru, setPromiseHandler} from './utils';
+import {
+  cloneArray,
+  createGetKeyIndex,
+  isSameValueZero,
+  onCacheOperation,
+  orderByLru,
+  setPromiseHandler
+} from './utils';
 
 /**
  * @function memoize
@@ -45,7 +55,7 @@ export default function memoize(fn: Function, options: Options) {
     onCacheAdd,
     onCacheChange,
     onCacheHit,
-    transformKey
+    transformKey,
   });
 
   const getKeyIndex: Function = createGetKeyIndex(isEqual, isMatchingKey);
@@ -56,7 +66,7 @@ export default function memoize(fn: Function, options: Options) {
     get size() {
       return cache.keys.length;
     },
-    values: []
+    values: [],
   };
   const {keys, values} = cache;
 
@@ -89,8 +99,11 @@ export default function memoize(fn: Function, options: Options) {
         values.pop();
       }
 
-      orderByLru(keys, shouldCloneArguments ? key : cloneArray(args), keys.length);
-      orderByLru(values, fn.apply(this, arguments), values.length);
+      const newKey = shouldCloneArguments ? key : cloneArray(args);
+      const newValue = fn.apply(this, arguments);
+
+      orderByLru(keys, newKey, keys.length);
+      orderByLru(values, newValue, values.length);
 
       if (isPromise) {
         setPromiseHandler(cache, normalizedOptions, memoized);
@@ -110,7 +123,7 @@ export default function memoize(fn: Function, options: Options) {
         configurable: true,
         get() {
           return cache;
-        }
+        },
       },
       cacheSnapshot: {
         configurable: true,
@@ -118,22 +131,22 @@ export default function memoize(fn: Function, options: Options) {
           return {
             keys: cloneArray(cache.keys),
             size: cache.size,
-            values: cloneArray(cache.values)
+            values: cloneArray(cache.values),
           };
-        }
+        },
       },
       isMemoized: {
         configurable: true,
         get() {
           return true;
-        }
+        },
       },
       options: {
         configurable: true,
         get() {
           return normalizedOptions;
-        }
-      }
+        },
+      },
     }: Object)
   );
 

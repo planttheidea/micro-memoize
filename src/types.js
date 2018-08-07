@@ -3,7 +3,7 @@
 export type Cache = {
   keys: Array<any>,
   size: number,
-  values: Array<any>
+  values: Array<any>,
 };
 
 export type Options = {
@@ -14,5 +14,5 @@ export type Options = {
   onCacheAdd: (cache: Cache, options: Options, memoized: Function) => void,
   onCacheChange: (cache: Cache, options: Options, memoized: Function) => void,
   onCacheHit: (cache: Cache, options: Options, memoized: Function) => void,
-  transformKey?: Function
+  transformKey?: Function,
 };

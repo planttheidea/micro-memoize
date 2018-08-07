@@ -1,7 +1,10 @@
 // @flow
 
 // types
-import type {Cache, Options} from './types';
+import type {
+  Cache,
+  Options
+} from './types';
 
 /**
  * @function cloneArray
@@ -22,7 +25,7 @@ export const cloneArray = (arrayLike: Array<any> | Object): Array<any> => {
   return array;
 };
 
-export const createAreKeysEqual = (isEqual: Function): Function => {
+export const createAreKeysEqual = (isEqual: Function): Function =>
   /**
    * @function areKeysEqual
    *
@@ -33,7 +36,7 @@ export const createAreKeysEqual = (isEqual: Function): Function => {
    * @param {Array<any>} keys2 the keys array to test
    * @returns {boolean} are the keys shallowly equal
    */
-  return (keys1: Array<any>, keys2: Array<any>): boolean => {
+  (keys1: Array<any>, keys2: Array<any>): boolean => {
     if (keys1.length !== keys2.length) {
       return false;
     }
@@ -46,7 +49,6 @@ export const createAreKeysEqual = (isEqual: Function): Function => {
 
     return true;
   };
-};
 
 export const createGetKeyIndex = (isEqual: Function, isMatchingKey: ?Function): Function => {
   const areKeysEqual: Function = typeof isMatchingKey === 'function' ? isMatchingKey : createAreKeysEqual(isEqual);
@@ -83,9 +85,8 @@ export const createGetKeyIndex = (isEqual: Function, isMatchingKey: ?Function): 
  * @param {any} object2 the second object to compare
  * @returns {boolean} are the two objects equal
  */
-export const isSameValueZero = (object1: any, object2: any): boolean => {
-  return object1 === object2 || (object1 !== object1 && object2 !== object2);
-};
+export const isSameValueZero = (object1: any, object2: any): boolean =>
+  object1 === object2 || (object1 !== object1 && object2 !== object2);
 
 /* eslint-disable no-unused-vars */
 export const onCacheOperation = (cacheIgnored: Cache, optionsIgnored: Options, memoized: Function): void => {};
@@ -125,12 +126,14 @@ export const setPromiseHandler = (cache: Cache, options: Options, memoized: Func
   const key: any = cache.keys[0];
 
   cache.values[0] = cache.values[0]
-    .then((value: any): any => {
-      options.onCacheHit(cache, options, memoized);
-      options.onCacheChange(cache, options, memoized);
+    .then(
+      (value: any): any => {
+        options.onCacheHit(cache, options, memoized);
+        options.onCacheChange(cache, options, memoized);
 
-      return value;
-    })
+        return value;
+      }
+    )
     .catch((error: Error) => {
       const keyIndex: number = createGetKeyIndex(options.isEqual)(cache.keys, key);
 
