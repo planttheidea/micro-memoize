@@ -22,12 +22,12 @@ module.exports = {
     inline: true,
     lazy: false,
     noInfo: false,
-    quiet: false,
     port: PORT,
+    quiet: false,
     stats: {
       colors: true,
-      progress: true
-    }
+      progress: true,
+    },
   },
 
   devtool: '#source-map',
@@ -47,20 +47,20 @@ module.exports = {
           failOnError: true,
           failOnWarning: false,
           fix: true,
-          formatter: eslintFriendlyFormatter
+          formatter: eslintFriendlyFormatter,
         },
-        test: /\.js$/
+        test: /\.js$/,
       },
       {
         include: [path.resolve(ROOT, 'src'), path.resolve(ROOT, 'DEV_ONLY')],
         loader: 'babel-loader',
         options: {
           plugins: ['react-hot-loader/babel'],
-          presets: ['react']
+          presets: ['react'],
         },
-        test: /\.js$/
-      }
-    ]
+        test: /\.js$/,
+      },
+    ],
   },
 
   output: {
@@ -73,7 +73,7 @@ module.exports = {
     path: path.resolve(ROOT, 'dist'),
     pathinfo: true,
     publicPath: `http://localhost:${PORT}/`,
-    umdNamedDefine: true
+    umdNamedDefine: true,
   },
 
   plugins: [
@@ -82,10 +82,10 @@ module.exports = {
     new CaseSensitivePathsPlugin(),
     new HtmlWebpackPlugin(),
     new webpack.HotModuleReplacementPlugin(),
-    new FlowBabelWebpackPlugin()
+    new FlowBabelWebpackPlugin(),
   ],
 
   resolve: {
-    plugins: [new ModuleScopePlugin(path.resolve(ROOT, 'src'))]
-  }
+    plugins: [new ModuleScopePlugin(path.resolve(ROOT, 'src'))],
+  },
 };

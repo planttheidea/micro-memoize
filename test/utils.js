@@ -6,9 +6,7 @@ import sinon from 'sinon';
 import * as utils from 'src/utils';
 
 test('if areKeysEqual will return false when the length of the keys are different', (t) => {
-  const isEqual = (o1, o2) => {
-    return o1 === o2;
-  };
+  const isEqual = (o1, o2) => o1 === o2;
 
   const areKeysEqual = utils.createAreKeysEqual(isEqual);
 
@@ -19,9 +17,7 @@ test('if areKeysEqual will return false when the length of the keys are differen
 });
 
 test('if areKeysEqual will return false when the keys have different values', (t) => {
-  const isEqual = (o1, o2) => {
-    return o1 === o2;
-  };
+  const isEqual = (o1, o2) => o1 === o2;
 
   const areKeysEqual = utils.createAreKeysEqual(isEqual);
 
@@ -32,9 +28,7 @@ test('if areKeysEqual will return false when the keys have different values', (t
 });
 
 test('if areKeysEqual will return true when the keys have equal values', (t) => {
-  const isEqual = (o1, o2) => {
-    return o1 === o2;
-  };
+  const isEqual = (o1, o2) => o1 === o2;
 
   const areKeysEqual = utils.createAreKeysEqual(isEqual);
 
@@ -45,9 +39,7 @@ test('if areKeysEqual will return true when the keys have equal values', (t) => 
 });
 
 test('if getKeyIndex will return the index of the match found', (t) => {
-  const isEqual = (o1, o2) => {
-    return o1 === o2;
-  };
+  const isEqual = (o1, o2) => o1 === o2;
 
   const getKeyIndex = utils.createGetKeyIndex(isEqual);
 
@@ -60,9 +52,7 @@ test('if getKeyIndex will return the index of the match found', (t) => {
 });
 
 test('if getKeyIndex will return -1 if no match is found', (t) => {
-  const isEqual = (o1, o2) => {
-    return o1 === o2;
-  };
+  const isEqual = (o1, o2) => o1 === o2;
 
   const getKeyIndex = utils.createGetKeyIndex(isEqual);
 
@@ -75,9 +65,7 @@ test('if getKeyIndex will return -1 if no match is found', (t) => {
 });
 
 test('if getKeyIndex will use the isMatchingKey method if passed', (t) => {
-  const isEqual = (o1, o2) => {
-    return o1 === o2;
-  };
+  const isEqual = (o1, o2) => o1 === o2;
   const isMatchingKey = (o1, o2) => {
     const existingKey = o1[0];
     const key = o2[0];
@@ -89,8 +77,20 @@ test('if getKeyIndex will use the isMatchingKey method if passed', (t) => {
 
   const getKeyIndex = utils.createGetKeyIndex(isEqual, isMatchingKey);
 
-  const allKeys = [[{foo: 'foo', bar: 'bar'}]];
-  const keysToMatch = [{foo: 'bar', bar: 'baz'}];
+  const allKeys = [
+    [
+      {
+        bar: 'bar',
+        foo: 'foo',
+      },
+    ],
+  ];
+  const keysToMatch = [
+    {
+      bar: 'baz',
+      foo: 'bar',
+    },
+  ];
 
   const result = getKeyIndex(allKeys, keysToMatch);
 
@@ -165,12 +165,12 @@ test('if setPromiseHandler will fire cache callbacks if resolved', async (t) => 
 
   const cache = {
     keys: [key],
-    values: [value]
+    values: [value],
   };
   const options = {
     isEqual: utils.isSameValueZero,
     onCacheChange: sinon.spy(),
-    onCacheHit: sinon.spy()
+    onCacheHit: sinon.spy(),
   };
 
   utils.setPromiseHandler(cache, options, memoized);
@@ -212,12 +212,12 @@ test('if setPromiseHandler will remove the key from cache when the promise is re
 
   const cache = {
     keys: [key],
-    values: [value]
+    values: [value],
   };
   const options = {
     isEqual: utils.isSameValueZero,
     onCacheChange: sinon.spy(),
-    onCacheHit: sinon.spy()
+    onCacheHit: sinon.spy(),
   };
   const memoized = () => {};
 
@@ -236,7 +236,7 @@ test('if setPromiseHandler will remove the key from cache when the promise is re
 
   t.deepEqual(cache, {
     keys: [],
-    values: []
+    values: [],
   });
 
   t.true(options.onCacheHit.notCalled);
@@ -259,12 +259,12 @@ test('if setPromiseHandler will not remove the key from cache when the promise i
 
   const cache = {
     keys: [key],
-    values: [value]
+    values: [value],
   };
   const options = {
     isEqual: utils.isSameValueZero,
     onCacheChange: sinon.spy(),
-    onCacheHit: sinon.spy()
+    onCacheHit: sinon.spy(),
   };
   const memoized = () => {};
 
@@ -288,7 +288,7 @@ test('if setPromiseHandler will not remove the key from cache when the promise i
 
   t.deepEqual(cache, {
     keys: [],
-    values: []
+    values: [],
   });
 
   t.true(options.onCacheHit.notCalled);
