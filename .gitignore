@@ -5,4 +5,5 @@ dist
 es
 node_modules
 lib
+mjs
 *.log

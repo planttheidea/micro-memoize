@@ -4,34 +4,55 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
 
 ## Table of contents
 
-* [Summary](#summary)
-* [Usage](#usage)
-* [Options](#options)
-  * [isEqual](#isequal)
-  * [isMatchingKey](#ismatchingkey)
-  * [isPromise](#ispromise)
-  * [maxSize](#maxsize)
-  * [onCacheAdd](#oncacheadd)
-  * [onCacheChange](#oncachechange)
-  * [onCacheHit](#oncachehit)
-  * [transformKey](#transformkey)
-* [Additional properties](#additional-properties)
-  * [cache](#cache)
-  * [cacheSnapshot](#cachesnapshot)
-  * [isMemoized](#ismemoized)
-  * [options](#options)
-* [Benchmarks](#benchmarks)
-  * [Single parameter (primitive only)](#single-parameter-primitive-only)
-  * [Single parameter (complex object)](#single-parameter-complex-object)
-  * [Multiple parameters (primitives only)](#multiple-parameters-primitives-only)
-  * [Multiple parameters (complex objects)](#multiple-parameters-complex-objects)
-* [Browser support](#browser-support)
-* [Node support](#node-support)
-* [Development](#development)
+- [Summary](#summary)
+- [Importing](#importing)
+- [Usage](#usage)
+- [Options](#options)
+  - [isEqual](#isequal)
+  - [isMatchingKey](#ismatchingkey)
+  - [isPromise](#ispromise)
+  - [maxSize](#maxsize)
+  - [onCacheAdd](#oncacheadd)
+  - [onCacheChange](#oncachechange)
+  - [onCacheHit](#oncachehit)
+  - [transformKey](#transformkey)
+- [Additional properties](#additional-properties)
+  - [cache](#cache)
+  - [cacheSnapshot](#cachesnapshot)
+  - [isMemoized](#ismemoized)
+  - [options](#options)
+- [Benchmarks](#benchmarks)
+  - [Single parameter (primitive only)](#single-parameter-primitive-only)
+  - [Single parameter (complex object)](#single-parameter-complex-object)
+  - [Multiple parameters (primitives only)](#multiple-parameters-primitives-only)
+  - [Multiple parameters (complex objects)](#multiple-parameters-complex-objects)
+- [Browser support](#browser-support)
+- [Node support](#node-support)
+- [Development](#development)
 
 ## Summary
 
 As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1.1kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
+
+## Importing
+
+ESM in browsers:
+
+```javascript
+import memoize from "micro-memoize";
+```
+
+ESM in NodeJS:
+
+```javascript
+import memoize from "micro-memoize/mjs";
+```
+
+CommonJS:
+
+```javascript
+const memoize = require("micro-memoize").default;
+```
 
 ## Usage
 
@@ -65,8 +86,8 @@ Custom method to compare equality of keys, determining whether to pull from cach
 
 Common use-cases:
 
-* Deep equality comparison
-* Limiting the arguments compared
+- Deep equality comparison
+- Limiting the arguments compared
 
 ```javascript
 import { deepEqual } from "fast-equals";
@@ -119,9 +140,9 @@ Custom method to compare equality of keys, determining whether to pull from cach
 
 Common use-cases:
 
-* Comparing the shape of the key
-* Matching on values regardless of order
-* Serialization of arguments
+- Comparing the shape of the key
+- Matching on values regardless of order
+- Serialization of arguments
 
 ```javascript
 import { deepEqual } from "fast-equals";
@@ -166,8 +187,8 @@ console.log(
 
 Identifies the value returned from the method as a `Promise`, which will result in one of two possible scenarios:
 
-* If the promise is resolved, it will fire the `onCacheHit` and `onCacheChange` options
-* If the promise is rejected, it will trigger auto-removal from cache
+- If the promise is resolved, it will fire the `onCacheHit` and `onCacheChange` options
+- If the promise is rejected, it will trigger auto-removal from cache
 
 ```javascript
 const fn = async (one, two) => {
@@ -416,10 +437,10 @@ All values provided are the number of operations per second (ops/sec) calculated
 
 Benchmarks was performed on an i7 8-core Arch Linux laptop with 16GB of memory using NodeJS version `8.9.4`. The default configuration of each library was tested with a fibonacci calculation based on the following parameters:
 
-* Single primitive = `35`
-* Single object = `{number: 35}`
-* Multiple primitives = `35, true`
-* Multiple objects = `{number: 35}, {isComplete: true}`
+- Single primitive = `35`
+- Single object = `{number: 35}`
+- Multiple primitives = `35, true`
+- Multiple objects = `{number: 35}, {isComplete: true}`
 
 #### Single parameter (primitive only)
 
@@ -481,32 +502,32 @@ This is the most robust use-case, with the same complexities as multiple primiti
 
 ## Browser support
 
-* Chrome (all versions)
-* executefox (all versions)
-* Edge (all versions)
-* Opera 15+
-* IE 9+
-* Safari 6+
-* iOS 8+
-* Android 4+
+- Chrome (all versions)
+- executefox (all versions)
+- Edge (all versions)
+- Opera 15+
+- IE 9+
+- Safari 6+
+- iOS 8+
+- Android 4+
 
 ## Node support
 
-* 4+
+- 4+
 
 ## Development
 
 Standard stuff, clone the repo and `npm install` dependencies. The npm scripts available:
 
-* `build` => run webpack to build development `dist` file with NODE_ENV=development
-* `build:minifed` => run webpack to build production `dist` file with NODE_ENV=production
-* `dev` => run webpack dev server to run example app (playground!)
-* `dist` => runs `build` and `build-minified`
-* `lint` => run ESLint against all files in the `src` folder
-* `prepublish` => runs `compile-for-publish`
-* `prepublish:compile` => run `lint`, `test`, `transpile:es`, `transpile:lib`, `dist`
-* `test` => run AVA test functions with `NODE_ENV=test`
-* `test:coverage` => run `test` but with `nyc` for coverage checker
-* `test:watch` => run `test`, but with persistent watcher
-* `transpile:lib` => run babel against all files in `src` to create files in `lib`
-* `transpile:es` => run babel against all files in `src` to create files in `es`, preserving ES2015 modules (for [`pkg.module`](https://github.com/rollup/rollup/wiki/pkg.module))
+- `build` => run webpack to build development `dist` file with NODE_ENV=development
+- `build:minifed` => run webpack to build production `dist` file with NODE_ENV=production
+- `dev` => run webpack dev server to run example app (playground!)
+- `dist` => runs `build` and `build-minified`
+- `lint` => run ESLint against all files in the `src` folder
+- `prepublish` => runs `compile-for-publish`
+- `prepublish:compile` => run `lint`, `test`, `transpile:es`, `transpile:lib`, `dist`
+- `test` => run AVA test functions with `NODE_ENV=test`
+- `test:coverage` => run `test` but with `nyc` for coverage checker
+- `test:watch` => run `test`, but with persistent watcher
+- `transpile:lib` => run babel against all files in `src` to create files in `lib`
+- `transpile:es` => run babel against all files in `src` to create files in `es`, preserving ES2015 modules (for [`pkg.module`](https://github.com/rollup/rollup/wiki/pkg.module))
