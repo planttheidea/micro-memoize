@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 2.1.0
+
+- Add ESM support for NodeJS with separate [`.mjs` extension](https://nodejs.org/api/esm.html) exports
+
 ## 2.0.4
 
 - Fix issue with recursive calls to memoized function created discrepancy between `keys` and `values` in cache
