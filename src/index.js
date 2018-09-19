@@ -3,7 +3,7 @@
 // types
 import type {
   Cache,
-  Options
+  Options,
 } from './types';
 
 // utils
@@ -13,7 +13,7 @@ import {
   isSameValueZero,
   onCacheOperation,
   orderByLru,
-  setPromiseHandler
+  setPromiseHandler,
 } from './utils';
 
 /**
@@ -44,8 +44,7 @@ export default function memoize(fn: Function, options: Options) {
     onCacheHit = onCacheOperation,
     transformKey,
     ...extraOptions
-  } =
-    options || {};
+  } = options || {};
 
   const normalizedOptions = Object.assign({}, extraOptions, {
     isEqual,
