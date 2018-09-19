@@ -1,66 +1,77 @@
 {
   "env": {
     "development": {
-      "plugins": ["syntax-flow", "transform-flow-strip-types"],
+      "plugins": [
+        "@babel/plugin-syntax-flow",
+        "@babel/plugin-transform-flow-strip-types"
+      ],
       "presets": [
         [
-          "env",
+          "@babel/preset-env",
           {
             "loose": true,
             "modules": false
           }
-        ],
-        "stage-2"
+        ]
       ]
     },
     "es": {
-      "plugins": ["syntax-flow", "transform-flow-strip-types"],
+      "plugins": [
+        "@babel/plugin-syntax-flow",
+        "@babel/plugin-transform-flow-strip-types"
+      ],
       "presets": [
         [
-          "env",
+          "@babel/preset-env",
           {
             "loose": true,
             "modules": false
           }
-        ],
-        "stage-2"
+        ]
       ]
     },
     "lib": {
-      "plugins": ["syntax-flow", "transform-flow-strip-types"],
+      "plugins": [
+        "@babel/plugin-syntax-flow",
+        "@babel/plugin-transform-flow-strip-types"
+      ],
       "presets": [
         [
-          "env",
+          "@babel/preset-env",
           {
             "loose": true
           }
-        ],
-        "stage-2"
+        ]
       ]
     },
     "production": {
-      "plugins": ["syntax-flow", "transform-flow-strip-types"],
+      "plugins": [
+        "@babel/plugin-syntax-flow",
+        "@babel/plugin-transform-flow-strip-types"
+      ],
       "presets": [
         [
-          "env",
+          "@babel/preset-env",
           {
             "loose": true,
             "modules": false
           }
-        ],
-        "stage-2"
+        ]
       ]
     },
     "test": {
-      "plugins": ["syntax-flow", "transform-flow-strip-types", "transform-runtime"],
+      "plugins": [
+        "@babel/plugin-syntax-flow",
+        "@babel/plugin-transform-flow-strip-types",
+        "@babel/plugin-transform-runtime"
+      ],
       "presets": [
         [
-          "env",
+          "@babel/preset-env",
           {
             "loose": true
           }
-        ],
-        "stage-2"
+        ]
       ]
     }
   }

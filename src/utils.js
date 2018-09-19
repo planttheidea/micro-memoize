@@ -3,7 +3,7 @@
 // types
 import type {
   Cache,
-  Options
+  Options,
 } from './types';
 
 /**

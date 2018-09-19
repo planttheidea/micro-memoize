@@ -1,15 +1,14 @@
 {
   "author": "tony.quetano@planttheidea.com",
   "ava": {
-    "babel": "inherit",
     "failFast": true,
     "files": [
       "test/*.js"
     ],
     "require": [
-      "babel-register"
+      "@babel/register"
     ],
-    "source": [
+    "sources": [
       "src/*.js"
     ],
     "verbose": true
@@ -27,18 +26,19 @@
   },
   "description": "A tiny, crazy fast memoization library for the 95% use-case",
   "devDependencies": {
-    "ava": "^0.25.0",
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
-    "babel-eslint": "^8.2.6",
-    "babel-loader": "^7.1.5",
-    "babel-plugin-syntax-flow": "^6.18.0",
-    "babel-plugin-transform-flow-strip-types": "^6.22.0",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-react": "^6.24.1",
-    "babel-preset-stage-2": "^6.24.1",
-    "babel-register": "^6.26.0",
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0",
+    "@babel/plugin-syntax-flow": "^7.0.0",
+    "@babel/plugin-transform-flow-strip-types": "^7.0.0",
+    "@babel/plugin-transform-runtime": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/preset-flow": "^7.0.0",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/register": "^7.0.0",
+    "@babel/runtime": "^7.0.0",
+    "ava": "^1.0.0-beta.8",
+    "babel-eslint": "^9.0.0",
+    "babel-loader": "^8.0.0",
     "benchmark": "^2.1.4",
     "case-sensitive-paths-webpack-plugin": "^2.1.2",
     "cli-table2": "^0.2.0",
@@ -55,10 +55,10 @@
     "in-publish": "^2.0.0",
     "lodash": "^4.17.10",
     "lru-memoize": "^1.0.2",
-    "mem": "^3.0.1",
+    "mem": "^4.0.0",
     "memoizee": "^0.4.13",
     "memoizerific": "^1.11.3",
-    "nyc": "^12.0.2",
+    "nyc": "^13.0.1",
     "optimize-js-plugin": "^0.0.4",
     "ora": "^3.0.0",
     "prop-types": "^15.6.2",
@@ -68,9 +68,9 @@
     "react-dom": "^16.4.2",
     "react-hot-loader": "^4.3.4",
     "rimraf": "^2.6.2",
-    "rollup": "^0.64.1",
-    "rollup-plugin-babel": "^3.0.7",
-    "rollup-plugin-uglify": "^4.0.0",
+    "rollup": "^0.66.0",
+    "rollup-plugin-babel": "^4.0.1",
+    "rollup-plugin-uglify": "^6.0.0",
     "sinon": "^6.1.5",
     "underscore": "^1.9.1",
     "webpack": "^4.16.5",
@@ -122,6 +122,7 @@
     "transpile:es": "BABEL_ENV=es babel src --out-dir es",
     "transpile:lib": "BABEL_ENV=lib babel src --out-dir lib"
   },
+  "sideEffects": false,
   "types": "./index.d.ts",
   "version": "2.1.0"
 }
