@@ -1,5 +1,10 @@
 # micro-memoize CHANGELOG
 
+## 2.1.1
+
+- Upgrade to babel 7
+- Add `"sideEffects": false` for better tree-shaking with webpack
+
 ## 2.1.0
 
 - Add ESM support for NodeJS with separate [`.mjs` extension](https://nodejs.org/api/esm.html) exports
