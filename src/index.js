@@ -8,12 +8,13 @@ import type {
 
 // utils
 import {
+  assign,
   cloneArray,
   createGetKeyIndex,
+  createSetPromiseHandler,
   isSameValueZero,
   onCacheOperation,
   orderByLru,
-  setPromiseHandler,
 } from './utils';
 
 /**
@@ -46,7 +47,7 @@ export default function memoize(fn: Function, options: Options) {
     ...extraOptions
   } = options || {};
 
-  const normalizedOptions = Object.assign({}, extraOptions, {
+  const normalizedOptions = assign({}, extraOptions, {
     isEqual,
     isMatchingKey,
     isPromise,
@@ -58,6 +59,7 @@ export default function memoize(fn: Function, options: Options) {
   });
 
   const getKeyIndex: Function = createGetKeyIndex(isEqual, isMatchingKey);
+  const setPromiseHandler: Function = createSetPromiseHandler(normalizedOptions);
   const shouldCloneArguments: boolean = !!(transformKey || isMatchingKey);
 
   const cache: Cache = {
@@ -79,8 +81,9 @@ export default function memoize(fn: Function, options: Options) {
    * @returns {any} the value of the method called with the arguments
    */
   function memoized(): any {
-    const args: Array<any> | Object = shouldCloneArguments ? cloneArray(arguments) : arguments;
-    const key: Array<any> | Object = transformKey ? transformKey(args) : args;
+    const args: Object = arguments;
+    const normalizedArgs: Array<any> | Object = shouldCloneArguments ? cloneArray(args) : args;
+    const key: Array<any> | Object = transformKey ? transformKey(normalizedArgs) : normalizedArgs;
     const keyIndex: number = getKeyIndex(keys, key);
 
     if (~keyIndex) {
@@ -98,14 +101,14 @@ export default function memoize(fn: Function, options: Options) {
         values.pop();
       }
 
-      const newKey = shouldCloneArguments ? key : cloneArray(args);
-      const newValue = fn.apply(this, arguments);
+      const newKey = shouldCloneArguments ? key : cloneArray(normalizedArgs);
+      const newValue = fn.apply(this, args);
 
       orderByLru(keys, newKey, keys.length);
       orderByLru(values, newValue, values.length);
 
       if (isPromise) {
-        setPromiseHandler(cache, normalizedOptions, memoized);
+        setPromiseHandler(cache, memoized);
       }
 
       onCacheAdd(cache, normalizedOptions, memoized);

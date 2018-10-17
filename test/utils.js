@@ -5,6 +5,36 @@ import sinon from 'sinon';
 // src
 import * as utils from 'src/utils';
 
+test('if assign will handle things just like Object.assign', (t) => {
+  const o1 = {};
+  const o2 = {foo: 'bar'};
+  const o3 = undefined;
+  const o4 = {bar: 'baz'};
+
+  const result = utils.assign(o1, o2, o3, o4);
+
+  t.is(result, o1);
+  t.deepEqual(result, Object.assign(o1, o2, o3, o4));
+});
+
+test('if cloneArray will clone the array shallowly for all specified lengths', (t) => {
+  const originals = {
+    0: [],
+    1: ['foo'],
+    2: ['foo', {bar: 'baz'}],
+    3: ['foo', {bar: 'baz'}, ['quz']],
+    4: ['foo', {bar: 'baz'}, ['quz'], 'blah'],
+  };
+
+  Object.keys(originals).forEach((length) => {
+    const original = originals[length];
+    const result = utils.cloneArray(original);
+
+    t.not(result, original);
+    t.deepEqual(result, original);
+  });
+});
+
 test('if areKeysEqual will return false when the length of the keys are different', (t) => {
   const isEqual = (o1, o2) => o1 === o2;
 
@@ -173,7 +203,7 @@ test('if setPromiseHandler will fire cache callbacks if resolved', async (t) => 
     onCacheHit: sinon.spy(),
   };
 
-  utils.setPromiseHandler(cache, options, memoized);
+  utils.createSetPromiseHandler(options)(cache, memoized);
 
   // this is just to prevent the unhandled rejection noise
   cache.values[0].catch(() => {});
@@ -221,7 +251,7 @@ test('if setPromiseHandler will remove the key from cache when the promise is re
   };
   const memoized = () => {};
 
-  utils.setPromiseHandler(cache, options, memoized);
+  utils.createSetPromiseHandler(options)(cache, memoized);
 
   // this is just to prevent the unhandled rejection noise
   cache.values[0].catch(() => {});
@@ -268,7 +298,7 @@ test('if setPromiseHandler will not remove the key from cache when the promise i
   };
   const memoized = () => {};
 
-  utils.setPromiseHandler(cache, options, memoized);
+  utils.createSetPromiseHandler(options)(cache, memoized);
 
   const newValue = cache.values[0];
 
@@ -294,13 +324,4 @@ test('if setPromiseHandler will not remove the key from cache when the promise i
   t.true(options.onCacheHit.notCalled);
 
   t.true(options.onCacheChange.notCalled);
-});
-
-test('if cloneArray will clone the array shallowly', (t) => {
-  const original = ['foo', {bar: 'baz'}];
-
-  const result = utils.cloneArray(original);
-
-  t.not(result, original);
-  t.deepEqual(result, original);
 });

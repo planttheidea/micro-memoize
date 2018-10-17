@@ -56,7 +56,7 @@ module.exports = {
         loader: 'babel-loader',
         options: {
           plugins: ['react-hot-loader/babel'],
-          presets: ['react'],
+          presets: ['@babel/preset-react'],
         },
         test: /\.js$/,
       },

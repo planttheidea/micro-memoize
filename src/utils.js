@@ -6,6 +6,36 @@ import type {
   Options,
 } from './types';
 
+const hasOwnProperty: Function = Object.prototype.hasOwnProperty;
+
+/**
+ * @function assign
+ *
+ * @description
+ * merge the sources into the target, as you would with Object.assign()
+ *
+ * @param {Object} target object to merge into
+ * @param  {...Array<Object>} sources the sources to merge into the target
+ * @returns {Object} the merged object
+ */
+export const assign = (target: Object, ...sources: Array<Object>): Object => {
+  let source;
+
+  for (let index = 0; index < sources.length; index++) {
+    source = sources[index];
+
+    if (source && typeof source === 'object') {
+      for (let key in source) {
+        if (hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+  }
+
+  return target;
+};
+
 /**
  * @function cloneArray
  *
@@ -16,9 +46,27 @@ import type {
  * @returns {Array<any>} the clone of the array
  */
 export const cloneArray = (arrayLike: Array<any> | Object): Array<any> => {
-  const array: Array<any> = new Array(arrayLike.length);
+  const length: number = arrayLike.length;
 
-  for (let index: number = 0; index < arrayLike.length; index++) {
+  if (!length) {
+    return [];
+  }
+
+  if (length === 1) {
+    return [arrayLike[0]];
+  }
+
+  if (length === 2) {
+    return [arrayLike[0], arrayLike[1]];
+  }
+
+  if (length === 3) {
+    return [arrayLike[0], arrayLike[1], arrayLike[2]];
+  }
+
+  const array: Array<any> = new Array(length);
+
+  for (let index: number = 0; index < length; index++) {
     array[index] = arrayLike[index];
   }
 
@@ -41,7 +89,7 @@ export const createAreKeysEqual = (isEqual: Function): Function =>
       return false;
     }
 
-    for (let index: number = 0; index < keys1.length; index++) {
+    for (let index: number = 0, length: number = keys1.length; index < length; index++) {
       if (!isEqual(keys1[index], keys2[index])) {
         return false;
       }
@@ -88,9 +136,7 @@ export const createGetKeyIndex = (isEqual: Function, isMatchingKey: ?Function): 
 export const isSameValueZero = (object1: any, object2: any): boolean =>
   object1 === object2 || (object1 !== object1 && object2 !== object2);
 
-/* eslint-disable no-unused-vars */
-export const onCacheOperation = (cacheIgnored: Cache, optionsIgnored: Options, memoized: Function): void => {};
-/* eslint-enable */
+export const onCacheOperation = (cacheIgnored: Cache, optionsIgnored: Options, memoizedIgnored: Function): void => {};
 
 /**
  * @function orderByLru
@@ -113,35 +159,38 @@ export const orderByLru = (array: Array<any>, value: any, startingIndex: number)
 };
 
 /**
- * @function setPromiseHandler
+ * @function createSetPromiseHandler
  *
  * @description
  * update the promise method to auto-remove from cache if rejected, and if resolved then fire cache hit / changed
  *
- * @param {Cache} cache the cache object
  * @param {Options} options the options for the memoized function
- * @param {function} memoized the memoized function
+ * @param {function(Cache, function): function} memoized the memoized function
  */
-export const setPromiseHandler = (cache: Cache, options: Options, memoized: Function): void => {
-  const key: any = cache.keys[0];
+export const createSetPromiseHandler = (options: Options): Function => {
+  const getKeyIndex = createGetKeyIndex(options.isEqual, options.isMatchingKey);
 
-  cache.values[0] = cache.values[0]
-    .then(
-      (value: any): any => {
-        options.onCacheHit(cache, options, memoized);
-        options.onCacheChange(cache, options, memoized);
+  return (cache: Cache, memoized: Function): void => {
+    const key: any = cache.keys[0];
 
-        return value;
-      }
-    )
-    .catch((error: Error) => {
-      const keyIndex: number = createGetKeyIndex(options.isEqual)(cache.keys, key);
+    cache.values[0] = cache.values[0]
+      .then(
+        (value: any): any => {
+          options.onCacheHit(cache, options, memoized);
+          options.onCacheChange(cache, options, memoized);
 
-      if (~keyIndex) {
-        cache.keys.splice(keyIndex, 1);
-        cache.values.splice(keyIndex, 1);
-      }
+          return value;
+        }
+      )
+      .catch((error: Error) => {
+        const keyIndex: number = getKeyIndex(cache.keys, key);
 
-      throw error;
-    });
+        if (~keyIndex) {
+          cache.keys.splice(keyIndex, 1);
+          cache.values.splice(keyIndex, 1);
+        }
+
+        throw error;
+      });
+  };
 };

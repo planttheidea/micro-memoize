@@ -1,43 +1,43 @@
-import React, {
-  PureComponent
-} from 'react';
+import React, {PureComponent} from 'react';
 import Bluebird from 'bluebird';
 import {
   deepEqual,
-  shallowEqual
+  shallowEqual,
 } from 'fast-equals';
 
 import memoize from '../src';
 
-// console.group('standard');
+console.group('standard');
 
-// const foo = 'foo';
-// const bar = 'bar';
-// const baz = 'baz';
-// const quz = 'quz';
+const foo = 'foo';
+const bar = 'bar';
+const baz = 'baz';
+const quz = 'quz';
 
-// const method = function(one, two) {
-//   console.log('standard method fired', one, two);
+const method = function(one, two) {
+  console.log('standard method fired', one, two);
 
-//   return [one, two].join(' ');
-// };
+  return [one, two].join(' ');
+};
 
-// const memoized = memoize(method);
+const memoized = memoize(method);
 
-// memoized(foo, bar);
-// memoized(bar, foo);
-// memoized(bar, foo);
-// memoized(foo, bar);
-// memoized(foo, bar);
+memoized(foo, bar);
+memoized(bar, foo);
+memoized(bar, foo);
+memoized(foo, bar);
+memoized(foo, bar);
 
-// console.log(memoized.cacheSnapshot);
-// console.log(memoized.cache);
+console.log(memoized.cacheSnapshot);
+console.log(memoized.cache);
 
-// memoized.cache.keys = [];
-// memoized.cache.values = [];
+memoized.cache.keys = [];
+memoized.cache.values = [];
 
-// console.log(memoized.cacheSnapshot);
-// console.log(memoized.cache);
+console.log(memoized.cacheSnapshot);
+console.log(memoized.cache);
+
+console.groupEnd('standard');
 
 // console.group('standard with larger cache size');
 
