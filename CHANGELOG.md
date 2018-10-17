@@ -1,5 +1,11 @@
 # micro-memoize CHANGELOG
 
+## 2.1.2
+
+- Fix issue where `isMatchingKey` was not being used with promise updater
+- Remove requirement of `Object.assign` existing globally
+- Add common use-case static handlers for up to 3 arguments, falling back to pre-existing dynamic handlers for more (faster comparison / argument cloning)
+
 ## 2.1.1
 
 - Upgrade to babel 7
