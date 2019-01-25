@@ -1,91 +1,63 @@
-'use strict';
+"use strict";
 
-const path = require('path');
-const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const eslintFriendlyFormatter = require('eslint-friendly-formatter');
-const FlowBabelWebpackPlugin = require('flow-babel-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
-const webpack = require('webpack');
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const path = require("path");
+const webpack = require("webpack");
 
-const ROOT = path.resolve(__dirname, '..');
-const PORT = 3000;
+const ROOT = path.resolve(__dirname, "..");
 
 module.exports = {
-  cache: true,
-
   devServer: {
-    clientLogLevel: 'none',
-    compress: true,
-    contentBase: './dist',
-    host: 'localhost',
+    contentBase: "./dist",
     inline: true,
-    lazy: false,
-    noInfo: false,
-    port: PORT,
-    quiet: false,
+    port: 3000,
     stats: {
+      assets: false,
+      chunks: true,
+      chunkModules: false,
       colors: true,
-      progress: true,
-    },
+      hash: false,
+      timings: true,
+      version: false
+    }
   },
 
-  devtool: '#source-map',
+  devtool: "#source-map",
 
-  entry: [path.resolve(ROOT, 'DEV_ONLY', 'index.js')],
+  entry: path.join(ROOT, "DEV_ONLY", "index.ts"),
 
-  mode: 'development',
+  mode: "development",
 
   module: {
     rules: [
       {
-        enforce: 'pre',
-        include: [path.resolve(ROOT, 'src')],
-        loader: 'eslint-loader',
-        options: {
-          configFile: '.eslintrc',
-          failOnError: true,
-          failOnWarning: false,
-          fix: true,
-          formatter: eslintFriendlyFormatter,
-        },
-        test: /\.js$/,
+        enforce: "pre",
+        include: [path.resolve(ROOT, "src")],
+        loader: "tslint-loader",
+        test: /\.ts$/
       },
       {
-        include: [path.resolve(ROOT, 'src'), path.resolve(ROOT, 'DEV_ONLY')],
-        loader: 'babel-loader',
-        options: {
-          plugins: ['react-hot-loader/babel'],
-          presets: ['@babel/preset-react'],
-        },
-        test: /\.js$/,
-      },
-    ],
+        include: [path.resolve(ROOT, "src"), /DEV_ONLY/],
+        loader: "ts-loader",
+        test: /\.ts$/
+      }
+    ]
   },
 
   output: {
-    devtoolModuleFilenameTemplate({absoluteResourcePath}) {
-      return path.resolve(absoluteResourcePath).replace(/\\/g, '/');
-    },
-    filename: 'micro-memoize.js',
-    library: 'memoize',
-    libraryTarget: 'umd',
-    path: path.resolve(ROOT, 'dist'),
-    pathinfo: true,
-    publicPath: `http://localhost:${PORT}/`,
-    umdNamedDefine: true,
+    filename: "micro-memoize.js",
+    library: "microMemoize",
+    libraryTarget: "umd",
+    path: path.resolve(ROOT, "dist"),
+    umdNamedDefine: true
   },
 
   plugins: [
-    new webpack.EnvironmentPlugin(['NODE_ENV']),
-    new webpack.NamedModulesPlugin(),
-    new CaseSensitivePathsPlugin(),
-    new HtmlWebpackPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
-    new FlowBabelWebpackPlugin(),
+    new webpack.EnvironmentPlugin(["NODE_ENV"]),
+    new HtmlWebpackPlugin()
   ],
 
   resolve: {
-    plugins: [new ModuleScopePlugin(path.resolve(ROOT, 'src'))],
-  },
+    extensions: [".tsx", ".ts", ".js"]
+  }
 };
