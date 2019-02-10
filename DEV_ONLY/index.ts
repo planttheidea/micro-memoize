@@ -3,7 +3,7 @@ import { deepEqual, shallowEqual } from 'fast-equals';
 
 import memoize from '../src';
 
-import '../benchmarks';
+// import '../benchmarks';
 
 document.body.style.backgroundColor = '#1d1d1d';
 document.body.style.color = '#d5d5d5';
@@ -16,57 +16,58 @@ div.textContent = 'Check the console for details.';
 
 document.body.appendChild(div);
 
-// console.group('standard');
+console.group('standard');
 
-// const foo = 'foo';
-// const bar = 'bar';
-// const baz = 'baz';
-// const quz = 'quz';
+const foo = 'foo';
+const bar = 'bar';
+const baz = 'baz';
+const quz = 'quz';
 
-// const method = function (one: string, two: string) {
-//   console.log('standard method fired', one, two);
+const method = function (one: string, two: string) {
+  console.log('standard method fired', one, two);
 
-//   return [one, two].join(' ');
-// };
+  return [one, two].join(' ');
+};
 
-// const memoized = memoize(method);
+const memoized = memoize(method);
 
-// memoized(foo, bar);
-// memoized(bar, foo);
-// memoized(bar, foo);
-// memoized(foo, bar);
-// memoized(foo, bar);
+memoized(foo, bar);
+memoized(bar, foo);
+memoized(bar, foo);
+memoized(foo, bar);
+memoized(foo, bar);
 
-// console.log(memoized.cacheSnapshot);
-// console.log(memoized.cache);
+console.log(memoized.cacheSnapshot);
+console.log(memoized.cache);
 
-// memoized.cache.keys = [];
-// memoized.cache.values = [];
+memoized.cache.keys = [];
+memoized.cache.values = [];
 
-// console.log(memoized.cacheSnapshot);
-// console.log(memoized.cache);
+console.log(memoized.cacheSnapshot);
+console.log(memoized.cache);
 
-// console.groupEnd();
+console.groupEnd();
 
-// console.group('standard with larger cache size');
+console.group('standard with larger cache size');
 
-// const memoizedLargerCache = memoize(method, {
-//   onCacheChange(cache) {
-//     console.log([...cache.keys]);
-//   },
-//   maxSize: 3,
-// });
+const memoizedLargerCache = memoize(method, {
+  onCacheChange(cache) {
+    console.log([...cache.keys]);
+  },
+  maxSize: 3,
+});
 
-// memoizedLargerCache(foo, bar);
-// memoizedLargerCache(bar, foo);
-// memoizedLargerCache(bar, foo);
-// memoizedLargerCache(foo, baz);
-// memoizedLargerCache(foo, bar);
-// memoizedLargerCache(baz, quz);
+memoizedLargerCache(foo, bar);
+memoizedLargerCache(bar, foo);
+memoizedLargerCache(bar, foo);
+memoizedLargerCache(foo, baz);
+memoizedLargerCache(foo, bar);
+memoizedLargerCache(baz, quz);
+memoizedLargerCache(foo, quz);
 
-// console.log(memoizedLargerCache.cacheSnapshot);
+console.log(memoizedLargerCache.cacheSnapshot);
 
-// console.groupEnd();
+console.groupEnd();
 
 // console.group('maxArgs');
 

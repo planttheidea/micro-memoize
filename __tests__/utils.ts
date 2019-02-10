@@ -46,7 +46,7 @@ describe('getKeyIndex', () => {
   it('will return the index of the match found', () => {
     const isEqual = (o1: any, o2: any) => o1 === o2;
 
-    const getKeyIndex = createGetKeyIndex({ isEqual });
+    const getKeyIndex = createGetKeyIndex({ isEqual, maxSize: 2 });
 
     const allKeys = [['key'], ['other key']];
     const keyToMatch = ['other key'];
@@ -113,7 +113,7 @@ describe('isSameValueZero', () => {
     expect(isSameValueZero(object1, object2)).toEqual(true);
   });
 
-  it('will return true when the objects are both NaN', () => {
+  it('will return true when the objects are NaN', () => {
     const object1 = NaN;
     const object2 = NaN;
 
@@ -155,8 +155,9 @@ describe('orderByLru', () => {
     const itemIndex = 0;
     const key = cache.keys[itemIndex];
     const value = cache.values[itemIndex];
+    const maxSize = 3;
 
-    orderByLru(cache, key, value, itemIndex);
+    orderByLru(cache, key, value, itemIndex, maxSize);
 
     expect(cache).toEqual({
       ...cache,
@@ -174,8 +175,9 @@ describe('orderByLru', () => {
     const itemIndex = 1;
     const key = cache.keys[itemIndex];
     const value = cache.values[itemIndex];
+    const maxSize = 3;
 
-    orderByLru(cache, key, value, itemIndex);
+    orderByLru(cache, key, value, itemIndex, maxSize);
 
     expect(cache).toEqual({
       ...cache,
@@ -193,8 +195,9 @@ describe('orderByLru', () => {
     const itemIndex = cache.keys.length;
     const key = ['key'];
     const value = 'new';
+    const maxSize = 4;
 
-    orderByLru(cache, key, value, itemIndex);
+    orderByLru(cache, key, value, itemIndex, maxSize);
 
     expect(cache).toEqual({
       ...cache,

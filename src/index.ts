@@ -59,19 +59,18 @@ function createMemoizedFunction(
     values,
   };
 
-  const canTransformKey: boolean = typeof transformKey === 'function';
+  const canTransformKey = typeof transformKey === 'function';
 
-  const shouldCloneArguments: boolean = !!(transformKey || isMatchingKey);
+  const shouldCloneArguments = !!(transformKey || isMatchingKey);
 
-  const shouldUpdateOnAdd: boolean = typeof onCacheAdd === 'function';
-  const shouldUpdateOnChange: boolean = typeof onCacheChange === 'function';
-  const shouldUpdateOnHit: boolean = typeof onCacheHit === 'function';
+  const shouldUpdateOnAdd = typeof onCacheAdd === 'function';
+  const shouldUpdateOnChange = typeof onCacheChange === 'function';
+  const shouldUpdateOnHit = typeof onCacheHit === 'function';
 
   function memoized(): any {
-    const args: IArguments = arguments;
     const normalizedArgs: MicroMemoize.RawKey = shouldCloneArguments
-      ? slice.call(args, 0)
-      : args;
+      ? slice.call(arguments, 0)
+      : arguments;
     const key: MicroMemoize.RawKey = canTransformKey
       ? transformKey(normalizedArgs)
       : normalizedArgs;
@@ -81,23 +80,18 @@ function createMemoizedFunction(
       shouldUpdateOnHit && onCacheHit(cache, normalizedOptions, memoized);
 
       if (keyIndex) {
-        orderByLru(cache, keys[keyIndex], values[keyIndex], keyIndex);
+        orderByLru(cache, keys[keyIndex], values[keyIndex], keyIndex, maxSize);
 
         shouldUpdateOnChange &&
           onCacheChange(cache, normalizedOptions, memoized);
       }
     } else {
-      const newValue: any = fn.apply(this, args);
+      const newValue: any = fn.apply(this, arguments);
       const newKey: MicroMemoize.Key = shouldCloneArguments
         ? key
         : slice.call(normalizedArgs, 0);
 
-      orderByLru(cache, newKey, newValue, keys.length);
-
-      if (keys.length > maxSize) {
-        keys.length = maxSize;
-        values.length = maxSize;
-      }
+      orderByLru(cache, newKey, newValue, keys.length, maxSize);
 
       isPromise && updateAsyncCache(cache, memoized);
 

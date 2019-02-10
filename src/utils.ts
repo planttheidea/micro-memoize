@@ -12,18 +12,24 @@ export function createAreKeysEqual(
    * @returns are the keys shallowly equal
    */
   return function areKeysEqual(key1: MicroMemoize.Key, key2: MicroMemoize.Key) {
-    const length: number = key1.length;
+    const length = key1.length;
 
     if (key2.length !== length) {
       return false;
     }
 
-    let index: number = length;
+    if (length === 1) {
+      return isEqual(key1[0], key2[0]);
+    }
 
-    while (index--) {
+    let index = 0;
+
+    while (index < length) {
       if (!isEqual(key1[index], key2[index])) {
         return false;
       }
+
+      index++;
     }
 
     return true;
@@ -33,6 +39,7 @@ export function createAreKeysEqual(
 export function createGetKeyIndex(
   options: MicroMemoize.Options,
 ): MicroMemoize.KeyIndexGetter {
+  const { maxSize } = options;
   const areKeysEqual: MicroMemoize.MatchingKeyComparator =
     typeof options.isMatchingKey === 'function'
       ? options.isMatchingKey
@@ -57,9 +64,17 @@ export function createGetKeyIndex(
       return 0;
     }
 
-    for (let index: number = 1; index < allKeys.length; index++) {
-      if (areKeysEqual(allKeys[index], keyToMatch)) {
-        return index;
+    if (maxSize > 1) {
+      const length = maxSize > allKeys.length ? allKeys.length : maxSize;
+
+      let index = 1;
+
+      while (index < length) {
+        if (areKeysEqual(allKeys[index], keyToMatch)) {
+          return index;
+        }
+
+        index++;
       }
     }
 
@@ -71,7 +86,7 @@ export function createGetKeyIndex(
  * @function isSameValueZero
  *
  * @description
- * are the objects equal based on SameValueZero
+ * are the objects equal based on SameValueZero equality
  *
  * @param object1 the first object to compare
  * @param object2 the second object to compare
@@ -125,8 +140,9 @@ export function orderByLru(
   newKey: MicroMemoize.Key,
   newValue: any,
   startingIndex: number,
+  maxSize: number,
 ) {
-  let index: number = startingIndex;
+  let index = startingIndex;
 
   while (index--) {
     cache.keys[index + 1] = cache.keys[index];
@@ -135,6 +151,11 @@ export function orderByLru(
 
   cache.keys[0] = newKey;
   cache.values[0] = newValue;
+
+  if (startingIndex >= maxSize) {
+    cache.keys.length = maxSize;
+    cache.values.length = maxSize;
+  }
 }
 
 export function createUpdateAsyncCache(
@@ -144,8 +165,8 @@ export function createUpdateAsyncCache(
 
   const { onCacheChange, onCacheHit } = options;
 
-  const shouldUpdateOnChange: boolean = typeof onCacheChange === 'function';
-  const shouldUpdateOnHit: boolean = typeof onCacheHit === 'function';
+  const shouldUpdateOnChange = typeof onCacheChange === 'function';
+  const shouldUpdateOnHit = typeof onCacheHit === 'function';
 
   /**
    * @function updateAsyncCache
@@ -161,16 +182,14 @@ export function createUpdateAsyncCache(
     const key: any = cache.keys[0];
 
     cache.values[0] = cache.values[0]
-      .then(
-        (value: any): any => {
-          shouldUpdateOnHit && onCacheHit(cache, options, memoized);
-          shouldUpdateOnChange && onCacheChange(cache, options, memoized);
+      .then((value: any) => {
+        shouldUpdateOnHit && onCacheHit(cache, options, memoized);
+        shouldUpdateOnChange && onCacheChange(cache, options, memoized);
 
-          return value;
-        },
-      )
+        return value;
+      })
       .catch((error: Error) => {
-        const keyIndex: number = getKeyIndex(cache.keys, key);
+        const keyIndex = getKeyIndex(cache.keys, key);
 
         if (~keyIndex) {
           cache.keys.splice(keyIndex, 1);
