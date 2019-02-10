@@ -1,39 +1,43 @@
-import typescript from "rollup-plugin-typescript";
-import { uglify } from "rollup-plugin-uglify";
+import typescript from 'rollup-plugin-typescript';
+import { uglify } from 'rollup-plugin-uglify';
 
-import pkg from "./package.json";
+import pkg from './package.json';
 
 const UMD_CONFIG = {
-  input: "src/index.ts",
+  input: 'src/index.ts',
   output: {
-    exports: "default",
+    exports: 'default',
     file: pkg.browser,
-    format: "umd",
+    format: 'umd',
     name: pkg.name,
-    sourcemap: true
+    sourcemap: true,
   },
-  plugins: [typescript()]
+  plugins: [
+    typescript({
+      typescript: require('typescript'),
+    }),
+  ],
 };
 
 const FORMATTED_CONFIG = Object.assign({}, UMD_CONFIG, {
   output: [
     Object.assign({}, UMD_CONFIG.output, {
       file: pkg.main,
-      format: "cjs"
+      format: 'cjs',
     }),
     Object.assign({}, UMD_CONFIG.output, {
       file: pkg.module,
-      format: "es"
-    })
-  ]
+      format: 'es',
+    }),
+  ],
 });
 
 const MINIFIED_CONFIG = Object.assign({}, UMD_CONFIG, {
   output: Object.assign({}, UMD_CONFIG.output, {
-    file: pkg.browser.replace(".js", ".min.js"),
-    sourcemap: false
+    file: pkg.browser.replace('.js', '.min.js'),
+    sourcemap: false,
   }),
-  plugins: UMD_CONFIG.plugins.concat([uglify()])
+  plugins: UMD_CONFIG.plugins.concat([uglify()]),
 });
 
 export default [UMD_CONFIG, FORMATTED_CONFIG, MINIFIED_CONFIG];

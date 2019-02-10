@@ -32,10 +32,7 @@ declare namespace MicroMemoize {
 
   export type KeyIndexGetter = (allKeys: Keys, keyToMatch: RawKey) => number;
 
-  export type AsyncCacheUpdater = (
-    cache: Cache,
-    memoized: MemoizedFunction,
-  ) => void;
+  export type AsyncCacheUpdater = (cache: Cache, memoized: Memoized) => void;
 
   export type Options = {
     isEqual?: EqualityComparator;
@@ -48,7 +45,8 @@ declare namespace MicroMemoize {
     transformKey?: KeyTransformer;
   };
 
-  export interface MemoizedFunction extends Function {
+  export interface Memoized extends Function {
+    [key: string]: any;
     cache?: Cache;
     cacheSnapshot?: Cache;
     isMemoized?: boolean;

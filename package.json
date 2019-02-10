@@ -1,18 +1,5 @@
 {
   "author": "tony.quetano@planttheidea.com",
-  "ava": {
-    "failFast": true,
-    "files": [
-      "test/*.js"
-    ],
-    "require": [
-      "@babel/register"
-    ],
-    "sources": [
-      "src/*.js"
-    ],
-    "verbose": true
-  },
   "browser": "dist/micro-memoize.js",
   "browserslist": [
     "defaults",
@@ -96,9 +83,10 @@
   "scripts": {
     "benchmark": "npm run dist && NODE_ENV=production node ./benchmarks/index.js",
     "build": "NODE_ENV=production rollup -c",
+    "build:mjs": "node ./es-to-mjs.js",
     "clean": "rimraf dist",
     "dev": "NODE_ENV=development webpack-dev-server --colors --progress --config=webpack/webpack.config.js",
-    "dist": "npm run clean && npm run build",
+    "dist": "npm run clean && npm run build && npm run build:mjs",
     "lint": "NODE_ENV=test tslint 'src/*.ts'",
     "lint:fix": "npm run lint -- --fix",
     "prepublish": "if in-publish; then npm run prepublish:compile; fi",

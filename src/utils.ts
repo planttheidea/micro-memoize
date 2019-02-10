@@ -1,6 +1,6 @@
-export const createAreKeysEqual = (
+export function createAreKeysEqual(
   isEqual: MicroMemoize.EqualityComparator,
-): MicroMemoize.MatchingKeyComparator =>
+): MicroMemoize.MatchingKeyComparator {
   /**
    * @function areKeysEqual
    *
@@ -11,7 +11,7 @@ export const createAreKeysEqual = (
    * @param key2 the keys array to test
    * @returns are the keys shallowly equal
    */
-  (key1: MicroMemoize.Key, key2: MicroMemoize.Key): boolean => {
+  return function areKeysEqual(key1: MicroMemoize.Key, key2: MicroMemoize.Key) {
     const length: number = key1.length;
 
     if (key2.length !== length) {
@@ -28,10 +28,11 @@ export const createAreKeysEqual = (
 
     return true;
   };
+}
 
-export const createGetKeyIndex = (
+export function createGetKeyIndex(
   options: MicroMemoize.Options,
-): MicroMemoize.KeyIndexGetter => {
+): MicroMemoize.KeyIndexGetter {
   const areKeysEqual: MicroMemoize.MatchingKeyComparator =
     typeof options.isMatchingKey === 'function'
       ? options.isMatchingKey
@@ -48,7 +49,10 @@ export const createGetKeyIndex = (
    *
    * @returns {number} the index of the matching key value, or -1
    */
-  return (allKeys: MicroMemoize.Keys, keyToMatch: MicroMemoize.Key): number => {
+  return function getKeyIndex(
+    allKeys: MicroMemoize.Keys,
+    keyToMatch: MicroMemoize.Key,
+  ) {
     if (areKeysEqual(allKeys[0], keyToMatch)) {
       return 0;
     }
@@ -61,20 +65,21 @@ export const createGetKeyIndex = (
 
     return -1;
   };
-};
+}
 
 /**
- * @function isStrictlyEqual
+ * @function isSameValueZero
  *
  * @description
- * are the objects equal based on strict equality
+ * are the objects equal based on SameValueZero
  *
  * @param object1 the first object to compare
  * @param object2 the second object to compare
  * @returns are the two objects equal
  */
-export const isStrictlyEqual = (object1: any, object2: any): boolean =>
-  object1 === object2;
+export function isSameValueZero(object1: any, object2: any) {
+  return object1 === object2 || (object1 !== object1 && object2 !== object2);
+}
 
 /**
  * @function mergeOptions
@@ -86,10 +91,10 @@ export const isStrictlyEqual = (object1: any, object2: any): boolean =>
  * @param providedOptions the defaulted options provided
  * @returns the merged options
  */
-export const mergeOptions = (
+export function mergeOptions(
   extraOptions: PlainObject,
   providedOptions: PlainObject,
-): PlainObject => {
+) {
   const target: PlainObject = {};
 
   for (const key in extraOptions) {
@@ -101,7 +106,7 @@ export const mergeOptions = (
   }
 
   return target;
-};
+}
 
 /**
  * @function orderByLru
@@ -115,12 +120,12 @@ export const mergeOptions = (
  * @param newValue the new value to move to the front
  * @param startingIndex the index of the item to move to the front
  */
-export const orderByLru = (
+export function orderByLru(
   cache: MicroMemoize.Cache,
   newKey: MicroMemoize.Key,
   newValue: any,
   startingIndex: number,
-): void => {
+) {
   let index: number = startingIndex;
 
   while (index--) {
@@ -130,11 +135,11 @@ export const orderByLru = (
 
   cache.keys[0] = newKey;
   cache.values[0] = newValue;
-};
+}
 
-export const createUpdateAsyncCache = (
+export function createUpdateAsyncCache(
   options: MicroMemoize.Options,
-): MicroMemoize.AsyncCacheUpdater => {
+): MicroMemoize.AsyncCacheUpdater {
   const getKeyIndex: MicroMemoize.KeyIndexGetter = createGetKeyIndex(options);
 
   const { onCacheChange, onCacheHit } = options;
@@ -152,11 +157,8 @@ export const createUpdateAsyncCache = (
    * @param cache the memoized function's cache
    * @param memoized the memoized function
    */
-  return (
-    cache: MicroMemoize.Cache,
-    memoized: MicroMemoize.MemoizedFunction,
-  ): void => {
-    const key: any = cache.keys;
+  return (cache: MicroMemoize.Cache, memoized: MicroMemoize.Memoized): void => {
+    const key: any = cache.keys[0];
 
     cache.values[0] = cache.values[0]
       .then(
@@ -178,4 +180,4 @@ export const createUpdateAsyncCache = (
         throw error;
       });
   };
-};
+}

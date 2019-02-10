@@ -2,24 +2,24 @@
 import {
   createGetKeyIndex,
   createUpdateAsyncCache,
-  isStrictlyEqual,
+  isSameValueZero,
   mergeOptions,
   orderByLru,
 } from './utils';
 
 const { slice } = Array.prototype;
 
-const createMemoizedFunction = (
-  fn: Function | MicroMemoize.MemoizedFunction,
+function createMemoizedFunction(
+  fn: Function | MicroMemoize.Memoized,
   options: MicroMemoize.Options = {},
-): MicroMemoize.MemoizedFunction => {
+): MicroMemoize.Memoized {
   // @ts-ignore
   if (fn.isMemoized) {
     return fn;
   }
 
   const {
-    isEqual = isStrictlyEqual,
+    isEqual = isSameValueZero,
     isMatchingKey,
     isPromise = false,
     maxSize = 1,
@@ -134,6 +134,6 @@ const createMemoizedFunction = (
   });
 
   return memoized;
-};
+}
 
 export default createMemoizedFunction;
