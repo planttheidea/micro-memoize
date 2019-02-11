@@ -130,6 +130,4 @@ function createMemoizedFunction(
   return memoized;
 }
 
-export { orderByLru };
-
 export default createMemoizedFunction;
