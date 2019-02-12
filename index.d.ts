@@ -1,8 +1,3 @@
-type PlainObject = {
-  [key: string]: any;
-  [index: number]: any;
-};
-
 declare namespace MicroMemoize {
   export type Key = any[];
 
@@ -55,6 +50,6 @@ declare namespace MicroMemoize {
 }
 
 export default function memoize<T extends Function>(
-  fn: T,
+  fn: T | MicroMemoize.Memoized,
   options?: MicroMemoize.Options,
 ): MicroMemoize.Memoized;

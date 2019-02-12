@@ -2,6 +2,7 @@ import {
   // createAreKeysEqual,
   createGetKeyIndex,
   createUpdateAsyncCache,
+  getCustomOptions,
   isSameValueZero,
   mergeOptions,
   orderByLru,
@@ -190,6 +191,19 @@ describe('getKeyIndex', () => {
     const result = getKeyIndex(allKeys, keyToMatch);
 
     expect(result).toEqual(-1);
+  });
+});
+
+describe('getCustomOptions', () => {
+  it('will return the custom options and no default options', () => {
+    const options = {
+      maxSize: 10,
+      foo: 'bar',
+    };
+
+    const result = getCustomOptions(options);
+
+    expect(result).toEqual({ foo: options.foo });
   });
 });
 

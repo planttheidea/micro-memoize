@@ -2,15 +2,17 @@
 import {
   createGetKeyIndex,
   createUpdateAsyncCache,
+  getCustomOptions,
   isSameValueZero,
   mergeOptions,
   orderByLru,
 } from './utils';
 
 const { slice } = Array.prototype;
+const { defineProperties } = Object;
 
-function createMemoizedFunction(
-  fn: Function | MicroMemoize.Memoized,
+function createMemoizedFunction<T extends Function>(
+  fn: T | MicroMemoize.Memoized,
   options: MicroMemoize.Options = {},
 ): MicroMemoize.Memoized {
   // @ts-ignore
@@ -27,10 +29,9 @@ function createMemoizedFunction(
     onCacheChange,
     onCacheHit,
     transformKey,
-    ...extraOptions
   }: MicroMemoize.Options = options;
 
-  const normalizedOptions = mergeOptions(extraOptions, {
+  const normalizedOptions = mergeOptions(getCustomOptions(options), {
     isEqual,
     isMatchingKey,
     isPromise,
@@ -94,7 +95,7 @@ function createMemoizedFunction(
     return values[0];
   }
 
-  Object.defineProperties(memoized, {
+  defineProperties(memoized, {
     cache: {
       configurable: true,
       value: cache,

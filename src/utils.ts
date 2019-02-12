@@ -1,3 +1,23 @@
+const DEFAULT_OPTIONS_KEYS: { [key: string]: boolean } = {
+  isEqual: true,
+  isMatchingKey: true,
+  isPromise: true,
+  maxSize: true,
+  onCacheAdd: true,
+  onCacheChange: true,
+  onCacheHit: true,
+  transformKey: true,
+};
+
+/**
+ * @function createGetKeyIndex
+ *
+ * @description
+ * create a method that will get the matching key index if found
+ *
+ * @param options the memoization options passed
+ * @returns the method to get the key index
+ */
 export function createGetKeyIndex(options: MicroMemoize.Options) {
   if (typeof options.isMatchingKey === 'function') {
     const { isMatchingKey, maxSize } = options;
@@ -77,6 +97,28 @@ export function createGetKeyIndex(options: MicroMemoize.Options) {
 
     return 0;
   };
+}
+
+/**
+ * @function getCustomOptions
+ *
+ * @description
+ * get the custom options on the object passed
+ *
+ * @param options the memoization options passed
+ * @returns the custom options passed
+ */
+export function getCustomOptions(options: MicroMemoize.Options) {
+  const customOptions: { [key: string]: any } = {};
+
+  for (const key in options) {
+    if (!DEFAULT_OPTIONS_KEYS[key]) {
+      // @ts-ignore
+      customOptions[key] = options[key];
+    }
+  }
+
+  return customOptions;
 }
 
 /**

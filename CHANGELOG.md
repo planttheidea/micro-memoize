@@ -1,5 +1,16 @@
 # micro-memoize CHANGELOG
 
+## 3.0.0
+
+- Rewrite in TypeScript
+- Use `rollup` for builds of all packages
+
+#### BREAKING CHANGES
+
+- Types contract is much stricter
+- Utility methods are no longer deep-linkable
+  - Not technically exposed in the API, but was relied upon by other libraries)
+
 ## 2.1.2
 
 - Fix issue where `isMatchingKey` was not being used with promise updater
