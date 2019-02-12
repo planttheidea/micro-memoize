@@ -1,84 +1,85 @@
-export function createAreKeysEqual(
-  isEqual: MicroMemoize.EqualityComparator,
-): MicroMemoize.MatchingKeyComparator {
-  /**
-   * @function areKeysEqual
-   *
-   * @description
-   * are the keys shallowly equal to one another
-   *
-   * @param key1 the keys array to test against
-   * @param key2 the keys array to test
-   * @returns are the keys shallowly equal
-   */
-  return function areKeysEqual(key1: MicroMemoize.Key, key2: MicroMemoize.Key) {
-    const length = key1.length;
+export function createGetKeyIndex({
+  isEqual,
+  isMatchingKey,
+  maxSize,
+}: MicroMemoize.Options) {
+  return function getKeyIndex(
+    allKeys: MicroMemoize.Keys,
+    keyToMatch: MicroMemoize.Key,
+  ) {
+    if (isMatchingKey) {
+      if (isMatchingKey(allKeys[0], keyToMatch)) {
+        return 0;
+      }
 
-    if (key2.length !== length) {
-      return false;
+      if (maxSize > 1) {
+        const keysLength = allKeys.length;
+
+        let index = 1;
+
+        while (index < keysLength) {
+          if (isMatchingKey(allKeys[index], keyToMatch)) {
+            return index;
+          }
+
+          index++;
+        }
+      }
+
+      return -1;
     }
 
-    if (length === 1) {
-      return isEqual(key1[0], key2[0]);
+    if (maxSize > 1) {
+      const keysLength = allKeys.length;
+      const keyLength = keyToMatch.length;
+
+      let index = 0;
+      let existingKey;
+      let argIndex;
+
+      while (index < keysLength) {
+        existingKey = allKeys[index];
+
+        if (existingKey.length === keyLength) {
+          argIndex = 0;
+
+          while (argIndex < keyLength) {
+            if (!isEqual(existingKey[argIndex], keyToMatch[argIndex])) {
+              break;
+            }
+
+            argIndex++;
+          }
+
+          if (argIndex === keyLength) {
+            return index;
+          }
+        }
+
+        index++;
+      }
+
+      return -1;
+    }
+
+    const existingKey = allKeys[0];
+    const keyLength = existingKey.length;
+
+    if (keyToMatch.length !== keyLength) {
+      return -1;
     }
 
     let index = 0;
 
-    while (index < length) {
-      if (!isEqual(key1[index], key2[index])) {
-        return false;
+    while (index < keyLength) {
+      if (!isEqual(existingKey[index], keyToMatch[index])) {
+        return -1;
       }
 
       index++;
     }
 
-    return true;
-  };
-}
-
-export function createGetKeyIndex(
-  options: MicroMemoize.Options,
-): MicroMemoize.KeyIndexGetter {
-  const { maxSize } = options;
-  const areKeysEqual: MicroMemoize.MatchingKeyComparator =
-    typeof options.isMatchingKey === 'function'
-      ? options.isMatchingKey
-      : createAreKeysEqual(options.isEqual);
-
-  /**
-   * @function getKeyIndex
-   *
-   * @description
-   * get the index of the matching key
-   *
-   * @param allKeys the list of all available keys
-   * @param keyToMatch the key to try to match
-   *
-   * @returns {number} the index of the matching key value, or -1
-   */
-  return function getKeyIndex(
-    allKeys: MicroMemoize.Keys,
-    keyToMatch: MicroMemoize.Key,
-  ) {
-    if (areKeysEqual(allKeys[0], keyToMatch)) {
-      return 0;
-    }
-
-    if (maxSize > 1) {
-      const length = maxSize > allKeys.length ? allKeys.length : maxSize;
-
-      let index = 1;
-
-      while (index < length) {
-        if (areKeysEqual(allKeys[index], keyToMatch)) {
-          return index;
-        }
-
-        index++;
-      }
-    }
-
-    return -1;
+    return 0;
   };
 }
 
@@ -191,7 +192,7 @@ export function createUpdateAsyncCache(
       .catch((error: Error) => {
         const keyIndex = getKeyIndex(cache.keys, key);
 
-        if (~keyIndex) {
+        if (keyIndex !== -1) {
           cache.keys.splice(keyIndex, 1);
           cache.values.splice(keyIndex, 1);
         }

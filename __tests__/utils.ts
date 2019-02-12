@@ -1,46 +1,11 @@
 import {
-  createAreKeysEqual,
+  // createAreKeysEqual,
   createGetKeyIndex,
   createUpdateAsyncCache,
   isSameValueZero,
   mergeOptions,
   orderByLru,
 } from '../src/utils';
-
-describe('areKeysEqual', () => {
-  it('will return false when the length of the keys are different', () => {
-    const isEqual = (o1: any, o2: any) => o1 === o2;
-
-    const areKeysEqual = createAreKeysEqual(isEqual);
-
-    const keys1: any[] = [];
-    const keys2 = ['key'];
-
-    expect(areKeysEqual(keys1, keys2)).toEqual(false);
-  });
-
-  it('will return false when the keys have different values', () => {
-    const isEqual = (o1: any, o2: any) => o1 === o2;
-
-    const areKeysEqual = createAreKeysEqual(isEqual);
-
-    const keys1 = ['key'];
-    const keys2 = ['other key'];
-
-    expect(areKeysEqual(keys1, keys2)).toEqual(false);
-  });
-
-  it('will return true when the keys have equal values', () => {
-    const isEqual = (o1: any, o2: any) => o1 === o2;
-
-    const areKeysEqual = createAreKeysEqual(isEqual);
-
-    const keys1 = ['key'];
-    const keys2 = ['key'];
-
-    expect(areKeysEqual(keys1, keys2)).toEqual(true);
-  });
-});
 
 describe('getKeyIndex', () => {
   it('will return the index of the match found', () => {

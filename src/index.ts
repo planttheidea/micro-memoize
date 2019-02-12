@@ -41,12 +41,8 @@ function createMemoizedFunction(
     transformKey,
   });
 
-  const getKeyIndex: MicroMemoize.KeyIndexGetter = createGetKeyIndex(
-    normalizedOptions,
-  );
-  const updateAsyncCache: MicroMemoize.AsyncCacheUpdater = createUpdateAsyncCache(
-    normalizedOptions,
-  );
+  const getKeyIndex = createGetKeyIndex(normalizedOptions);
+  const updateAsyncCache = createUpdateAsyncCache(normalizedOptions);
 
   const keys: MicroMemoize.Keys = [];
   const values: MicroMemoize.Values = [];
@@ -68,15 +64,13 @@ function createMemoizedFunction(
   const shouldUpdateOnHit = typeof onCacheHit === 'function';
 
   function memoized(): any {
-    const normalizedArgs: MicroMemoize.RawKey = shouldCloneArguments
+    const normalizedArgs = shouldCloneArguments
       ? slice.call(arguments, 0)
       : arguments;
-    const key: MicroMemoize.RawKey = canTransformKey
-      ? transformKey(normalizedArgs)
-      : normalizedArgs;
-    const keyIndex: number = keys.length ? getKeyIndex(keys, key) : -1;
+    const key = canTransformKey ? transformKey(normalizedArgs) : normalizedArgs;
+    const keyIndex = keys.length ? getKeyIndex(keys, key) : -1;
 
-    if (~keyIndex) {
+    if (keyIndex !== -1) {
       shouldUpdateOnHit && onCacheHit(cache, normalizedOptions, memoized);
 
       if (keyIndex) {
@@ -86,10 +80,8 @@ function createMemoizedFunction(
           onCacheChange(cache, normalizedOptions, memoized);
       }
     } else {
-      const newValue: any = fn.apply(this, arguments);
-      const newKey: MicroMemoize.Key = shouldCloneArguments
-        ? key
-        : slice.call(normalizedArgs, 0);
+      const newValue = fn.apply(this, arguments);
+      const newKey = shouldCloneArguments ? key : slice.call(arguments, 0);
 
       orderByLru(cache, newKey, newValue, keys.length, maxSize);
 

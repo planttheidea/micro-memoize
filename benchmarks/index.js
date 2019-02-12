@@ -32,9 +32,7 @@ const lruMemoize = require('lru-memoize').default;
 const mem = require('mem');
 const memoizee = require('memoizee');
 const memoizerific = require('memoizerific');
-const memoize =
-  require('../dist/micro-memoize.cjs').default ||
-  require('../dist/micro-memoize.cjs');
+const memoize = require('../dist/micro-memoize.cjs');
 const ramda = require('ramda').memoizeWith(resolveArguments);
 const underscore = require('underscore').memoize;
 
@@ -198,6 +196,7 @@ const arrayIsComplete = [isComplete];
 const objectIsComplete = { isComplete };
 
 const suite = createSuite({
+  minTime: 1000,
   onComplete(results) {
     const combinedResults = Object.keys(results)
       .reduce((combined, group) => {
@@ -264,7 +263,6 @@ const suite = createSuite({
     console.log(`Starting benchmarks for group ${group}...`);
     console.log('');
   },
-  minTime: 3000,
   onResult({ name, stats }) {
     console.log(
       `Benchmark completed for ${name}: ${stats.ops.toLocaleString()} ops/sec`,
@@ -276,7 +274,11 @@ Object.keys(singularPrimitive).forEach(name => {
   const fn = singularPrimitive[name];
 
   suite.add(name, 'singular primitive', () => {
-    fn(number);
+    try {
+      fn(number);
+    } catch (error) {
+      console.error(error);
+    }
   });
 });
 

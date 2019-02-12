@@ -2,6 +2,7 @@ import Bluebird from 'bluebird';
 import { deepEqual, shallowEqual } from 'fast-equals';
 
 import memoize from '../src';
+import { __ } from 'ramda';
 
 // import '../benchmarks';
 
@@ -48,26 +49,26 @@ console.log(memoized.cache);
 
 console.groupEnd();
 
-console.group('standard with larger cache size');
+// console.group('standard with larger cache size');
 
-const memoizedLargerCache = memoize(method, {
-  onCacheChange(cache) {
-    console.log([...cache.keys]);
-  },
-  maxSize: 3,
-});
+// const memoizedLargerCache = memoize(method, {
+//   onCacheChange(cache) {
+//     console.log([...cache.keys]);
+//   },
+//   maxSize: 3,
+// });
 
-memoizedLargerCache(foo, bar);
-memoizedLargerCache(bar, foo);
-memoizedLargerCache(bar, foo);
-memoizedLargerCache(foo, baz);
-memoizedLargerCache(foo, bar);
-memoizedLargerCache(baz, quz);
-memoizedLargerCache(foo, quz);
+// memoizedLargerCache(foo, bar);
+// memoizedLargerCache(bar, foo);
+// memoizedLargerCache(bar, foo);
+// memoizedLargerCache(foo, baz);
+// memoizedLargerCache(foo, bar);
+// memoizedLargerCache(baz, quz);
+// memoizedLargerCache(foo, quz);
 
-console.log(memoizedLargerCache.cacheSnapshot);
+// console.log(memoizedLargerCache.cacheSnapshot);
 
-console.groupEnd();
+// console.groupEnd();
 
 // console.group('maxArgs');
 

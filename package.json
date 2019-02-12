@@ -32,7 +32,7 @@
     "memoizee": "^0.4.14",
     "memoizerific": "^1.11.3",
     "mini-bench": "^1.0.0",
-    "ora": "^3.0.0",
+    "ora": "^3.1.0",
     "performance-now": "^2.1.0",
     "ramda": "^0.26.1",
     "react": "^16.7.0",
