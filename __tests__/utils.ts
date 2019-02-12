@@ -11,6 +11,45 @@ describe('getKeyIndex', () => {
   it('will return the index of the match found', () => {
     const isEqual = (o1: any, o2: any) => o1 === o2;
 
+    const getKeyIndex = createGetKeyIndex({ isEqual });
+
+    const allKeys = [['key']];
+    const keyToMatch = ['key'];
+
+    const result = getKeyIndex(allKeys, keyToMatch);
+
+    expect(result).toEqual(0);
+  });
+
+  it('will return -1 if the key length is different', () => {
+    const isEqual = (o1: any, o2: any) => o1 === o2;
+
+    const getKeyIndex = createGetKeyIndex({ isEqual });
+
+    const allKeys = [['key']];
+    const keyToMatch = ['some', 'other key'];
+
+    const result = getKeyIndex(allKeys, keyToMatch);
+
+    expect(result).toEqual(-1);
+  });
+
+  it('will return -1 if no match found', () => {
+    const isEqual = (o1: any, o2: any) => o1 === o2;
+
+    const getKeyIndex = createGetKeyIndex({ isEqual });
+
+    const allKeys = [['key']];
+    const keyToMatch = ['other key'];
+
+    const result = getKeyIndex(allKeys, keyToMatch);
+
+    expect(result).toEqual(-1);
+  });
+
+  it('will return the index of the match found with larger maxSize', () => {
+    const isEqual = (o1: any, o2: any) => o1 === o2;
+
     const getKeyIndex = createGetKeyIndex({ isEqual, maxSize: 2 });
 
     const allKeys = [['key'], ['other key']];
@@ -21,10 +60,10 @@ describe('getKeyIndex', () => {
     expect(result).toEqual(1);
   });
 
-  it('will return -1 of no match found', () => {
+  it('will return -1 if no match found and maxSize is larger', () => {
     const isEqual = (o1: any, o2: any) => o1 === o2;
 
-    const getKeyIndex = createGetKeyIndex({ isEqual });
+    const getKeyIndex = createGetKeyIndex({ isEqual, maxSize: 2 });
 
     const allKeys = [['key'], ['other key']];
     const keyToMatch = ['not present key'];
@@ -34,7 +73,7 @@ describe('getKeyIndex', () => {
     expect(result).toEqual(-1);
   });
 
-  it('will use the isMatchingKey method if passed', () => {
+  it('will use the isMatchingKey method is passed', () => {
     const isEqual = (o1: any, o2: any) => o1 === o2;
     const isMatchingKey = (o1: any, o2: any) => {
       const existingKey = o1[0];
@@ -67,6 +106,90 @@ describe('getKeyIndex', () => {
     const result = getKeyIndex(allKeys, keyToMatch);
 
     expect(result).toEqual(0);
+  });
+
+  it('will use the isMatchingKey method is passed and maxSize is greater than 1', () => {
+    const isEqual = (o1: any, o2: any) => o1 === o2;
+    const isMatchingKey = (o1: any, o2: any) => {
+      const existingKey = o1[0];
+      const key = o2[0];
+
+      return (
+        existingKey.hasOwnProperty('foo') &&
+        key.hasOwnProperty('foo') &&
+        (existingKey.bar === 'bar' || key.bar === 'baz')
+      );
+    };
+
+    const getKeyIndex = createGetKeyIndex({
+      isEqual,
+      isMatchingKey,
+      maxSize: 2,
+    });
+
+    const allKeys = [
+      [
+        {
+          bar: 'baz',
+          baz: 'quz',
+        },
+      ],
+      [
+        {
+          bar: 'bar',
+          foo: 'foo',
+        },
+      ],
+    ];
+    const keyToMatch = [
+      {
+        bar: 'baz',
+        foo: 'bar',
+      },
+    ];
+
+    const result = getKeyIndex(allKeys, keyToMatch);
+
+    expect(result).toEqual(1);
+  });
+
+  it('will return -1 if the isMatchingKey method is passed and no match is found', () => {
+    const isEqual = (o1: any, o2: any) => o1 === o2;
+    const isMatchingKey = (o1: any, o2: any) => {
+      const existingKey = o1[0];
+      const key = o2[0];
+
+      return (
+        existingKey.hasOwnProperty('foo') &&
+        key.hasOwnProperty('foo') &&
+        (existingKey.bar === 'bar' || key.bar === 'baz')
+      );
+    };
+
+    const getKeyIndex = createGetKeyIndex({
+      isEqual,
+      isMatchingKey,
+      maxSize: 2,
+    });
+
+    const allKeys = [
+      [
+        {
+          bar: 'baz',
+          baz: 'quz',
+        },
+      ],
+    ];
+    const keyToMatch = [
+      {
+        bar: 'baz',
+        foo: 'bar',
+      },
+    ];
+
+    const result = getKeyIndex(allKeys, keyToMatch);
+
+    expect(result).toEqual(-1);
   });
 });
 

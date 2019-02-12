@@ -1,13 +1,11 @@
-export function createGetKeyIndex({
-  isEqual,
-  isMatchingKey,
-  maxSize,
-}: MicroMemoize.Options) {
-  return function getKeyIndex(
-    allKeys: MicroMemoize.Keys,
-    keyToMatch: MicroMemoize.Key,
-  ) {
-    if (isMatchingKey) {
+export function createGetKeyIndex(options: MicroMemoize.Options) {
+  if (typeof options.isMatchingKey === 'function') {
+    const { isMatchingKey, maxSize } = options;
+
+    return function getKeyIndex(
+      allKeys: MicroMemoize.Keys,
+      keyToMatch: MicroMemoize.Key,
+    ) {
       if (isMatchingKey(allKeys[0], keyToMatch)) {
         return 0;
       }
@@ -15,53 +13,55 @@ export function createGetKeyIndex({
       if (maxSize > 1) {
         const keysLength = allKeys.length;
 
-        let index = 1;
-
-        while (index < keysLength) {
+        for (let index = 1; index < keysLength; index++) {
           if (isMatchingKey(allKeys[index], keyToMatch)) {
             return index;
           }
-
-          index++;
         }
       }
 
       return -1;
-    }
+    };
+  }
 
-    if (maxSize > 1) {
+  const { isEqual } = options;
+
+  if (options.maxSize > 1) {
+    return function getKeyIndex(
+      allKeys: MicroMemoize.Keys,
+      keyToMatch: MicroMemoize.Key,
+    ) {
       const keysLength = allKeys.length;
       const keyLength = keyToMatch.length;
 
-      let index = 0;
       let existingKey;
-      let argIndex;
 
-      while (index < keysLength) {
+      for (let index = 0; index < keysLength; index++) {
         existingKey = allKeys[index];
 
         if (existingKey.length === keyLength) {
-          argIndex = 0;
+          let argIndex = 0;
 
-          while (argIndex < keyLength) {
+          for (; argIndex < keyLength; argIndex++) {
             if (!isEqual(existingKey[argIndex], keyToMatch[argIndex])) {
               break;
             }
-
-            argIndex++;
           }
 
           if (argIndex === keyLength) {
             return index;
           }
         }
-
-        index++;
       }
 
       return -1;
-    }
+    };
+  }
 
+  return function getKeyIndex(
+    allKeys: MicroMemoize.Keys,
+    keyToMatch: MicroMemoize.Key,
+  ) {
     const existingKey = allKeys[0];
     const keyLength = existingKey.length;
 
@@ -69,14 +69,10 @@ export function createGetKeyIndex({
       return -1;
     }
 
-    let index = 0;
-
-    while (index < keyLength) {
+    for (let index = 0; index < keyLength; index++) {
       if (!isEqual(existingKey[index], keyToMatch[index])) {
         return -1;
       }
-
-      index++;
     }
 
     return 0;
