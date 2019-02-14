@@ -1,35 +1,43 @@
-import babel from 'rollup-plugin-babel';
-import {uglify} from 'rollup-plugin-uglify';
+import typescript from 'rollup-plugin-typescript';
+import { uglify } from 'rollup-plugin-uglify';
 
-export default [
-  {
-    input: 'src/index.js',
-    output: {
-      exports: 'named',
-      file: 'dist/micro-memoize.js',
-      format: 'umd',
-      name: 'memoize',
-      sourcemap: true,
-    },
-    plugins: [
-      babel({
-        exclude: 'node_modules/**',
-      }),
-    ],
+import pkg from './package.json';
+
+const UMD_CONFIG = {
+  input: 'src/index.ts',
+  output: {
+    exports: 'default',
+    file: pkg.browser,
+    format: 'umd',
+    name: pkg.name,
+    sourcemap: true,
   },
-  {
-    input: 'src/index.js',
-    output: {
-      exports: 'named',
-      file: 'dist/micro-memoize.min.js',
-      format: 'umd',
-      name: 'memoize',
-    },
-    plugins: [
-      babel({
-        exclude: 'node_modules/**',
-      }),
-      uglify(),
-    ],
-  },
-];
+  plugins: [
+    typescript({
+      typescript: require('typescript'),
+    }),
+  ],
+};
+
+const FORMATTED_CONFIG = Object.assign({}, UMD_CONFIG, {
+  output: [
+    Object.assign({}, UMD_CONFIG.output, {
+      file: pkg.main,
+      format: 'cjs',
+    }),
+    Object.assign({}, UMD_CONFIG.output, {
+      file: pkg.module,
+      format: 'es',
+    }),
+  ],
+});
+
+const MINIFIED_CONFIG = Object.assign({}, UMD_CONFIG, {
+  output: Object.assign({}, UMD_CONFIG.output, {
+    file: pkg.browser.replace('.js', '.min.js'),
+    sourcemap: false,
+  }),
+  plugins: UMD_CONFIG.plugins.concat([uglify()]),
+});
+
+export default [UMD_CONFIG, FORMATTED_CONFIG, MINIFIED_CONFIG];

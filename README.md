@@ -32,48 +32,39 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
 
 ## Summary
 
-As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1.1kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
+As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1.2kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
 
 ## Importing
 
 ESM in browsers:
 
 ```javascript
-import memoize from "micro-memoize";
+import memoize from 'micro-memoize';
 ```
 
 ESM in NodeJS:
 
 ```javascript
-import memoize from "micro-memoize/mjs";
+import memoize from 'micro-memoize/mjs';
 ```
 
 CommonJS:
 
 ```javascript
-const memoize = require("micro-memoize").default;
+const memoize = require('micro-memoize');
 ```
 
 ## Usage
 
 ```javascript
-// ES2015+
-import memoize from "micro-memoize";
-
-// CommonJS
-const memoize = require("micro-memoize").default;
-
-// old-school
-const memoize = window.memoize;
-
 const assembleToObject = (one, two) => {
   return { one, two };
 };
 
 const memoized = memoize(assembleToObject);
 
-console.log(memoized("one", "two")); // {one: 'one', two: 'two'}
-console.log(memoized("one", "two")); // pulled from cache, {one: 'one', two: 'two'}
+console.log(memoized('one', 'two')); // {one: 'one', two: 'two'}
+console.log(memoized('one', 'two')); // pulled from cache, {one: 'one', two: 'two'}
 ```
 
 ## Options
@@ -90,12 +81,12 @@ Common use-cases:
 - Limiting the arguments compared
 
 ```javascript
-import { deepEqual } from "fast-equals";
+import { deepEqual } from 'fast-equals';
 
 const deepObject = object => {
   return {
     foo: object.foo,
-    bar: object.bar
+    bar: object.bar,
   };
 };
 
@@ -104,29 +95,29 @@ const memoizedDeepObject = memoize(deepObject, { isEqual: deepEqual });
 console.log(
   memoizedDeepObject({
     foo: {
-      deep: "foo"
+      deep: 'foo',
     },
     bar: {
-      deep: "bar"
+      deep: 'bar',
     },
     baz: {
-      deep: "baz"
-    }
-  })
+      deep: 'baz',
+    },
+  }),
 ); // {foo: {deep: 'foo'}, bar: {deep: 'bar'}}
 
 console.log(
   memoizedDeepObject({
     foo: {
-      deep: "foo"
+      deep: 'foo',
     },
     bar: {
-      deep: "bar"
+      deep: 'bar',
     },
     baz: {
-      deep: "baz"
-    }
-  })
+      deep: 'baz',
+    },
+  }),
 ); // pulled from cache
 ```
 
@@ -145,45 +136,45 @@ Common use-cases:
 - Serialization of arguments
 
 ```javascript
-import { deepEqual } from "fast-equals";
+import { deepEqual } from 'fast-equals';
 
 const deepObject = object => {
   return {
     foo: object.foo,
-    bar: object.bar
+    bar: object.bar,
   };
 };
 
 const memoizedShape = memoize(deepObject, {
   isMatchingKey(object1, object2) {
     return (
-      object1.hasOwnProperty("foo") &&
-      object2.hasOwnProperty("foo") &&
+      object1.hasOwnProperty('foo') &&
+      object2.hasOwnProperty('foo') &&
       object1.bar === object2.bar
     );
-  }
+  },
 });
 
 console.log(
   memoizedShape({
-    foo: "foo",
-    bar: "bar",
-    baz: "baz"
-  })
+    foo: 'foo',
+    bar: 'bar',
+    baz: 'baz',
+  }),
 ); // {foo: {deep: 'foo'}, bar: {deep: 'bar'}}
 
 console.log(
   memoizedShape({
-    foo: "not foo",
-    bar: "bar",
-    baz: "baz"
-  })
+    foo: 'not foo',
+    bar: 'bar',
+    baz: 'baz',
+  }),
 ); // pulled from cache
 ```
 
 #### isPromise
 
-`boolean`, _defaults to `boolean`_
+`boolean`, _defaults to `false`_
 
 Identifies the value returned from the method as a `Promise`, which will result in one of two possible scenarios:
 
@@ -201,7 +192,7 @@ const fn = async (one, two) => {
 
 const memoized = memoize(fn, { isPromise: true });
 
-memoized("one", "two");
+memoized('one', 'two');
 
 console.log(memoized.cacheSnapshot.keys); // [['one', 'two']]
 console.log(memoized.cacheSnapshot.values); // [Promise]
@@ -227,22 +218,22 @@ const manyPossibleArgs = (one, two) => {
 
 const memoized = memoize(manyPossibleArgs, { maxSize: 3 });
 
-console.log(memoized("one", "two")); // ['one', 'two']
-console.log(memoized("two", "three")); // ['two', 'three']
-console.log(memoized("three", "four")); // ['three', 'four']
+console.log(memoized('one', 'two')); // ['one', 'two']
+console.log(memoized('two', 'three')); // ['two', 'three']
+console.log(memoized('three', 'four')); // ['three', 'four']
 
-console.log(memoized("one", "two")); // pulled from cache
-console.log(memoized("two", "three")); // pulled from cache
-console.log(memoized("three", "four")); // pulled from cache
+console.log(memoized('one', 'two')); // pulled from cache
+console.log(memoized('two', 'three')); // pulled from cache
+console.log(memoized('three', 'four')); // pulled from cache
 
-console.log(memoized("four", "five")); // ['four', 'five'], drops ['one', 'two'] from cache
+console.log(memoized('four', 'five')); // ['four', 'five'], drops ['one', 'two'] from cache
 ```
 
 **NOTE**: The default for `micro-memoize` differs from the default implementation of `moize`. `moize` will store an infinite number of results unless restricted, whereas `micro-memoize` will only store the most recent result. In this way, the default implementation of `micro-memoize` operates more like [`moize.simple`](https://github.com/planttheidea/moize#moizesimple).
 
 #### onCacheAdd
 
-`function(cache: Cache, options: Options): void`, _defaults to noop_
+`function(cache: Cache, options: Options): void`
 
 Callback method that executes whenever the cache is added to. This is mainly to allow for higher-order caching managers that use `micro-memoize` to perform superset functionality on the `cache` object.
 
@@ -253,29 +244,29 @@ const fn = (one, two) => {
 
 const memoized = memoize(fn, {
   onCacheAdd(cache, options) {
-    console.log("cache has been added to: ", cache);
-    console.log("memoized method has the following options applied: ", options);
-  }
+    console.log('cache has been added to: ', cache);
+    console.log('memoized method has the following options applied: ', options);
+  },
 });
 
-memoized("foo", "bar"); // cache has been added to
-memoized("foo", "bar");
-memoized("foo", "bar");
+memoized('foo', 'bar'); // cache has been added to
+memoized('foo', 'bar');
+memoized('foo', 'bar');
 
-memoized("bar", "foo"); // cache has been added to
-memoized("bar", "foo");
-memoized("bar", "foo");
+memoized('bar', 'foo'); // cache has been added to
+memoized('bar', 'foo');
+memoized('bar', 'foo');
 
-memoized("foo", "bar");
-memoized("foo", "bar");
-memoized("foo", "bar");
+memoized('foo', 'bar');
+memoized('foo', 'bar');
+memoized('foo', 'bar');
 ```
 
 **NOTE**: This method is not executed when the `cache` is manually manipulated, only when changed via calling the memoized method.
 
 #### onCacheChange
 
-`function(cache: Cache, options: Options): void`, _defaults to noop_
+`function(cache: Cache, options: Options): void`
 
 Callback method that executes whenever the cache is added to or the order is updated. This is mainly to allow for higher-order caching managers that use `micro-memoize` to perform superset functionality on the `cache` object.
 
@@ -286,29 +277,29 @@ const fn = (one, two) => {
 
 const memoized = memoize(fn, {
   onCacheChange(cache, options) {
-    console.log("cache has changed: ", cache);
-    console.log("memoized method has the following options applied: ", options);
-  }
+    console.log('cache has changed: ', cache);
+    console.log('memoized method has the following options applied: ', options);
+  },
 });
 
-memoized("foo", "bar"); // cache has changed
-memoized("foo", "bar");
-memoized("foo", "bar");
+memoized('foo', 'bar'); // cache has changed
+memoized('foo', 'bar');
+memoized('foo', 'bar');
 
-memoized("bar", "foo"); // cache has changed
-memoized("bar", "foo");
-memoized("bar", "foo");
+memoized('bar', 'foo'); // cache has changed
+memoized('bar', 'foo');
+memoized('bar', 'foo');
 
-memoized("foo", "bar"); // cache has changed
-memoized("foo", "bar");
-memoized("foo", "bar");
+memoized('foo', 'bar'); // cache has changed
+memoized('foo', 'bar');
+memoized('foo', 'bar');
 ```
 
 **NOTE**: This method is not executed when the `cache` is manually manipulated, only when changed via calling the memoized method. When the execution of other cache listeners (`onCacheAdd`, `onCacheHit`) is applicable, this method will execute after those methods.
 
 #### onCacheHit
 
-`function(cache: Cache, options: Options): void`, _defaults to noop_
+`function(cache: Cache, options: Options): void`
 
 Callback method that executes whenever the cache is hit, whether the order is updated or not. This is mainly to allow for higher-order caching managers that use `micro-memoize` to perform superset functionality on the `cache` object.
 
@@ -320,22 +311,22 @@ const fn = (one, two) => {
 const memoized = memoize(fn, {
   maxSize: 2,
   onCacheHit(cache, options) {
-    console.log("cache was hit: ", cache);
-    console.log("memoized method has the following options applied: ", options);
-  }
+    console.log('cache was hit: ', cache);
+    console.log('memoized method has the following options applied: ', options);
+  },
 });
 
-memoized("foo", "bar");
-memoized("foo", "bar"); // cache was hit
-memoized("foo", "bar"); // cache was hit
+memoized('foo', 'bar');
+memoized('foo', 'bar'); // cache was hit
+memoized('foo', 'bar'); // cache was hit
 
-memoized("bar", "foo");
-memoized("bar", "foo"); // cache was hit
-memoized("bar", "foo"); // cache was hit
+memoized('bar', 'foo');
+memoized('bar', 'foo'); // cache was hit
+memoized('bar', 'foo'); // cache was hit
 
-memoized("foo", "bar"); // cache was hit
-memoized("foo", "bar"); // cache was hit
-memoized("foo", "bar"); // cache was hit
+memoized('foo', 'bar'); // cache was hit
+memoized('foo', 'bar'); // cache was hit
+memoized('foo', 'bar'); // cache was hit
 ```
 
 **NOTE**: This method is not executed when the `cache` is manually manipulated, only when changed via calling the memoized method.
@@ -352,11 +343,11 @@ const ignoreFunctionArgs = (one, two) => {
 };
 
 const memoized = memoize(ignoreFunctionArgs, {
-  transformKey: JSON.stringify
+  transformKey: JSON.stringify,
 });
 
-console.log(memoized("one", () => {})); // ['one', () => {}]
-console.log(memoized("one", () => {})); // pulled from cache, ['one', () => {}]
+console.log(memoized('one', () => {})); // ['one', () => {}]
+console.log(memoized('one', () => {})); // pulled from cache, ['one', () => {}]
 ```
 
 If your transformed keys require something other than `SameValueZero` equality, you can combine `transformKey` with [`isEqual`](#isequal) for completely custom key creation and comparison.
@@ -372,13 +363,13 @@ const memoized = memoize(ignoreFunctionArgs, {
   },
   transformKey(args) {
     return {
-      args: JSON.stringify(args)
+      args: JSON.stringify(args),
     };
-  }
+  },
 });
 
-console.log(memoized("one", () => {})); // ['one', () => {}]
-console.log(memoized("one", () => {})); // pulled from cache, ['one', () => {}]
+console.log(memoized('one', () => {})); // ['one', () => {}]
+console.log(memoized('one', () => {})); // pulled from cache, ['one', () => {}]
 ```
 
 ## Additional properties
@@ -405,10 +396,10 @@ const method = (one, two) => {
 
 const memoized = memoize(method);
 
-memoized.cache.keys.push(["one", "two"]);
-memoized.cache.values.push("cached");
+memoized.cache.keys.push(['one', 'two']);
+memoized.cache.values.push('cached');
 
-console.log(memoized("one", "two")); // 'cached'
+console.log(memoized('one', 'two')); // 'cached'
 ```
 
 **HOTE**: `moize` offers a variety of convenience methods for this manual `cache` manipulation, and while `micro-memoize` allows all the same capabilities by exposing the `cache`, it does not provide any convenience methods.
@@ -442,63 +433,75 @@ Benchmarks was performed on an i7 8-core Arch Linux laptop with 16GB of memory u
 - Multiple primitives = `35, true`
 - Multiple objects = `{number: 35}, {isComplete: true}`
 
+**NOTE**: Not all libraries tested support multiple parameters out of the box, but support the ability to pass a custom `resolver`. Because these often need to resolve to a string value, [a common suggestion](https://github.com/lodash/lodash/issues/2115) is to just `JSON.stringify` the arguments, so that is what is used when needed.
+
 #### Single parameter (primitive only)
 
 This is usually what benchmarks target for ... its the least-likely use-case, but the easiest to optimize, often at the expense of more common use-cases.
 
-|                   | Operations / second | Relative margin of error |
-| ----------------- | ------------------- | ------------------------ |
-| fast-memoize      | 219,525,943         | 0.56%                    |
-| **micro-memoize** | **76,004,234**      | **1.12%**                |
-| lodash            | 26,920,988          | 0.65%                    |
-| underscore        | 24,126,335          | 0.73%                    |
-| memoizee          | 16,575,237          | 0.74%                    |
-| lru-memoize       | 8,016,237           | 1.58%                    |
-| Addy Osmani       | 6,476,533           | 0.96%                    |
-| memoizerific      | 5,511,233           | 0.78%                    |
-| ramda             | 1,107,319           | 0.68%                    |
+|                   | Operations / second |
+| ----------------- | ------------------- |
+| fast-memoize      | 47,878,927          |
+| **micro-memoize** | **40,373,458**      |
+| lru-memoize       | 39,989,466          |
+| Addy Osmani       | 27,782,914          |
+| lodash            | 26,352,951          |
+| ramda             | 22,475,634          |
+| underscore        | 22,030,431          |
+| mem               | 20,299,797          |
+| memoizee          | 16,985,364          |
+| memoizerific      | 5,823,373           |
 
 #### Single parameter (complex object)
 
 This is what most memoization libraries target as the primary use-case, as it removes the complexities of multiple arguments but allows for usage with one to many values.
 
-|                   | Operations / second | Relative margin of error |
-| ----------------- | ------------------- | ------------------------ |
-| **micro-memoize** | **60,533,096**      | **0.68%**                |
-| memoizee          | 11,601,186          | 0.82%                    |
-| lodash            | 8,017,634           | 0.77%                    |
-| underscore        | 7,910,175           | 0.76%                    |
-| lru-memoize       | 6,878,249           | 1.12%                    |
-| memoizerific      | 4.377,062           | 0.74%                    |
-| Addy Osmani       | 1,829,256           | 0.74%                    |
-| fast-memoize      | 1,468,272           | 0.67%                    |
-| ramda             | 213,118             | 0.84%                    |
+|                   | Operations / second |
+| ----------------- | ------------------- |
+| **micro-memoize** | **30,040,598**      |
+| lodash            | 29,298,955          |
+| lru-memoize       | 21,341,877          |
+| memoizee          | 11,149,801          |
+| memoizerific      | 5,542,238           |
+| ramda             | 2,112,667           |
+| underscore        | 2,089,144           |
+| Addy Osmani       | 1,973,732           |
+| mem               | 1,853,416           |
+| fast-memoize      | 1,527,852           |
 
 #### Multiple parameters (primitives only)
 
 This is a very common use-case for function calls, but can be more difficult to optimize because you need to account for multiple possibilities ... did the number of arguments change, are there default arguments, etc.
 
-|                   | Operations / second | Relative margin of error |
-| ----------------- | ------------------- | ------------------------ |
-| **micro-memoize** | **49,690,821**      | **1.26%**                |
-| memoizee          | 10,425,265          | 0.76%                    |
-| lru-memoize       | 6,165,918           | 0.76%                    |
-| memoizerific      | 4,587,050           | 0.72%                    |
-| Addy Osmani       | 3,409,941           | 0.67%                    |
-| fast-memoize      | 1,214,616           | 0.66%                    |
+|                   | Operations / second |
+| ----------------- | ------------------- |
+| **micro-memoize** | **27,606,297**      |
+| lru-memoize       | 17,917,076          |
+| memoizee          | 6,778,193           |
+| Addy Osmani       | 5,787,376           |
+| memoizerific      | 4,651,947           |
+| mem               | 2,402,371           |
+| ramda             | 1,548,197           |
+| underscore        | 1,522,849           |
+| lodash            | 1,349,424           |
+| fast-memoize      | 1,300,765           |
 
 #### Multiple parameters (complex objects)
 
 This is the most robust use-case, with the same complexities as multiple primitives but managing bulkier objects with additional edge scenarios (destructured with defaults, for example).
 
-|                   | Operations / second | Relative margin of error |
-| ----------------- | ------------------- | ------------------------ |
-| **micro-memoize** | **47,300,339**      | **1.20%**                |
-| memoizee          | 7,487,582           | 0.73%                    |
-| lru-memoize       | 6,287,893           | 1.15%                    |
-| memoizerific      | 3,537,690           | 0.75%                    |
-| Addy Osmani       | 936,273             | 0.70%                    |
-| fast-memoize      | 808,141             | 0.68%                    |
+|                   | Operations / second |
+| ----------------- | ------------------- |
+| **micro-memoize** | **25,845,573**      |
+| lru-memoize       | 17,060,727          |
+| memoizee          | 6,708,619           |
+| memoizerific      | 4,719,046           |
+| mem               | 1,045,712           |
+| ramda             | 962,299             |
+| underscore        | 952,825             |
+| Addy Osmani       | 941,157             |
+| fast-memoize      | 872,483             |
+| lodash            | 871,964             |
 
 ## Browser support
 
