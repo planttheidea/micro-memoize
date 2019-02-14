@@ -7,6 +7,7 @@
 
 #### BREAKING CHANGES
 
+- CommonJS `require`s no longer require `.default`
 - Types contract is much stricter
 - Utility methods are no longer deep-linkable
   - Not technically exposed in the API, but was relied upon by other libraries)
