@@ -82,7 +82,7 @@
     "benchmark": "npm run dist && NODE_ENV=production node ./benchmarks/index.js",
     "build": "NODE_ENV=production rollup -c",
     "build:mjs": "node ./es-to-mjs.js",
-    "clean": "rimraf dist",
+    "clean": "rimraf dist && rimraf mjs",
     "dev": "NODE_ENV=development webpack-dev-server --colors --progress --config=webpack/webpack.config.js",
     "dist": "npm run clean && npm run build && npm run build:mjs",
     "lint": "NODE_ENV=test tslint 'src/*.ts'",

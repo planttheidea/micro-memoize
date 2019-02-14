@@ -18,10 +18,12 @@ const DEFAULT_OPTIONS_KEYS: { [key: string]: boolean } = {
  * @param options the memoization options passed
  * @returns the method to get the key index
  */
-export function createGetKeyIndex(options: MicroMemoize.Options) {
-  if (typeof options.isMatchingKey === 'function') {
-    const { isMatchingKey, maxSize } = options;
-
+export function createGetKeyIndex({
+  isEqual,
+  isMatchingKey,
+  maxSize,
+}: MicroMemoize.Options) {
+  if (typeof isMatchingKey === 'function') {
     return function getKeyIndex(
       allKeys: MicroMemoize.Keys,
       keyToMatch: MicroMemoize.Key,
@@ -44,9 +46,7 @@ export function createGetKeyIndex(options: MicroMemoize.Options) {
     };
   }
 
-  const { isEqual } = options;
-
-  if (options.maxSize > 1) {
+  if (maxSize > 1) {
     return function getKeyIndex(
       allKeys: MicroMemoize.Keys,
       keyToMatch: MicroMemoize.Key,
