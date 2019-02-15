@@ -402,7 +402,7 @@ memoized.cache.values.push('cached');
 console.log(memoized('one', 'two')); // 'cached'
 ```
 
-**HOTE**: `moize` offers a variety of convenience methods for this manual `cache` manipulation, and while `micro-memoize` allows all the same capabilities by exposing the `cache`, it does not provide any convenience methods.
+**NOTE**: `moize` offers a variety of convenience methods for this manual `cache` manipulation, and while `micro-memoize` allows all the same capabilities by exposing the `cache`, it does not provide any convenience methods.
 
 #### cacheSnapshot
 
@@ -426,7 +426,7 @@ The [`options`](#options) passed when creating the memoized method.
 
 All values provided are the number of operations per second (ops/sec) calculated by the [Benchmark suite](https://benchmarkjs.com/). Note that `underscore`, `lodash`, and `ramda` do not support mulitple-parameter memoization (which is where `micro-memoize` really shines), so they are not included in those benchmarks.
 
-Benchmarks was performed on an i7 8-core Arch Linux laptop with 16GB of memory using NodeJS version `8.9.4`. The default configuration of each library was tested with a fibonacci calculation based on the following parameters:
+Benchmarks was performed on an i7 8-core Arch Linux laptop with 16GB of memory using NodeJS version `10.15.0`. The default configuration of each library was tested with a fibonacci calculation based on the following parameters:
 
 - Single primitive = `35`
 - Single object = `{number: 35}`
