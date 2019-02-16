@@ -745,7 +745,7 @@ describe('memoize', () => {
 
   test('if recursive calls to self will be respected at runtime', () => {
     const calc = memoize(
-      (object: { [key: string]: any }, metadata: { c: number }) =>
+      (object: { [key: string]: any }, metadata: { c: number }): PlainObject =>
         Object.keys(object).reduce((totals: { [key: string]: number }, key) => {
           if (Array.isArray(object[key])) {
             totals[key] = object[key].map(

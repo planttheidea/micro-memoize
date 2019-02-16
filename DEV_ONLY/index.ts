@@ -49,246 +49,246 @@ console.log(memoized.cache);
 
 console.groupEnd();
 
-// console.group('standard with larger cache size');
+console.group('standard with larger cache size');
 
-// const memoizedLargerCache = memoize(method, {
-//   onCacheChange(cache) {
-//     console.log([...cache.keys]);
-//   },
-//   maxSize: 3,
-// });
+const memoizedLargerCache = memoize(method, {
+  onCacheChange(cache) {
+    console.log([...cache.keys]);
+  },
+  maxSize: 3,
+});
 
-// memoizedLargerCache(foo, bar);
-// memoizedLargerCache(bar, foo);
-// memoizedLargerCache(bar, foo);
-// memoizedLargerCache(foo, baz);
-// memoizedLargerCache(foo, bar);
-// memoizedLargerCache(baz, quz);
-// memoizedLargerCache(foo, quz);
+memoizedLargerCache(foo, bar);
+memoizedLargerCache(bar, foo);
+memoizedLargerCache(bar, foo);
+memoizedLargerCache(foo, baz);
+memoizedLargerCache(foo, bar);
+memoizedLargerCache(baz, quz);
+memoizedLargerCache(foo, quz);
 
-// console.log(memoizedLargerCache.cacheSnapshot);
+console.log(memoizedLargerCache.cacheSnapshot);
 
-// console.groupEnd();
+console.groupEnd();
 
-// console.group('maxArgs');
+console.group('maxArgs');
 
-// // limit to testing the first args
-// const isEqualMaxArgs = (
-//   originalKey: MicroMemoize.Key,
-//   newKey: MicroMemoize.Key,
-// ): boolean => {
-//   return originalKey[0] === newKey[0];
-// };
+// limit to testing the first args
+const isEqualMaxArgs = (
+  originalKey: MicroMemoize.Key,
+  newKey: MicroMemoize.Key,
+): boolean => {
+  return originalKey[0] === newKey[0];
+};
 
-// const memoizedMax = memoize(method, { isEqual: isEqualMaxArgs });
+const memoizedMax = memoize(method, { isEqual: isEqualMaxArgs });
 
-// memoizedMax(foo, bar);
-// memoizedMax(foo, 'baz');
-// memoizedMax(foo, 'quz');
+memoizedMax(foo, bar);
+memoizedMax(foo, 'baz');
+memoizedMax(foo, 'quz');
 
-// console.groupEnd();
+console.groupEnd();
 
-// console.group('custom - deep equals');
+console.group('custom - deep equals');
 
-// const deepEqualMethod = ({ one, two }: { one: string; two: string }) => {
-//   console.log('custom equal method fired', one, two);
+const deepEqualMethod = ({ one, two }: { one: string; two: string }) => {
+  console.log('custom equal method fired', one, two);
 
-//   return [one, two];
-// };
+  return [one, two];
+};
 
-// const deepEqualMemoized = memoize(deepEqualMethod, {
-//   isEqual: deepEqual,
-// });
+const deepEqualMemoized = memoize(deepEqualMethod, {
+  isEqual: deepEqual,
+});
 
-// deepEqualMemoized({ one: 1, two: 2 });
-// deepEqualMemoized({ one: 2, two: 1 });
-// deepEqualMemoized({ one: 1, two: 2 });
-// deepEqualMemoized({ one: 1, two: 2 });
+deepEqualMemoized({ one: 1, two: 2 });
+deepEqualMemoized({ one: 2, two: 1 });
+deepEqualMemoized({ one: 1, two: 2 });
+deepEqualMemoized({ one: 1, two: 2 });
 
-// console.log(deepEqualMemoized.cacheSnapshot);
+console.log(deepEqualMemoized.cacheSnapshot);
 
-// console.groupEnd();
+console.groupEnd();
 
-// console.group('promise');
+console.group('promise');
 
-// const promiseMethod = (number: number, otherNumber: number) => {
-//   console.log('promise method fired', number);
+const promiseMethod = (number: number, otherNumber: number) => {
+  console.log('promise method fired', number);
 
-//   return new Promise((resolve: Function) => {
-//     resolve(number * otherNumber);
-//   });
-// };
+  return new Promise((resolve: Function) => {
+    resolve(number * otherNumber);
+  });
+};
 
-// const promiseMethodRejected = (number: number) => {
-//   console.log('promise rejection method fired', number);
+const promiseMethodRejected = (number: number) => {
+  console.log('promise rejection method fired', number);
 
-//   return new Bluebird((resolve, reject) => {
-//     setTimeout(() => {
-//       reject(new Error(foo));
-//     },         100);
-//   });
-// };
+  return new Bluebird((resolve, reject) => {
+    setTimeout(() => {
+      reject(new Error(foo));
+    },         100);
+  });
+};
 
-// const memoizedPromise = memoize(promiseMethod, { isPromise: true });
-// const memoizedPromiseRejected = memoize(promiseMethodRejected, {
-//   isPromise: true,
-// });
+const memoizedPromise = memoize(promiseMethod, { isPromise: true });
+const memoizedPromiseRejected = memoize(promiseMethodRejected, {
+  isPromise: true,
+});
 
-// memoizedPromiseRejected(3)
-//   .then((value: any) => {
-//     console.log(value);
-//   })
-//   .catch((error: Error) => {
-//     console.log(memoizedPromiseRejected.cacheSnapshot);
-//     console.error(error);
-//   });
+memoizedPromiseRejected(3)
+  .then((value: any) => {
+    console.log(value);
+  })
+  .catch((error: Error) => {
+    console.log(memoizedPromiseRejected.cacheSnapshot);
+    console.error(error);
+  });
 
-// memoizedPromiseRejected(3)
-//   .then((value: any) => {
-//     console.log(value);
-//   })
-//   .catch((error: Error) => {
-//     console.log(memoizedPromiseRejected.cacheSnapshot);
-//     console.error(error);
-//   });
+memoizedPromiseRejected(3)
+  .then((value: any) => {
+    console.log(value);
+  })
+  .catch((error: Error) => {
+    console.log(memoizedPromiseRejected.cacheSnapshot);
+    console.error(error);
+  });
 
-// memoizedPromiseRejected(3)
-//   .then((value: any) => {
-//     console.log(value);
-//   })
-//   .catch((error: Error) => {
-//     console.log(memoizedPromiseRejected.cacheSnapshot);
-//     console.error(error);
-//   });
+memoizedPromiseRejected(3)
+  .then((value: any) => {
+    console.log(value);
+  })
+  .catch((error: Error) => {
+    console.log(memoizedPromiseRejected.cacheSnapshot);
+    console.error(error);
+  });
 
-// // get result
-// memoizedPromise(2, 2).then((value: string) => {
-//   console.log(`computed value: ${value}`);
-// });
+// get result
+memoizedPromise(2, 2).then((value: string) => {
+  console.log(`computed value: ${value}`);
+});
 
-// // pull from cache
-// memoizedPromise(2, 2).then((value: string) => {
-//   console.log(`cached value: ${value}`);
-// });
+// pull from cache
+memoizedPromise(2, 2).then((value: string) => {
+  console.log(`cached value: ${value}`);
+});
 
-// console.log(memoizedPromise.cacheSnapshot.keys);
+console.log(memoizedPromise.cacheSnapshot.keys);
 
-// console.groupEnd();
+console.groupEnd();
 
-// console.group('with default parameters');
+console.group('with default parameters');
 
-// const withDefault = (foo: string, bar: string = 'default') => {
-//   console.log('with default fired', foo, bar);
+const withDefault = (foo: string, bar: string = 'default') => {
+  console.log('with default fired', foo, bar);
 
-//   return `${foo} ${bar}`;
-// };
-// const moizedWithDefault = memoize(withDefault, { maxSize: 5 });
+  return `${foo} ${bar}`;
+};
+const moizedWithDefault = memoize(withDefault, { maxSize: 5 });
 
-// console.log(moizedWithDefault(foo));
-// console.log(moizedWithDefault(foo, bar));
-// console.log(moizedWithDefault(foo));
+console.log(moizedWithDefault(foo));
+console.log(moizedWithDefault(foo, bar));
+console.log(moizedWithDefault(foo));
 
-// console.groupEnd();
+console.groupEnd();
 
-// console.group('transform key');
+console.group('transform key');
 
-// const noFns = (one: string, two: string, three: Function) => {
-//   console.log('transform key called');
+const noFns = (one: string, two: string, three: Function) => {
+  console.log('transform key called');
 
-//   return { one, two, three };
-// };
+  return { one, two, three };
+};
 
-// const memoizedNoFns = memoize(noFns, {
-//   isEqual(key1: MicroMemoize.Key, key2: MicroMemoize.Key) {
-//     return key1 === key2;
-//   },
-//   transformKey(args: MicroMemoize.RawKey) {
-//     return [JSON.stringify(args)];
-//   },
-// });
+const memoizedNoFns = memoize(noFns, {
+  isEqual(key1: MicroMemoize.Key, key2: MicroMemoize.Key) {
+    return key1 === key2;
+  },
+  transformKey(args: MicroMemoize.RawKey) {
+    return [JSON.stringify(args)];
+  },
+});
 
-// console.log(memoizedNoFns('one', 'two', function three() {}));
-// console.log(memoizedNoFns('one', 'two', function four() {}));
-// console.log(memoizedNoFns('one', 'two', function five() {}));
+console.log(memoizedNoFns('one', 'two', function three() {}));
+console.log(memoizedNoFns('one', 'two', function four() {}));
+console.log(memoizedNoFns('one', 'two', function five() {}));
 
-// console.log(memoizedNoFns.cache);
+console.log(memoizedNoFns.cache);
 
-// console.groupEnd();
+console.groupEnd();
 
-// console.group('matching whole key');
+console.group('matching whole key');
 
-// const matchingKeyMethod = function (object: {
-//   deeply: { nested: { number: number } };
-// }) {
-//   return object.deeply.nested.number;
-// };
+const matchingKeyMethod = function (object: {
+  deeply: { nested: { number: number } };
+}) {
+  return object.deeply.nested.number;
+};
 
-// const matchingKeyMemoized = memoize(matchingKeyMethod, {
-//   isMatchingKey: deepEqual,
-// });
+const matchingKeyMemoized = memoize(matchingKeyMethod, {
+  isMatchingKey: deepEqual,
+});
 
-// matchingKeyMemoized({ deeply: { nested: { number: 35 } } });
-// matchingKeyMemoized({ deeply: { nested: { number: 35 } } });
-// matchingKeyMemoized({ deeply: { nested: { number: 35 } } });
-// matchingKeyMemoized({ deeply: { nested: { number: 35 } } });
-// matchingKeyMemoized({ deeply: { nested: { number: 35 } } });
+matchingKeyMemoized({ deeply: { nested: { number: 35 } } });
+matchingKeyMemoized({ deeply: { nested: { number: 35 } } });
+matchingKeyMemoized({ deeply: { nested: { number: 35 } } });
+matchingKeyMemoized({ deeply: { nested: { number: 35 } } });
+matchingKeyMemoized({ deeply: { nested: { number: 35 } } });
 
-// console.log(matchingKeyMemoized.cache);
+console.log(matchingKeyMemoized.cache);
 
-// console.groupEnd();
+console.groupEnd();
 
-// const calc = memoize(
-//   (object: PlainObject, metadata: PlainObject) =>
-//     Object.keys(object).reduce((totals: PlainObject, key: string) => {
-//       if (Array.isArray(object[key])) {
-//         totals[key] = object[key].map((subObject: PlainObject) =>
-//           calc(subObject, metadata),
-//         );
-//       } else {
-//         totals[key] = object[key].a + object[key].b + metadata.c;
-//       }
+const calc = memoize(
+  (object: PlainObject, metadata: PlainObject): PlainObject =>
+    Object.keys(object).reduce((totals: PlainObject, key: string) => {
+      if (Array.isArray(object[key])) {
+        totals[key] = object[key].map((subObject: PlainObject) =>
+          calc(subObject, metadata),
+        );
+      } else {
+        totals[key] = object[key].a + object[key].b + metadata.c;
+      }
 
-//       return totals;
-//     },                         {}),
-//   {
-//     maxSize: 10,
-//   },
-// );
+      return totals;
+    },                         {}),
+  {
+    maxSize: 10,
+  },
+);
 
-// const data = {
-//   fifth: {
-//     a: 4,
-//     b: 5,
-//   },
-//   first: [
-//     {
-//       second: {
-//         a: 1,
-//         b: 2,
-//       },
-//     },
-//     {
-//       third: [
-//         {
-//           fourth: {
-//             a: 2,
-//             b: 3,
-//           },
-//         },
-//       ],
-//     },
-//   ],
-// };
-// const metadata = {
-//   c: 6,
-// };
+const data = {
+  fifth: {
+    a: 4,
+    b: 5,
+  },
+  first: [
+    {
+      second: {
+        a: 1,
+        b: 2,
+      },
+    },
+    {
+      third: [
+        {
+          fourth: {
+            a: 2,
+            b: 3,
+          },
+        },
+      ],
+    },
+  ],
+};
+const metadata = {
+  c: 6,
+};
 
-// const result1 = calc(data, metadata);
+const result1 = calc(data, metadata);
 
-// console.log(result1);
-// console.log(calc.cacheSnapshot);
+console.log(result1);
+console.log(calc.cacheSnapshot);
 
-// const result2 = calc(data, metadata);
+const result2 = calc(data, metadata);
 
-// console.log(result2);
-// console.log(calc.cacheSnapshot);
+console.log(result2);
+console.log(calc.cacheSnapshot);

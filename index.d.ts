@@ -30,6 +30,8 @@ declare namespace MicroMemoize {
   export type AsyncCacheUpdater = (cache: Cache, memoized: Memoized) => void;
 
   export type Options = {
+    [key: string]: any;
+    [index: number]: any;
     isEqual?: EqualityComparator;
     isMatchingKey?: MatchingKeyComparator;
     isPromise?: boolean;

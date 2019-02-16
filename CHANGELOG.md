@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 3.0.1
+
+- Fix types declaration for `Options` to allow custom keys / indices
+
 ## 3.0.0
 
 - Rewrite in TypeScript
