@@ -89,6 +89,7 @@
     "lint:fix": "npm run lint -- --fix",
     "prepublish": "if in-publish; then npm run prepublish:compile; fi",
     "prepublish:compile": "npm run lint && npm run test:coverage && npm run dist",
+    "release": "release-it",
     "start": "npm run dev",
     "test": "NODE_PATH=. jest",
     "test:coverage": "npm run test -- --coverage",
