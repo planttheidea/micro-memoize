@@ -230,7 +230,7 @@ const suite = createSuite({
         name,
         stats: {
           ...stats,
-          ops: stats.iterations / stats.elapsed,
+          ops: (stats.iterations / stats.elapsed) * 1000,
         },
       }))
       .sort((a, b) => {
