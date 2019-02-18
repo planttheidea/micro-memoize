@@ -7,9 +7,21 @@ declare namespace MicroMemoize {
 
   export type Values = any[];
 
+  export type Options = {
+    isEqual?: EqualityComparator;
+    isMatchingKey?: MatchingKeyComparator;
+    isPromise?: boolean;
+    maxSize?: number;
+    onCacheAdd?: CacheModifiedHandler;
+    onCacheChange?: CacheModifiedHandler;
+    onCacheHit?: CacheModifiedHandler;
+    transformKey?: KeyTransformer;
+  };
+
   export type Cache = {
     keys: Keys;
-    size: number;
+    getKeyIndex: (key: RawKey) => number;
+    options: Options;
     values: Values;
   };
 
@@ -28,19 +40,6 @@ declare namespace MicroMemoize {
   export type KeyIndexGetter = (allKeys: Keys, keyToMatch: RawKey) => number;
 
   export type AsyncCacheUpdater = (cache: Cache, memoized: Memoized) => void;
-
-  export type Options = {
-    [key: string]: any;
-    [index: number]: any;
-    isEqual?: EqualityComparator;
-    isMatchingKey?: MatchingKeyComparator;
-    isPromise?: boolean;
-    maxSize?: number;
-    onCacheAdd?: CacheModifiedHandler;
-    onCacheChange?: CacheModifiedHandler;
-    onCacheHit?: CacheModifiedHandler;
-    transformKey?: KeyTransformer;
-  };
 
   export interface Memoized extends Function {
     [key: string]: any;
