@@ -1,15 +1,13 @@
+// cache
+import Cache from './Cache';
+
 // utils
 import {
-  createGetKeyIndex,
-  createUpdateAsyncCache,
+  copyArray,
   getCustomOptions,
   isSameValueZero,
   mergeOptions,
-  orderByLru,
 } from './utils';
-
-const { slice } = Array.prototype;
-const { defineProperties } = Object;
 
 function createMemoizedFunction<T extends Function>(
   fn: T | MicroMemoize.Memoized,
@@ -42,81 +40,73 @@ function createMemoizedFunction<T extends Function>(
     transformKey,
   });
 
-  const getKeyIndex = createGetKeyIndex(normalizedOptions);
-  const updateAsyncCache = createUpdateAsyncCache(normalizedOptions);
-
-  const keys: MicroMemoize.Keys = [];
-  const values: MicroMemoize.Values = [];
-
-  const cache: MicroMemoize.Cache = {
-    keys,
-    get size() {
-      return cache.keys.length;
-    },
-    values,
-  };
+  const cache = new Cache(normalizedOptions);
 
   const canTransformKey = typeof transformKey === 'function';
-
-  const shouldCloneArguments = !!(transformKey || isMatchingKey);
-
-  const shouldUpdateOnAdd = typeof onCacheAdd === 'function';
-  const shouldUpdateOnChange = typeof onCacheChange === 'function';
-  const shouldUpdateOnHit = typeof onCacheHit === 'function';
+  const shouldCloneArguments = canTransformKey || !!isMatchingKey;
 
   function memoized(): any {
     const normalizedArgs = shouldCloneArguments
-      ? slice.call(arguments, 0)
+      ? copyArray(arguments)
       : arguments;
     const key = canTransformKey ? transformKey(normalizedArgs) : normalizedArgs;
-    const keyIndex = keys.length ? getKeyIndex(keys, key) : -1;
+    const keyIndex = cache.size ? cache.getKeyIndex(key) : -1;
 
     if (keyIndex !== -1) {
-      shouldUpdateOnHit && onCacheHit(cache, normalizedOptions, memoized);
+      onCacheHit && onCacheHit(cache, normalizedOptions, memoized);
 
       if (keyIndex) {
-        orderByLru(cache, keys[keyIndex], values[keyIndex], keyIndex, maxSize);
+        cache.orderByLru(
+          cache.keys[keyIndex],
+          cache.values[keyIndex],
+          keyIndex,
+        );
 
-        shouldUpdateOnChange &&
-          onCacheChange(cache, normalizedOptions, memoized);
+        onCacheChange && onCacheChange(cache, normalizedOptions, memoized);
       }
     } else {
       const newValue = fn.apply(this, arguments);
-      const newKey = shouldCloneArguments ? key : slice.call(arguments, 0);
+      const newKey = shouldCloneArguments ? key : copyArray(normalizedArgs);
 
-      orderByLru(cache, newKey, newValue, keys.length, maxSize);
+      cache.orderByLru(newKey as MicroMemoize.Key, newValue, cache.size);
 
-      isPromise && updateAsyncCache(cache, memoized);
+      isPromise && cache.updateAsync(memoized);
 
-      shouldUpdateOnAdd && onCacheAdd(cache, normalizedOptions, memoized);
-      shouldUpdateOnChange && onCacheChange(cache, normalizedOptions, memoized);
+      onCacheAdd && onCacheAdd(cache, normalizedOptions, memoized);
+      onCacheChange && onCacheChange(cache, normalizedOptions, memoized);
     }
 
-    return values[0];
+    return cache.values[0];
   }
 
-  defineProperties(memoized, {
+  Object.defineProperties(memoized, {
     cache: {
       configurable: true,
+      enumerable: false,
       value: cache,
+      writable: true,
     },
     cacheSnapshot: {
       configurable: true,
       get() {
         return {
-          keys: slice.call(cache.keys, 0),
+          keys: copyArray(cache.keys),
           size: cache.size,
-          values: slice.call(cache.values, 0),
+          values: copyArray(cache.values),
         };
       },
     },
     isMemoized: {
       configurable: true,
+      enumerable: false,
       value: true,
+      writable: true,
     },
     options: {
       configurable: true,
+      enumerable: false,
       value: normalizedOptions,
+      writable: true,
     },
   });
 

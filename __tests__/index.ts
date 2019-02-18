@@ -2,7 +2,27 @@
 import { deepEqual } from 'fast-equals';
 
 import memoize from '../src';
+import Cache from '../src/Cache';
 import { isSameValueZero } from '../src/utils';
+
+const DEFAULT_OPTIONS = {
+  isEqual: isSameValueZero,
+  isPromise: false,
+  maxSize: 1,
+};
+
+function getExpectedCache(
+  keys: (any[])[],
+  values: any[],
+  options: MicroMemoize.Options,
+) {
+  const cache = new Cache(options);
+
+  cache.keys = keys;
+  cache.values = values;
+
+  return cache;
+}
 
 describe('memoize', () => {
   it('will return the function if already memoized', () => {
@@ -29,11 +49,7 @@ describe('memoize', () => {
 
     const memoized = memoize(fn);
 
-    expect(memoized.cache).toEqual({
-      keys: [],
-      size: 0,
-      values: [],
-    });
+    expect(memoized.cache).toEqual(new Cache(DEFAULT_OPTIONS));
     expect(memoized.cacheSnapshot).toEqual({
       keys: [],
       size: 0,
@@ -61,16 +77,17 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(1);
 
-    expect(memoized.cache).toEqual({
-      keys: [['one', 'two']],
-      size: 1,
-      values: [
-        {
-          one: 'one',
-          two: 'two',
-        },
-      ],
-    });
+    const expectedCache = new Cache(memoized.options);
+
+    expectedCache.keys = [['one', 'two']];
+    expectedCache.values = [
+      {
+        one: 'one',
+        two: 'two',
+      },
+    ];
+
+    expect(memoized.cache).toEqual(expectedCache);
   });
 
   it('will return the memoized function that can have multiple cached key => value pairs', () => {
@@ -88,11 +105,7 @@ describe('memoize', () => {
 
     const memoized = memoize(fn, { maxSize });
 
-    expect(memoized.cache).toEqual({
-      keys: [],
-      size: 0,
-      values: [],
-    });
+    expect(memoized.cache).toEqual(new Cache({ ...DEFAULT_OPTIONS, maxSize }));
 
     expect(memoized.cacheSnapshot).toEqual({
       keys: [],
@@ -131,10 +144,9 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(4);
 
-    expect(memoized.cache).toEqual({
-      keys: [['three', 'four'], ['two', 'three'], ['four', 'five']],
-      size: 3,
-      values: [
+    const expectedCache = getExpectedCache(
+      [['three', 'four'], ['two', 'three'], ['four', 'five']],
+      [
         {
           one: 'three',
           two: 'four',
@@ -148,7 +160,10 @@ describe('memoize', () => {
           two: 'five',
         },
       ],
-    });
+      memoized.options,
+    );
+
+    expect(memoized.cache).toEqual(expectedCache);
   });
 
   it('will return the memoized function that will use the custom isEqual method', () => {
@@ -189,18 +204,18 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(1);
 
-    expect(memoized.cache).toEqual({
-      keys: [
-        [{ deep: { value: 'value' } }, { other: { deep: { value: 'value' } } }],
-      ],
-      size: 1,
-      values: [
+    const expectedCache = getExpectedCache(
+      [[{ deep: { value: 'value' } }, { other: { deep: { value: 'value' } } }]],
+      [
         {
           one: { deep: { value: 'value' } },
           two: { other: { deep: { value: 'value' } } },
         },
       ],
-    });
+      memoized.options,
+    );
+
+    expect(memoized.cache).toEqual(expectedCache);
   });
 
   it('will return the memoized function that will use the transformKey method', () => {
@@ -243,16 +258,18 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(1);
 
-    expect(memoized.cache).toEqual({
-      keys: [['[{"one":"one"},null]']],
-      size: 1,
-      values: [
+    const expectedCache = getExpectedCache(
+      [['[{"one":"one"},null]']],
+      [
         {
           one: { one: 'one' },
           two: fnArg1,
         },
       ],
-    });
+      memoized.options,
+    );
+
+    expect(memoized.cache).toEqual(expectedCache);
   });
 
   it('will return the memoized function that will use the transformKey method with a custom isEqual', () => {
@@ -304,22 +321,24 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(1);
 
-    expect(memoized.cache).toEqual({
-      keys: [
+    const expectedCache = getExpectedCache(
+      [
         [
           {
             args: '[{"one":"one"},null]',
           },
         ],
       ],
-      size: 1,
-      values: [
+      [
         {
           one: { one: 'one' },
           two: fnArg1,
         },
       ],
-    });
+      memoized.options,
+    );
+
+    expect(memoized.cache).toEqual(expectedCache);
   });
 
   it('will return a memoized method that will auto-remove the key from cache if isPromise is true and the promise is rejected', async () => {
@@ -406,18 +425,20 @@ describe('memoize', () => {
 
     memoized('foo', 'bar');
 
+    let expectedCache = getExpectedCache(
+      [['foo', 'bar']],
+      [
+        {
+          one: 'foo',
+          two: 'bar',
+        },
+      ],
+      memoized.options,
+    );
+
     expect(onCacheChange).toHaveBeenCalledTimes(1);
     expect(onCacheChange).toHaveBeenCalledWith(
-      {
-        keys: [['foo', 'bar']],
-        size: 1,
-        values: [
-          {
-            one: 'foo',
-            two: 'bar',
-          },
-        ],
-      },
+      expectedCache,
       {
         maxSize,
         onCacheChange,
@@ -433,22 +454,24 @@ describe('memoize', () => {
 
     memoized('bar', 'foo');
 
+    expectedCache = getExpectedCache(
+      [['bar', 'foo'], ['foo', 'bar']],
+      [
+        {
+          one: 'bar',
+          two: 'foo',
+        },
+        {
+          one: 'foo',
+          two: 'bar',
+        },
+      ],
+      memoized.options,
+    );
+
     expect(onCacheChange).toHaveBeenCalledTimes(1);
     expect(onCacheChange).toHaveBeenCalledWith(
-      {
-        keys: [['bar', 'foo'], ['foo', 'bar']],
-        size: 2,
-        values: [
-          {
-            one: 'bar',
-            two: 'foo',
-          },
-          {
-            one: 'foo',
-            two: 'bar',
-          },
-        ],
-      },
+      expectedCache,
       {
         maxSize,
         onCacheChange,
@@ -470,22 +493,24 @@ describe('memoize', () => {
 
     memoized('foo', 'bar');
 
+    expectedCache = getExpectedCache(
+      [['foo', 'bar'], ['bar', 'foo']],
+      [
+        {
+          one: 'foo',
+          two: 'bar',
+        },
+        {
+          one: 'bar',
+          two: 'foo',
+        },
+      ],
+      memoized.options,
+    );
+
     expect(onCacheChange).toHaveBeenCalledTimes(1);
     expect(onCacheChange).toHaveBeenCalledWith(
-      {
-        keys: [['foo', 'bar'], ['bar', 'foo']],
-        size: 2,
-        values: [
-          {
-            one: 'foo',
-            two: 'bar',
-          },
-          {
-            one: 'bar',
-            two: 'foo',
-          },
-        ],
-      },
+      expectedCache,
       {
         maxSize,
         onCacheChange,
@@ -545,22 +570,57 @@ describe('memoize', () => {
 
     memoized('bar', 'foo');
 
+    let expectedCache = getExpectedCache(
+      [['bar', 'foo'], ['foo', 'bar']],
+      [
+        {
+          one: 'bar',
+          two: 'foo',
+        },
+        {
+          one: 'foo',
+          two: 'bar',
+        },
+      ],
+      memoized.options,
+    );
+
     expect(onCacheHit).toHaveBeenCalledTimes(1);
     expect(onCacheHit).toHaveBeenCalledWith(
+      expectedCache,
       {
-        keys: [['bar', 'foo'], ['foo', 'bar']],
-        size: 2,
-        values: [
-          {
-            one: 'bar',
-            two: 'foo',
-          },
-          {
-            one: 'foo',
-            two: 'bar',
-          },
-        ],
+        maxSize,
+        onCacheHit,
+        isEqual: isSameValueZero,
+        isMatchingKey: undefined,
+        isPromise: false,
+        transformKey: undefined,
       },
+      memoized,
+    );
+
+    onCacheHit.mockReset();
+
+    memoized('foo', 'bar');
+
+    expectedCache = getExpectedCache(
+      [['foo', 'bar'], ['bar', 'foo']],
+      [
+        {
+          one: 'foo',
+          two: 'bar',
+        },
+        {
+          one: 'bar',
+          two: 'foo',
+        },
+      ],
+      memoized.options,
+    );
+
+    expect(onCacheHit).toHaveBeenCalledTimes(1);
+    expect(onCacheHit).toHaveBeenCalledWith(
+      expectedCache,
       {
         maxSize,
         onCacheHit,
@@ -578,51 +638,7 @@ describe('memoize', () => {
 
     expect(onCacheHit).toHaveBeenCalledTimes(1);
     expect(onCacheHit).toHaveBeenCalledWith(
-      {
-        keys: [['foo', 'bar'], ['bar', 'foo']],
-        size: 2,
-        values: [
-          {
-            one: 'foo',
-            two: 'bar',
-          },
-          {
-            one: 'bar',
-            two: 'foo',
-          },
-        ],
-      },
-      {
-        maxSize,
-        onCacheHit,
-        isEqual: isSameValueZero,
-        isMatchingKey: undefined,
-        isPromise: false,
-        transformKey: undefined,
-      },
-      memoized,
-    );
-
-    onCacheHit.mockReset();
-
-    memoized('foo', 'bar');
-
-    expect(onCacheHit).toHaveBeenCalledTimes(1);
-    expect(onCacheHit).toHaveBeenCalledWith(
-      {
-        keys: [['foo', 'bar'], ['bar', 'foo']],
-        size: 2,
-        values: [
-          {
-            one: 'foo',
-            two: 'bar',
-          },
-          {
-            one: 'bar',
-            two: 'foo',
-          },
-        ],
-      },
+      expectedCache,
       {
         maxSize,
         onCacheHit,
@@ -672,18 +688,20 @@ describe('memoize', () => {
 
     memoized('foo', 'bar');
 
+    let expectedCache = getExpectedCache(
+      [['foo', 'bar']],
+      [
+        {
+          one: 'foo',
+          two: 'bar',
+        },
+      ],
+      memoized.options,
+    );
+
     expect(onCacheAdd).toHaveBeenCalledTimes(1);
     expect(onCacheAdd).toHaveBeenCalledWith(
-      {
-        keys: [['foo', 'bar']],
-        size: 1,
-        values: [
-          {
-            one: 'foo',
-            two: 'bar',
-          },
-        ],
-      },
+      expectedCache,
       {
         maxSize,
         onCacheAdd,
@@ -699,22 +717,24 @@ describe('memoize', () => {
 
     memoized('bar', 'foo');
 
+    expectedCache = getExpectedCache(
+      [['bar', 'foo'], ['foo', 'bar']],
+      [
+        {
+          one: 'bar',
+          two: 'foo',
+        },
+        {
+          one: 'foo',
+          two: 'bar',
+        },
+      ],
+      memoized.options,
+    );
+
     expect(onCacheAdd).toHaveBeenCalledTimes(1);
     expect(onCacheAdd).toHaveBeenCalledWith(
-      {
-        keys: [['bar', 'foo'], ['foo', 'bar']],
-        size: 2,
-        values: [
-          {
-            one: 'bar',
-            two: 'foo',
-          },
-          {
-            one: 'foo',
-            two: 'bar',
-          },
-        ],
-      },
+      expectedCache,
       {
         maxSize,
         onCacheAdd,

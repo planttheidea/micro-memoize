@@ -1,7 +1,4 @@
 const _ = require('lodash');
-// const fs = require("fs");
-const React = require('react');
-
 const { createSuite } = require('benchee');
 const Table = require('cli-table2');
 
@@ -230,7 +227,7 @@ const suite = createSuite({
         name,
         stats: {
           ...stats,
-          ops: (stats.iterations / stats.elapsed) * 1000,
+          ops: ~~((stats.iterations / stats.elapsed) * 1000),
         },
       }))
       .sort((a, b) => {

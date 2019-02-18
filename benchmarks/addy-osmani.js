@@ -7,20 +7,23 @@
  * Released under an MIT license.
  */
 module.exports = function memoize(fn) {
-  return function(...args) {
-    let index = args.length,
-        hash = '',
-        currentArg = null;
+  fn.cache || (fn.cache = {});
 
-    currentArg = null;
+  return function() {
+    let index = arguments.length;
+    let hash = '';
+    let currentArg = null;
 
     while (index--) {
-      currentArg = args[index];
-      hash += currentArg === Object(currentArg) ? JSON.stringify(currentArg) : currentArg;
-
-      fn.memoize || (fn.memoize = {});
+      currentArg = arguments[index];
+      hash +=
+        currentArg === Object(currentArg)
+          ? JSON.stringify(currentArg)
+          : currentArg;
     }
 
-    return hash in fn.memoize ? fn.memoize[hash] : (fn.memoize[hash] = fn.apply(this, args));
+    return hash in fn.cache
+      ? fn.cache[hash]
+      : (fn.cache[hash] = fn.apply(this, arguments));
   };
 };
