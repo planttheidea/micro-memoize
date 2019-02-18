@@ -8,6 +8,9 @@ declare namespace MicroMemoize {
   export type Values = any[];
 
   export type Options = {
+    [key: string]: any;
+    [index: number]: any;
+
     isEqual?: EqualityComparator;
     isMatchingKey?: MatchingKeyComparator;
     isPromise?: boolean;
@@ -43,6 +46,8 @@ declare namespace MicroMemoize {
 
   export interface Memoized extends Function {
     [key: string]: any;
+    [index: number]: any;
+
     cache?: Cache;
     cacheSnapshot?: Cache;
     isMemoized?: boolean;
