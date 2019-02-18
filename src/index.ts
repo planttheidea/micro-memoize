@@ -70,7 +70,7 @@ function createMemoizedFunction<T extends Function>(
 
       cache.orderByLru(newKey as MicroMemoize.Key, newValue, cache.size);
 
-      isPromise && cache.updateAsync(memoized);
+      isPromise && cache._updateAsync(memoized);
 
       onCacheAdd && onCacheAdd(cache, normalizedOptions, memoized);
       onCacheChange && onCacheChange(cache, normalizedOptions, memoized);

@@ -94,6 +94,43 @@ class Cache implements MicroMemoize.Cache {
 
   /**
    * @instance
+   * @function updateAsync
+   *
+   * @description
+   * update the promise method to auto-remove from cache if rejected, and
+   * if resolved then fire cache hit / changed
+   *
+   * @param memoized the memoized function
+   */
+  _updateAsync(memoized: MicroMemoize.Memoized) {
+    const key: any = this.keys[0];
+
+    this.values[0] = this.values[0]
+      .then((value: any) => {
+        if (typeof this.options.onCacheHit === 'function') {
+          this.options.onCacheHit(this, this.options, memoized);
+        }
+
+        if (typeof this.options.onCacheChange === 'function') {
+          this.options.onCacheChange(this, this.options, memoized);
+        }
+
+        return value;
+      })
+      .catch((error: Error) => {
+        const keyIndex = this.getKeyIndex(key);
+
+        if (keyIndex !== -1) {
+          this.keys.splice(keyIndex, 1);
+          this.values.splice(keyIndex, 1);
+        }
+
+        throw error;
+      });
+  }
+
+  /**
+   * @instance
    * @function orderByLru
    *
    * @description
@@ -121,43 +158,6 @@ class Cache implements MicroMemoize.Cache {
       keys.length = maxSize;
       values.length = maxSize;
     }
-  }
-
-  /**
-   * @instance
-   * @function updateAsync
-   *
-   * @description
-   * update the promise method to auto-remove from cache if rejected, and
-   * if resolved then fire cache hit / changed
-   *
-   * @param memoized the memoized function
-   */
-  updateAsync(memoized: MicroMemoize.Memoized) {
-    const key: any = this.keys[0];
-
-    this.values[0] = this.values[0]
-      .then((value: any) => {
-        if (typeof this.options.onCacheHit === 'function') {
-          this.options.onCacheHit(this, this.options, memoized);
-        }
-
-        if (typeof this.options.onCacheChange === 'function') {
-          this.options.onCacheChange(this, this.options, memoized);
-        }
-
-        return value;
-      })
-      .catch((error: Error) => {
-        const keyIndex = this.getKeyIndex(key);
-
-        if (keyIndex !== -1) {
-          this.keys.splice(keyIndex, 1);
-          this.values.splice(keyIndex, 1);
-        }
-
-        throw error;
-      });
   }
 }
 

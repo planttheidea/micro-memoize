@@ -56,6 +56,166 @@ describe('constructor', () => {
   });
 });
 
+describe('_updateAsync', () => {
+  it('will fire cache callbacks if resolved', async () => {
+    const timeout = 200;
+
+    const fn = async () => {
+      await new Promise((resolve: Function) => {
+        setTimeout(resolve, timeout);
+      });
+
+      return 'resolved';
+    };
+    const key = ['foo'];
+    const memoized = () => {};
+
+    const value = fn();
+
+    const cache = new Cache({
+      ...DEFAULT_OPTIONS,
+      isPromise: true,
+      onCacheChange: jest.fn(),
+      onCacheHit: jest.fn(),
+    });
+
+    cache.keys = [key];
+    cache.values = [value];
+
+    cache._updateAsync(memoized);
+
+    // this is just to prevent the unhandled rejection noise
+    cache.values[0].catch(() => {});
+
+    expect(cache.keys.length).toEqual(1);
+    expect(cache.values.length).toEqual(1);
+    expect(cache.values[0]).toEqual(value);
+
+    await new Promise((resolve: Function) => {
+      setTimeout(resolve, timeout + 50);
+    });
+
+    expect(cache.keys.length).toEqual(1);
+    expect(cache.values.length).toEqual(1);
+    expect(cache.values[0]).toEqual(value);
+
+    expect(cache.options.onCacheHit).toHaveBeenCalledTimes(1);
+    expect(cache.options.onCacheHit).toHaveBeenCalledWith(
+      cache,
+      cache.options,
+      memoized,
+    );
+
+    expect(cache.options.onCacheChange).toHaveBeenCalledTimes(1);
+    expect(cache.options.onCacheChange).toHaveBeenCalledWith(
+      cache,
+      cache.options,
+      memoized,
+    );
+  });
+
+  it('will remove the key from cache when the promise is rejected', async () => {
+    const timeout = 200;
+
+    const fn = async () => {
+      await new Promise((resolve: Function, reject: Function) => {
+        setTimeout(() => reject(new Error('boom')), timeout);
+      });
+    };
+    const key = ['foo'];
+    const value = fn();
+
+    const memoized = () => {};
+
+    const cache = new Cache({
+      ...DEFAULT_OPTIONS,
+      isPromise: true,
+      onCacheChange: jest.fn(),
+      onCacheHit: jest.fn(),
+    });
+
+    cache.keys = [key];
+    cache.values = [value];
+
+    cache._updateAsync(memoized);
+
+    const catcher = jest.fn();
+
+    cache.values[0].catch(catcher);
+
+    expect(cache.keys.length).toEqual(1);
+    expect(cache.values.length).toEqual(1);
+    expect(cache.values[0]).toEqual(value);
+
+    await new Promise((resolve: Function) => {
+      setTimeout(resolve, timeout + 50);
+    });
+
+    expect(catcher).toHaveBeenCalledTimes(1);
+
+    const expectedCache = new Cache({
+      ...DEFAULT_OPTIONS,
+      isPromise: true,
+      onCacheChange: cache.options.onCacheChange,
+      onCacheHit: cache.options.onCacheHit,
+    });
+
+    expect(cache).toEqual(expectedCache);
+
+    expect(cache.options.onCacheHit).toHaveBeenCalledTimes(0);
+    expect(cache.options.onCacheChange).toHaveBeenCalledTimes(0);
+  });
+
+  it('will not remove the key from cache when the promise is rejected but the key no longer exists', async () => {
+    const timeout = 200;
+
+    const fn = async () => {
+      await new Promise((resolve: Function, reject: Function) => {
+        setTimeout(() => reject(new Error('boom')), timeout);
+      });
+    };
+    const key = ['foo'];
+    const value = fn();
+
+    const memoized = () => {};
+
+    const cache = new Cache({
+      ...DEFAULT_OPTIONS,
+      isPromise: true,
+      onCacheChange: jest.fn(),
+      onCacheHit: jest.fn(),
+    });
+
+    cache.keys = [key];
+    cache.values = [value];
+
+    cache._updateAsync(memoized);
+
+    const newValue = cache.values[0];
+
+    const catcher = jest.fn();
+
+    newValue.catch(catcher);
+
+    expect(cache.keys.length).toEqual(1);
+    expect(cache.values.length).toEqual(1);
+    expect(cache.values[0]).toEqual(value);
+
+    cache.keys = [['bar']];
+    // @ts-ignore
+    cache.values = [Promise.resolve('baz')];
+
+    await new Promise((resolve: Function) => {
+      setTimeout(resolve, timeout + 50);
+    });
+
+    expect(catcher).toHaveBeenCalledTimes(1);
+
+    expect(cache.options.onCacheHit).toHaveBeenCalledTimes(0);
+    expect(cache.options.onCacheChange).toHaveBeenCalledTimes(0);
+  });
+});
+
 describe('getKeyIndex', () => {
   it('will return the index of the match found when maxSize is 1', () => {
     const cache = new Cache(DEFAULT_OPTIONS);
@@ -344,165 +504,5 @@ describe('orderByLru', () => {
       keys: [key, ['first'], ['second'], ['third']],
       values: [value, 'first', 'second', 'third'],
     });
-  });
-});
-
-describe('updateAsync', () => {
-  it('will fire cache callbacks if resolved', async () => {
-    const timeout = 200;
-
-    const fn = async () => {
-      await new Promise((resolve: Function) => {
-        setTimeout(resolve, timeout);
-      });
-
-      return 'resolved';
-    };
-    const key = ['foo'];
-    const memoized = () => {};
-
-    const value = fn();
-
-    const cache = new Cache({
-      ...DEFAULT_OPTIONS,
-      isPromise: true,
-      onCacheChange: jest.fn(),
-      onCacheHit: jest.fn(),
-    });
-
-    cache.keys = [key];
-    cache.values = [value];
-
-    cache.updateAsync(memoized);
-
-    // this is just to prevent the unhandled rejection noise
-    cache.values[0].catch(() => {});
-
-    expect(cache.keys.length).toEqual(1);
-    expect(cache.values.length).toEqual(1);
-    expect(cache.values[0]).toEqual(value);
-
-    await new Promise((resolve: Function) => {
-      setTimeout(resolve, timeout + 50);
-    });
-
-    expect(cache.keys.length).toEqual(1);
-    expect(cache.values.length).toEqual(1);
-    expect(cache.values[0]).toEqual(value);
-
-    expect(cache.options.onCacheHit).toHaveBeenCalledTimes(1);
-    expect(cache.options.onCacheHit).toHaveBeenCalledWith(
-      cache,
-      cache.options,
-      memoized,
-    );
-
-    expect(cache.options.onCacheChange).toHaveBeenCalledTimes(1);
-    expect(cache.options.onCacheChange).toHaveBeenCalledWith(
-      cache,
-      cache.options,
-      memoized,
-    );
-  });
-
-  it('will remove the key from cache when the promise is rejected', async () => {
-    const timeout = 200;
-
-    const fn = async () => {
-      await new Promise((resolve: Function, reject: Function) => {
-        setTimeout(() => reject(new Error('boom')), timeout);
-      });
-    };
-    const key = ['foo'];
-    const value = fn();
-
-    const memoized = () => {};
-
-    const cache = new Cache({
-      ...DEFAULT_OPTIONS,
-      isPromise: true,
-      onCacheChange: jest.fn(),
-      onCacheHit: jest.fn(),
-    });
-
-    cache.keys = [key];
-    cache.values = [value];
-
-    cache.updateAsync(memoized);
-
-    const catcher = jest.fn();
-
-    cache.values[0].catch(catcher);
-
-    expect(cache.keys.length).toEqual(1);
-    expect(cache.values.length).toEqual(1);
-    expect(cache.values[0]).toEqual(value);
-
-    await new Promise((resolve: Function) => {
-      setTimeout(resolve, timeout + 50);
-    });
-
-    expect(catcher).toHaveBeenCalledTimes(1);
-
-    const expectedCache = new Cache({
-      ...DEFAULT_OPTIONS,
-      isPromise: true,
-      onCacheChange: cache.options.onCacheChange,
-      onCacheHit: cache.options.onCacheHit,
-    });
-
-    expect(cache).toEqual(expectedCache);
-
-    expect(cache.options.onCacheHit).toHaveBeenCalledTimes(0);
-    expect(cache.options.onCacheChange).toHaveBeenCalledTimes(0);
-  });
-
-  it('will not remove the key from cache when the promise is rejected but the key no longer exists', async () => {
-    const timeout = 200;
-
-    const fn = async () => {
-      await new Promise((resolve: Function, reject: Function) => {
-        setTimeout(() => reject(new Error('boom')), timeout);
-      });
-    };
-    const key = ['foo'];
-    const value = fn();
-
-    const memoized = () => {};
-
-    const cache = new Cache({
-      ...DEFAULT_OPTIONS,
-      isPromise: true,
-      onCacheChange: jest.fn(),
-      onCacheHit: jest.fn(),
-    });
-
-    cache.keys = [key];
-    cache.values = [value];
-
-    cache.updateAsync(memoized);
-
-    const newValue = cache.values[0];
-
-    const catcher = jest.fn();
-
-    newValue.catch(catcher);
-
-    expect(cache.keys.length).toEqual(1);
-    expect(cache.values.length).toEqual(1);
-    expect(cache.values[0]).toEqual(value);
-
-    cache.keys = [['bar']];
-    // @ts-ignore
-    cache.values = [Promise.resolve('baz')];
-
-    await new Promise((resolve: Function) => {
-      setTimeout(resolve, timeout + 50);
-    });
-
-    expect(catcher).toHaveBeenCalledTimes(1);
-
-    expect(cache.options.onCacheHit).toHaveBeenCalledTimes(0);
-    expect(cache.options.onCacheChange).toHaveBeenCalledTimes(0);
   });
 });
