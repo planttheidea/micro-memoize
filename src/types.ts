@@ -23,7 +23,7 @@ export type MatchingKeyComparator = (key1: Key, key2: RawKey) => boolean;
 
 export type CacheModifiedHandler = (
   cache: Cache,
-  options: Options,
+  options: StandardOptions,
   memoized: Function,
 ) => void;
 
@@ -36,7 +36,7 @@ export type AsyncCacheUpdater = (
   memoized: Memoized<Function>,
 ) => void;
 
-export type Options = {
+export type StandardOptions = {
   isEqual?: EqualityComparator;
   isMatchingKey?: MatchingKeyComparator;
   isPromise?: boolean;
@@ -47,10 +47,12 @@ export type Options = {
   transformKey?: KeyTransformer;
 };
 
+export type Options = StandardOptions & Dictionary<any>;
+
 export type Memoized<Fn extends Function> = Fn & {
   [key: string]: any;
   cache?: Cache;
   cacheSnapshot?: Cache;
   isMemoized?: boolean;
-  options?: Options;
+  options?: StandardOptions;
 };

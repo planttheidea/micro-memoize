@@ -1,5 +1,5 @@
 // types
-import { Cache, Memoized, Keys, Options, Values } from './types';
+import { Cache, Memoized, Keys, StandardOptions, Values } from './types';
 
 // utils
 import {
@@ -18,7 +18,7 @@ const { defineProperties } = Object;
 
 function createMemoizedFunction<Fn extends Function>(
   fn: Fn,
-  options: Options = {},
+  options: StandardOptions = {},
 ): Memoized<Fn> {
   if (isMemoized(fn)) {
     return fn;
@@ -37,7 +37,7 @@ function createMemoizedFunction<Fn extends Function>(
     onCacheChange,
     onCacheHit,
     transformKey,
-  }: Options = options;
+  }: StandardOptions = options;
 
   const normalizedOptions = mergeOptions(getCustomOptions(options), {
     isEqual,

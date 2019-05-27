@@ -6,6 +6,7 @@ import {
   KeyIndexGetter,
   Keys,
   Memoized,
+  StandardOptions,
   Options,
 } from './types';
 
@@ -33,7 +34,7 @@ export function createGetKeyIndex({
   isEqual,
   isMatchingKey,
   maxSize,
-}: Options) {
+}: StandardOptions) {
   if (typeof isMatchingKey === 'function') {
     return function getKeyIndex(allKeys: Keys, keyToMatch: Key) {
       if (isMatchingKey(allKeys[0], keyToMatch)) {
@@ -115,7 +116,6 @@ export function getCustomOptions(options: Options) {
 
   for (const key in options) {
     if (!DEFAULT_OPTIONS_KEYS[key]) {
-      // @ts-ignore
       customOptions[key] = options[key];
     }
   }
@@ -166,19 +166,19 @@ export function isSameValueZero(object1: any, object2: any) {
  */
 export function mergeOptions(
   extraOptions: Dictionary<any>,
-  providedOptions: Options,
+  providedOptions: StandardOptions,
 ) {
-  const target: Dictionary<any> = {};
+  const target: Options = {};
 
   for (const key in extraOptions) {
     target[key] = extraOptions[key];
   }
 
   for (const key in providedOptions) {
-    target[key] = providedOptions[key as keyof Options];
+    target[key] = providedOptions[key as keyof StandardOptions];
   }
 
-  return target as Options;
+  return target;
 }
 
 /**
@@ -216,7 +216,9 @@ export function orderByLru(
   }
 }
 
-export function createUpdateAsyncCache(options: Options): AsyncCacheUpdater {
+export function createUpdateAsyncCache(
+  options: StandardOptions,
+): AsyncCacheUpdater {
   const getKeyIndex: KeyIndexGetter = createGetKeyIndex(options);
 
   const { onCacheChange, onCacheHit } = options;
