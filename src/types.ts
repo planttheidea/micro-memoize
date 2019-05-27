@@ -54,5 +54,5 @@ export type Memoized<Fn extends Function> = Fn & {
   cache?: Cache;
   cacheSnapshot?: Cache;
   isMemoized?: boolean;
-  options?: StandardOptions;
+  options?: Options;
 };

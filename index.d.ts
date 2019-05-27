@@ -55,6 +55,6 @@ declare namespace MicroMemoize {
     cache?: Cache;
     cacheSnapshot?: Cache;
     isMemoized?: boolean;
-    options?: StandardOptions;
+    options?: Options;
   };
 }
