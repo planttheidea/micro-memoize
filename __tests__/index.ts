@@ -15,6 +15,13 @@ describe('memoize', () => {
     expect(memoized).toBe(fn);
   });
 
+  it('will throw an error if not a function', () => {
+    const fn = 123;
+
+    // @ts-ignore
+    expect(() => memoize(fn)).toThrow();
+  })
+
   it('will return the memoized function', () => {
     let callCount = 0;
 
@@ -327,7 +334,7 @@ describe('memoize', () => {
 
     const error = new Error('boom');
 
-    const fn = async () => {
+    const fn = async (ignored: string) => {
       await new Promise((resolve: Function) => {
         setTimeout(resolve, timeout);
       });
@@ -362,17 +369,14 @@ describe('memoize', () => {
   });
 
   it('will fire the onCacheChange method passed with the cache when it is added to', () => {
-    const fn = (one: any, two: any) => ({
-      one,
-      two,
-    });
+    const fn = (one: string, two: string) => ({ one, two });
     const onCacheChange = jest.fn();
 
     const memoized = memoize(fn, { onCacheChange });
 
     expect(memoized.options.onCacheChange).toBe(onCacheChange);
 
-    memoized('foo');
+    memoized('foo', 'bar');
 
     expect(onCacheChange).toHaveBeenCalledTimes(1);
     expect(onCacheChange).toHaveBeenCalledWith(
@@ -390,10 +394,7 @@ describe('memoize', () => {
   });
 
   it('will fire the onCacheChange method passed with the cache when it is updated', () => {
-    const fn = (one: any, two: any) => ({
-      one,
-      two,
-    });
+    const fn = (one: string, two: string) => ({ one, two });
     const onCacheChange = jest.fn();
     const maxSize = 2;
 
@@ -505,17 +506,14 @@ describe('memoize', () => {
   });
 
   it('will not fire the onCacheHit method passed with the cache when it is added to', () => {
-    const fn = (one: any, two: any) => ({
-      one,
-      two,
-    });
+    const fn = (one: string, two: string) => ({ one, two });
     const onCacheHit = jest.fn();
 
     const memoized = memoize(fn, { onCacheHit });
 
     expect(memoized.options.onCacheHit).toBe(onCacheHit);
 
-    memoized('foo');
+    memoized('foo', 'bar');
 
     expect(onCacheHit).toHaveBeenCalledTimes(0);
   });
@@ -646,11 +644,11 @@ describe('memoize', () => {
 
     expect(memoized.options.onCacheAdd).toBe(onCacheAdd);
 
-    memoized('foo');
+    memoized('foo', 'bar');
 
     expect(onCacheAdd).toHaveBeenCalledTimes(1);
 
-    memoized('foo');
+    memoized('foo', 'bar');
 
     expect(onCacheAdd).toHaveBeenCalledTimes(1);
   });
@@ -743,9 +741,13 @@ describe('memoize', () => {
     expect(onCacheAdd).toHaveBeenCalledTimes(0);
   });
 
+  type Dictionary<Type> = {
+    [key: string]: Type;
+  }
+
   test('if recursive calls to self will be respected at runtime', () => {
     const calc = memoize(
-      (object: { [key: string]: any }, metadata: { c: number }): PlainObject =>
+      (object: { [key: string]: any }, metadata: { c: number }): Dictionary<any> =>
         Object.keys(object).reduce((totals: { [key: string]: number }, key) => {
           if (Array.isArray(object[key])) {
             totals[key] = object[key].map(

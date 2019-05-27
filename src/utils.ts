@@ -1,3 +1,14 @@
+import {
+  AsyncCacheUpdater,
+  Cache,
+  Dictionary,
+  Key,
+  KeyIndexGetter,
+  Keys,
+  Memoized,
+  Options
+} from './types';
+
 const DEFAULT_OPTIONS_KEYS: { [key: string]: boolean } = {
   isEqual: true,
   isMatchingKey: true,
@@ -18,16 +29,9 @@ const DEFAULT_OPTIONS_KEYS: { [key: string]: boolean } = {
  * @param options the memoization options passed
  * @returns the method to get the key index
  */
-export function createGetKeyIndex({
-  isEqual,
-  isMatchingKey,
-  maxSize,
-}: MicroMemoize.Options) {
+export function createGetKeyIndex({ isEqual, isMatchingKey, maxSize }: Options) {
   if (typeof isMatchingKey === 'function') {
-    return function getKeyIndex(
-      allKeys: MicroMemoize.Keys,
-      keyToMatch: MicroMemoize.Key,
-    ) {
+    return function getKeyIndex(allKeys: Keys, keyToMatch: Key) {
       if (isMatchingKey(allKeys[0], keyToMatch)) {
         return 0;
       }
@@ -47,10 +51,7 @@ export function createGetKeyIndex({
   }
 
   if (maxSize > 1) {
-    return function getKeyIndex(
-      allKeys: MicroMemoize.Keys,
-      keyToMatch: MicroMemoize.Key,
-    ) {
+    return function getKeyIndex(allKeys: Keys, keyToMatch: Key) {
       const keysLength = allKeys.length;
       const keyLength = keyToMatch.length;
 
@@ -78,10 +79,7 @@ export function createGetKeyIndex({
     };
   }
 
-  return function getKeyIndex(
-    allKeys: MicroMemoize.Keys,
-    keyToMatch: MicroMemoize.Key,
-  ) {
+  return function getKeyIndex(allKeys: Keys, keyToMatch: Key) {
     const existingKey = allKeys[0];
     const keyLength = existingKey.length;
 
@@ -108,7 +106,7 @@ export function createGetKeyIndex({
  * @param options the memoization options passed
  * @returns the custom options passed
  */
-export function getCustomOptions(options: MicroMemoize.Options) {
+export function getCustomOptions(options: Options) {
   const customOptions: { [key: string]: any } = {};
 
   for (const key in options) {
@@ -119,6 +117,23 @@ export function getCustomOptions(options: MicroMemoize.Options) {
   }
 
   return customOptions;
+}
+
+export function isFunction(fn: any): fn is Function {
+  return typeof fn === 'function';
+}
+
+/**
+ * @function isMemoized
+ * 
+ * @description
+ * is the function passed already memoized
+ * 
+ * @param fn the function to test
+ * @returns is the function already memoized
+ */
+export function isMemoized<Fn>(fn: Fn | Memoized<Fn>): fn is Memoized<Fn> {
+  return isFunction(fn) && (fn as Memoized<Fn>).isMemoized === true;
 }
 
 /**
@@ -145,21 +160,18 @@ export function isSameValueZero(object1: any, object2: any) {
  * @param providedOptions the defaulted options provided
  * @returns the merged options
  */
-export function mergeOptions(
-  extraOptions: PlainObject,
-  providedOptions: PlainObject,
-) {
-  const target: PlainObject = {};
+export function mergeOptions(extraOptions: Dictionary<any>, providedOptions: Options) {
+  const target: Dictionary<any> = {};
 
   for (const key in extraOptions) {
     target[key] = extraOptions[key];
   }
 
   for (const key in providedOptions) {
-    target[key] = providedOptions[key];
+    target[key] = providedOptions[key as keyof Options];
   }
 
-  return target;
+  return target as Options;
 }
 
 /**
@@ -175,8 +187,8 @@ export function mergeOptions(
  * @param startingIndex the index of the item to move to the front
  */
 export function orderByLru(
-  cache: MicroMemoize.Cache,
-  newKey: MicroMemoize.Key,
+  cache: Cache,
+  newKey: Key,
   newValue: any,
   startingIndex: number,
   maxSize: number,
@@ -197,10 +209,8 @@ export function orderByLru(
   }
 }
 
-export function createUpdateAsyncCache(
-  options: MicroMemoize.Options,
-): MicroMemoize.AsyncCacheUpdater {
-  const getKeyIndex: MicroMemoize.KeyIndexGetter = createGetKeyIndex(options);
+export function createUpdateAsyncCache(options: Options): AsyncCacheUpdater {
+  const getKeyIndex: KeyIndexGetter = createGetKeyIndex(options);
 
   const { onCacheChange, onCacheHit } = options;
 
@@ -217,7 +227,7 @@ export function createUpdateAsyncCache(
    * @param cache the memoized function's cache
    * @param memoized the memoized function
    */
-  return (cache: MicroMemoize.Cache, memoized: MicroMemoize.Memoized): void => {
+  return (cache: Cache, memoized: Memoized<Function>): void => {
     const key: any = cache.keys[0];
 
     cache.values[0] = cache.values[0]

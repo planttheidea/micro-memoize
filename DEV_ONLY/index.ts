@@ -90,7 +90,7 @@ console.groupEnd();
 
 console.group('custom - deep equals');
 
-const deepEqualMethod = ({ one, two }: { one: string; two: string }) => {
+const deepEqualMethod = ({ one, two }: { one: string | number; two: string | number }) => {
   console.log('custom equal method fired', one, two);
 
   return [one, two];
@@ -237,11 +237,16 @@ console.log(matchingKeyMemoized.cache);
 
 console.groupEnd();
 
+type Dictionary<Type> = {
+  [key: string]: Type;
+  [index: number]: Type;
+}
+
 const calc = memoize(
-  (object: PlainObject, metadata: PlainObject): PlainObject =>
-    Object.keys(object).reduce((totals: PlainObject, key: string) => {
+  (object: Dictionary<any>, metadata: Dictionary<any>) =>
+    Object.keys(object).reduce((totals: Dictionary<any>, key: string) => {
       if (Array.isArray(object[key])) {
-        totals[key] = object[key].map((subObject: PlainObject) =>
+        totals[key] = object[key].map((subObject: Dictionary<any>) =>
           calc(subObject, metadata),
         );
       } else {

@@ -1,8 +1,19 @@
+// types
+import {
+  Cache,
+  Memoized,
+  Keys,
+  Options,
+  Values
+} from './types';
+
 // utils
 import {
   createGetKeyIndex,
   createUpdateAsyncCache,
   getCustomOptions,
+  isFunction,
+  isMemoized,
   isSameValueZero,
   mergeOptions,
   orderByLru,
@@ -11,13 +22,13 @@ import {
 const { slice } = Array.prototype;
 const { defineProperties } = Object;
 
-function createMemoizedFunction<T extends Function>(
-  fn: T | MicroMemoize.Memoized,
-  options: MicroMemoize.Options = {},
-): MicroMemoize.Memoized {
-  // @ts-ignore
-  if (fn.isMemoized) {
+function createMemoizedFunction<Fn extends Function>(fn: Fn, options: Options = {}): Memoized<Fn> {
+  if (isMemoized(fn)) {
     return fn;
+  }
+
+  if (!isFunction(fn)) {
+    throw new TypeError('You must pass a function to `memoize`.');
   }
 
   const {
@@ -29,7 +40,7 @@ function createMemoizedFunction<T extends Function>(
     onCacheChange,
     onCacheHit,
     transformKey,
-  }: MicroMemoize.Options = options;
+  }: Options = options;
 
   const normalizedOptions = mergeOptions(getCustomOptions(options), {
     isEqual,
@@ -45,10 +56,10 @@ function createMemoizedFunction<T extends Function>(
   const getKeyIndex = createGetKeyIndex(normalizedOptions);
   const updateAsyncCache = createUpdateAsyncCache(normalizedOptions);
 
-  const keys: MicroMemoize.Keys = [];
-  const values: MicroMemoize.Values = [];
+  const keys: Keys = [];
+  const values: Values = [];
 
-  const cache: MicroMemoize.Cache = {
+  const cache: Cache = {
     keys,
     get size() {
       return cache.keys.length;
@@ -64,7 +75,8 @@ function createMemoizedFunction<T extends Function>(
   const shouldUpdateOnChange = typeof onCacheChange === 'function';
   const shouldUpdateOnHit = typeof onCacheHit === 'function';
 
-  function memoized(): any {
+  // @ts-ignore
+  const memoized: Memoized<Fn> = function memoized() {
     const normalizedArgs = shouldCloneArguments
       ? slice.call(arguments, 0)
       : arguments;

@@ -27,7 +27,7 @@ declare namespace MicroMemoize {
 
   export type KeyIndexGetter = (allKeys: Keys, keyToMatch: RawKey) => number;
 
-  export type AsyncCacheUpdater = (cache: Cache, memoized: Memoized) => void;
+  export type AsyncCacheUpdater = (cache: Cache, memoized: Memoized<Function>) => void;
 
   export type Options = {
     [key: string]: any;
@@ -42,16 +42,11 @@ declare namespace MicroMemoize {
     transformKey?: KeyTransformer;
   };
 
-  export interface Memoized extends Function {
+  export type Memoized<Fn extends Function> = Fn & {
     [key: string]: any;
     cache?: Cache;
     cacheSnapshot?: Cache;
     isMemoized?: boolean;
     options?: Options;
-  }
+  };
 }
-
-export default function memoize<T extends Function>(
-  fn: T | MicroMemoize.Memoized,
-  options?: MicroMemoize.Options,
-): MicroMemoize.Memoized;
