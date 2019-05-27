@@ -1,11 +1,5 @@
 // types
-import {
-  Cache,
-  Memoized,
-  Keys,
-  Options,
-  Values
-} from './types';
+import { Cache, Memoized, Keys, Options, Values } from './types';
 
 // utils
 import {
@@ -22,7 +16,10 @@ import {
 const { slice } = Array.prototype;
 const { defineProperties } = Object;
 
-function createMemoizedFunction<Fn extends Function>(fn: Fn, options: Options = {}): Memoized<Fn> {
+function createMemoizedFunction<Fn extends Function>(
+  fn: Fn,
+  options: Options = {},
+): Memoized<Fn> {
   if (isMemoized(fn)) {
     return fn;
   }
@@ -105,7 +102,7 @@ function createMemoizedFunction<Fn extends Function>(fn: Fn, options: Options = 
     }
 
     return values[0];
-  }
+  };
 
   defineProperties(memoized, {
     cache: {

@@ -6,7 +6,7 @@ import {
   KeyIndexGetter,
   Keys,
   Memoized,
-  Options
+  Options,
 } from './types';
 
 const DEFAULT_OPTIONS_KEYS: { [key: string]: boolean } = {
@@ -29,7 +29,11 @@ const DEFAULT_OPTIONS_KEYS: { [key: string]: boolean } = {
  * @param options the memoization options passed
  * @returns the method to get the key index
  */
-export function createGetKeyIndex({ isEqual, isMatchingKey, maxSize }: Options) {
+export function createGetKeyIndex({
+  isEqual,
+  isMatchingKey,
+  maxSize,
+}: Options) {
   if (typeof isMatchingKey === 'function') {
     return function getKeyIndex(allKeys: Keys, keyToMatch: Key) {
       if (isMatchingKey(allKeys[0], keyToMatch)) {
@@ -125,15 +129,15 @@ export function isFunction(fn: any): fn is Function {
 
 /**
  * @function isMemoized
- * 
+ *
  * @description
  * is the function passed already memoized
- * 
+ *
  * @param fn the function to test
  * @returns is the function already memoized
  */
-export function isMemoized<Fn>(fn: Fn | Memoized<Fn>): fn is Memoized<Fn> {
-  return isFunction(fn) && (fn as Memoized<Fn>).isMemoized === true;
+export function isMemoized(fn: any): fn is Memoized<Function> {
+  return isFunction(fn) && (fn as Memoized<Function>).isMemoized;
 }
 
 /**
@@ -160,7 +164,10 @@ export function isSameValueZero(object1: any, object2: any) {
  * @param providedOptions the defaulted options provided
  * @returns the merged options
  */
-export function mergeOptions(extraOptions: Dictionary<any>, providedOptions: Options) {
+export function mergeOptions(
+  extraOptions: Dictionary<any>,
+  providedOptions: Options,
+) {
   const target: Dictionary<any> = {};
 
   for (const key in extraOptions) {

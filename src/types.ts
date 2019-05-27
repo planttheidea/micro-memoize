@@ -1,7 +1,7 @@
 export type Dictionary<Type> = {
   [key: string]: Type;
   [index: number]: Type;
-}
+};
 
 export type Key = any[];
 
@@ -31,7 +31,10 @@ export type KeyTransformer = (args: RawKey) => Key;
 
 export type KeyIndexGetter = (allKeys: Keys, keyToMatch: RawKey) => number;
 
-export type AsyncCacheUpdater = (cache: Cache, memoized: Memoized<Function>) => void;
+export type AsyncCacheUpdater = (
+  cache: Cache,
+  memoized: Memoized<Function>,
+) => void;
 
 export type Options = {
   isEqual?: EqualityComparator;

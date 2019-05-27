@@ -1,5 +1,5 @@
 import Bluebird from 'bluebird';
-import { deepEqual, shallowEqual } from 'fast-equals';
+import { deepEqual } from 'fast-equals';
 
 import memoize from '../src';
 import { __ } from 'ramda';
@@ -73,10 +73,7 @@ console.groupEnd();
 console.group('maxArgs');
 
 // limit to testing the first args
-const isEqualMaxArgs = (
-  originalKey: MicroMemoize.Key,
-  newKey: MicroMemoize.Key,
-): boolean => {
+const isEqualMaxArgs = (originalKey: string, newKey: string): boolean => {
   return originalKey[0] === newKey[0];
 };
 
@@ -90,7 +87,13 @@ console.groupEnd();
 
 console.group('custom - deep equals');
 
-const deepEqualMethod = ({ one, two }: { one: string | number; two: string | number }) => {
+const deepEqualMethod = ({
+  one,
+  two,
+}: {
+  one: string | number;
+  two: string | number;
+}) => {
   console.log('custom equal method fired', one, two);
 
   return [one, two];
@@ -199,10 +202,10 @@ const noFns = (one: string, two: string, three: Function) => {
 };
 
 const memoizedNoFns = memoize(noFns, {
-  isEqual(key1: MicroMemoize.Key, key2: MicroMemoize.Key) {
+  isEqual(key1: string, key2: string) {
     return key1 === key2;
   },
-  transformKey(args: MicroMemoize.RawKey) {
+  transformKey(args: any) {
     return [JSON.stringify(args)];
   },
 });
@@ -240,7 +243,7 @@ console.groupEnd();
 type Dictionary<Type> = {
   [key: string]: Type;
   [index: number]: Type;
-}
+};
 
 const calc = memoize(
   (object: Dictionary<any>, metadata: Dictionary<any>) =>
