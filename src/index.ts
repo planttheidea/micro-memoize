@@ -13,8 +13,10 @@ import {
   orderByLru,
 } from './utils';
 
-const { slice } = Array.prototype;
-const { defineProperties } = Object;
+const slice = Function.prototype.bind.call(
+  Function.prototype.call,
+  Array.prototype.slice,
+);
 
 function createMemoizedFunction<Fn extends Function>(
   fn: Fn,
@@ -75,7 +77,7 @@ function createMemoizedFunction<Fn extends Function>(
   // @ts-ignore
   const memoized: Memoized<Fn> = function memoized() {
     const normalizedArgs = shouldCloneArguments
-      ? slice.call(arguments, 0)
+      ? slice(arguments, 0)
       : arguments;
     const key = canTransformKey ? transformKey(normalizedArgs) : normalizedArgs;
     const keyIndex = keys.length ? getKeyIndex(keys, key) : -1;
@@ -91,7 +93,7 @@ function createMemoizedFunction<Fn extends Function>(
       }
     } else {
       const newValue = fn.apply(this, arguments);
-      const newKey = shouldCloneArguments ? key : slice.call(arguments, 0);
+      const newKey = shouldCloneArguments ? key : slice(arguments, 0);
 
       orderByLru(cache, newKey, newValue, keys.length, maxSize);
 
@@ -104,7 +106,7 @@ function createMemoizedFunction<Fn extends Function>(
     return values[0];
   };
 
-  defineProperties(memoized, {
+  Object.defineProperties(memoized, {
     cache: {
       configurable: true,
       value: cache,
@@ -113,9 +115,9 @@ function createMemoizedFunction<Fn extends Function>(
       configurable: true,
       get() {
         return {
-          keys: slice.call(cache.keys, 0),
+          keys: slice(cache.keys, 0),
           size: cache.size,
-          values: slice.call(cache.values, 0),
+          values: slice(cache.values, 0),
         };
       },
     },
