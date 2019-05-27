@@ -236,7 +236,7 @@ describe('mergeOptions', () => {
       extra: 'options',
     };
     const providedOptions = {
-      provided: 'options',
+      isPromise: true,
     };
 
     const result = mergeOptions(extraOptions, providedOptions);

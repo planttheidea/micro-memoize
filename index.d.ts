@@ -1,3 +1,8 @@
+type Dictionary<Type> = {
+  [key: string]: Type;
+  [index: number]: Type;
+};
+
 declare namespace MicroMemoize {
   export type Key = any[];
 
@@ -19,7 +24,7 @@ declare namespace MicroMemoize {
 
   export type CacheModifiedHandler = (
     cache: Cache,
-    options: Options,
+    options: StandardOptions,
     memoized: Function,
   ) => void;
 
@@ -27,11 +32,12 @@ declare namespace MicroMemoize {
 
   export type KeyIndexGetter = (allKeys: Keys, keyToMatch: RawKey) => number;
 
-  export type AsyncCacheUpdater = (cache: Cache, memoized: Memoized) => void;
+  export type AsyncCacheUpdater = (
+    cache: Cache,
+    memoized: Memoized<Function>,
+  ) => void;
 
-  export type Options = {
-    [key: string]: any;
-    [index: number]: any;
+  export type StandardOptions = {
     isEqual?: EqualityComparator;
     isMatchingKey?: MatchingKeyComparator;
     isPromise?: boolean;
@@ -42,16 +48,13 @@ declare namespace MicroMemoize {
     transformKey?: KeyTransformer;
   };
 
-  export interface Memoized extends Function {
+  export type Options = StandardOptions & Dictionary<any>;
+
+  export type Memoized<Fn extends Function> = Fn & {
     [key: string]: any;
     cache?: Cache;
     cacheSnapshot?: Cache;
     isMemoized?: boolean;
     options?: Options;
-  }
+  };
 }
-
-export default function memoize<T extends Function>(
-  fn: T | MicroMemoize.Memoized,
-  options?: MicroMemoize.Options,
-): MicroMemoize.Memoized;

@@ -1,23 +1,33 @@
+// types
+import { Cache, Memoized, Keys, StandardOptions, Values } from './types';
+
 // utils
 import {
   createGetKeyIndex,
   createUpdateAsyncCache,
   getCustomOptions,
+  isFunction,
+  isMemoized,
   isSameValueZero,
   mergeOptions,
   orderByLru,
 } from './utils';
 
-const { slice } = Array.prototype;
-const { defineProperties } = Object;
+const slice = Function.prototype.bind.call(
+  Function.prototype.call,
+  Array.prototype.slice,
+);
 
-function createMemoizedFunction<T extends Function>(
-  fn: T | MicroMemoize.Memoized,
-  options: MicroMemoize.Options = {},
-): MicroMemoize.Memoized {
-  // @ts-ignore
-  if (fn.isMemoized) {
+function createMemoizedFunction<Fn extends Function>(
+  fn: Fn,
+  options: StandardOptions = {},
+): Memoized<Fn> {
+  if (isMemoized(fn)) {
     return fn;
+  }
+
+  if (!isFunction(fn)) {
+    throw new TypeError('You must pass a function to `memoize`.');
   }
 
   const {
@@ -29,7 +39,7 @@ function createMemoizedFunction<T extends Function>(
     onCacheChange,
     onCacheHit,
     transformKey,
-  }: MicroMemoize.Options = options;
+  }: StandardOptions = options;
 
   const normalizedOptions = mergeOptions(getCustomOptions(options), {
     isEqual,
@@ -45,10 +55,10 @@ function createMemoizedFunction<T extends Function>(
   const getKeyIndex = createGetKeyIndex(normalizedOptions);
   const updateAsyncCache = createUpdateAsyncCache(normalizedOptions);
 
-  const keys: MicroMemoize.Keys = [];
-  const values: MicroMemoize.Values = [];
+  const keys: Keys = [];
+  const values: Values = [];
 
-  const cache: MicroMemoize.Cache = {
+  const cache: Cache = {
     keys,
     get size() {
       return cache.keys.length;
@@ -64,9 +74,10 @@ function createMemoizedFunction<T extends Function>(
   const shouldUpdateOnChange = typeof onCacheChange === 'function';
   const shouldUpdateOnHit = typeof onCacheHit === 'function';
 
-  function memoized(): any {
+  // @ts-ignore
+  const memoized: Memoized<Fn> = function memoized() {
     const normalizedArgs = shouldCloneArguments
-      ? slice.call(arguments, 0)
+      ? slice(arguments, 0)
       : arguments;
     const key = canTransformKey ? transformKey(normalizedArgs) : normalizedArgs;
     const keyIndex = keys.length ? getKeyIndex(keys, key) : -1;
@@ -82,7 +93,7 @@ function createMemoizedFunction<T extends Function>(
       }
     } else {
       const newValue = fn.apply(this, arguments);
-      const newKey = shouldCloneArguments ? key : slice.call(arguments, 0);
+      const newKey = shouldCloneArguments ? key : slice(arguments, 0);
 
       orderByLru(cache, newKey, newValue, keys.length, maxSize);
 
@@ -93,9 +104,9 @@ function createMemoizedFunction<T extends Function>(
     }
 
     return values[0];
-  }
+  };
 
-  defineProperties(memoized, {
+  Object.defineProperties(memoized, {
     cache: {
       configurable: true,
       value: cache,
@@ -104,9 +115,9 @@ function createMemoizedFunction<T extends Function>(
       configurable: true,
       get() {
         return {
-          keys: slice.call(cache.keys, 0),
+          keys: slice(cache.keys, 0),
           size: cache.size,
-          values: slice.call(cache.values, 0),
+          values: slice(cache.values, 0),
         };
       },
     },

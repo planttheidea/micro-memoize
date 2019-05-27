@@ -1,5 +1,10 @@
 # micro-memoize CHANGELOG
 
+## 3.0.2
+
+- Fix types declarations to ensure signature of `fn` passed is retained
+- Throw an error when the first parameter passed is not a function
+
 ## 3.0.1
 
 - Fix types declaration for `Options` to allow custom keys / indices
