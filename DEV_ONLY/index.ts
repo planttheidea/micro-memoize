@@ -73,15 +73,18 @@ console.groupEnd();
 console.group('maxArgs');
 
 // limit to testing the first args
-const isEqualMaxArgs = (originalKey: string[], newKey: string[]): boolean => {
+const isMatchingKeyMaxArgs = (
+  originalKey: string[],
+  newKey: string[],
+): boolean => {
   return originalKey[0] === newKey[0];
 };
 
-const memoizedMax = memoize(method, { isEqual: isEqualMaxArgs });
+const memoizedMax = memoize(method, { isMatchingKey: isMatchingKeyMaxArgs });
 
 memoizedMax(foo, bar);
-memoizedMax(foo, 'baz');
-memoizedMax(foo, 'quz');
+memoizedMax(foo, baz);
+memoizedMax(foo, quz);
 
 console.groupEnd();
 
@@ -100,7 +103,7 @@ const deepEqualMethod = ({
 };
 
 const deepEqualMemoized = memoize(deepEqualMethod, {
-  isEqual: deepEqual,
+  isMatchingKey: deepEqual,
 });
 
 deepEqualMemoized({ one: 1, two: 2 });
@@ -185,6 +188,7 @@ const withDefault = (foo: string, bar: string = 'default') => {
 
   return `${foo} ${bar}`;
 };
+'';
 const moizedWithDefault = memoize(withDefault, { maxSize: 5 });
 
 console.log(moizedWithDefault(foo));
@@ -202,8 +206,8 @@ const noFns = (one: string, two: string, three: Function) => {
 };
 
 const memoizedNoFns = memoize(noFns, {
-  isEqual(key1: string[], key2: string[]) {
-    return key1[0] === key2[0];
+  isEqual(key1: string, key2: string) {
+    return key1 === key2;
   },
   transformKey(args: any) {
     return [JSON.stringify(args)];

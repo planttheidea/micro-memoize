@@ -18,7 +18,7 @@ declare namespace MicroMemoize {
     values: Values;
   };
 
-  export type EqualityComparator = (object1: any[], object2: any[]) => boolean;
+  export type EqualityComparator = (object1: any, object2: any) => boolean;
 
   export type MatchingKeyComparator = (key1: Key, key2: RawKey) => boolean;
 
