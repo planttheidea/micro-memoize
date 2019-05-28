@@ -1,4 +1,5 @@
 import { Cache } from '../src/Cache';
+import { Memoized } from '../src/types';
 
 import { isSameValueZero } from '../src/utils';
 
@@ -383,7 +384,7 @@ describe('cache methods', () => {
         return 'resolved';
       };
       const key = ['foo'];
-      const memoized = () => {};
+      const memoized = ((() => {}) as unknown) as Memoized<Function>;
 
       const value = fn();
 
@@ -430,7 +431,7 @@ describe('cache methods', () => {
         return 'resolved';
       };
       const key = ['foo'];
-      const memoized = () => {};
+      const memoized = ((() => {}) as unknown) as Memoized<Function>;
 
       const value = fn();
 
@@ -501,7 +502,7 @@ describe('cache methods', () => {
       cache.keys = [key];
       cache.values = [value];
 
-      const memoized = () => {};
+      const memoized = ((() => {}) as unknown) as Memoized<Function>;
 
       cache.updateAsyncCache(memoized);
 
@@ -554,7 +555,7 @@ describe('cache methods', () => {
       cache.keys = [key];
       cache.values = [value];
 
-      const memoized = () => {};
+      const memoized = ((() => {}) as unknown) as Memoized<Function>;
 
       cache.updateAsyncCache(memoized);
 

@@ -251,7 +251,7 @@ type Dictionary<Type> = {
 };
 
 const calc = memoize(
-  (object: Dictionary<any>, metadata: Dictionary<any>) =>
+  (object: Dictionary<any>, metadata: Dictionary<any>): Dictionary<any> =>
     Object.keys(object).reduce((totals: Dictionary<any>, key: string) => {
       if (Array.isArray(object[key])) {
         totals[key] = object[key].map((subObject: Dictionary<any>) =>

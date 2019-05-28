@@ -4,9 +4,13 @@
 
 - Update to use `Cache` class instead of plain object (~10% performance improvement)
 
-#### BREAKING CHANGES
+#### Breaking changes
 
 - `memoized.cacheSnapshot` has been deprecated in favor of `memoized.cache.snapshot`
+
+#### Enhancements
+
+- You can now compose memoized functions with their options
 
 ## 3.0.2
 

@@ -8,7 +8,7 @@ export type Value = any;
 
 export type RawKey = Key | IArguments;
 
-export type Cache = {
+export interface Cache {
   canTransformKey: boolean;
   getKeyIndex: KeyIndexGetter;
   keys: Key[];
@@ -23,7 +23,7 @@ export type Cache = {
     values: Value[];
   };
   values: Value[];
-};
+}
 
 export type EqualityComparator = (object1: any, object2: any) => boolean;
 

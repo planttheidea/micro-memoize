@@ -9,7 +9,7 @@ declare namespace MicroMemoize {
 
   export type RawKey = Key | IArguments;
 
-  export type Cache = {
+  export interface Cache {
     canTransformKey: boolean;
     getKeyIndex: KeyIndexGetter;
     keys: Key[];
@@ -24,7 +24,7 @@ declare namespace MicroMemoize {
       values: Value[];
     };
     values: Value[];
-  };
+  }
 
   export type EqualityComparator = (object1: any, object2: any) => boolean;
 
@@ -38,7 +38,7 @@ declare namespace MicroMemoize {
 
   export type KeyTransformer = (args: RawKey) => Key;
 
-  export type KeyIndexGetter = (allKeys: Keys, keyToMatch: RawKey) => number;
+  export type KeyIndexGetter = (allKeys: Key[], keyToMatch: RawKey) => number;
 
   export type StandardOptions = {
     isEqual?: EqualityComparator;
