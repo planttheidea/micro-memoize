@@ -1,22 +1,18 @@
+// cache
+import { Cache } from './Cache';
+
 // types
-import { Cache, Memoized, Keys, StandardOptions, Values } from './types';
+import { Memoized, Keys, StandardOptions, Values } from './types';
 
 // utils
 import {
-  createGetKeyIndex,
-  createUpdateAsyncCache,
   getCustomOptions,
   isFunction,
   isMemoized,
   isSameValueZero,
   mergeOptions,
-  orderByLru,
+  slice,
 } from './utils';
-
-const slice = Function.prototype.bind.call(
-  Function.prototype.call,
-  Array.prototype.slice,
-);
 
 function createMemoizedFunction<Fn extends Function>(
   fn: Fn,
@@ -52,27 +48,17 @@ function createMemoizedFunction<Fn extends Function>(
     transformKey,
   });
 
-  const getKeyIndex = createGetKeyIndex(normalizedOptions);
-  const updateAsyncCache = createUpdateAsyncCache(normalizedOptions);
+  const cache = new Cache(normalizedOptions);
 
-  const keys: Keys = [];
-  const values: Values = [];
-
-  const cache: Cache = {
+  const {
     keys,
-    get size() {
-      return cache.keys.length;
-    },
     values,
-  };
-
-  const canTransformKey = typeof transformKey === 'function';
-
-  const shouldCloneArguments = !!(transformKey || isMatchingKey);
-
-  const shouldUpdateOnAdd = typeof onCacheAdd === 'function';
-  const shouldUpdateOnChange = typeof onCacheChange === 'function';
-  const shouldUpdateOnHit = typeof onCacheHit === 'function';
+    canTransformKey,
+    shouldCloneArguments,
+    shouldUpdateOnAdd,
+    shouldUpdateOnChange,
+    shouldUpdateOnHit,
+  } = cache;
 
   // @ts-ignore
   const memoized: Memoized<Fn> = function memoized() {
@@ -80,27 +66,37 @@ function createMemoizedFunction<Fn extends Function>(
       ? slice(arguments, 0)
       : arguments;
     const key = canTransformKey ? transformKey(normalizedArgs) : normalizedArgs;
-    const keyIndex = keys.length ? getKeyIndex(keys, key) : -1;
+    const keyIndex = keys.length ? cache.getKeyIndex(key) : -1;
 
     if (keyIndex !== -1) {
-      shouldUpdateOnHit && onCacheHit(cache, normalizedOptions, memoized);
+      if (shouldUpdateOnHit) {
+        onCacheHit(cache, normalizedOptions, memoized);
+      }
 
       if (keyIndex) {
-        orderByLru(cache, keys[keyIndex], values[keyIndex], keyIndex, maxSize);
+        cache.orderByLru(keys[keyIndex], values[keyIndex], keyIndex);
 
-        shouldUpdateOnChange &&
+        if (shouldUpdateOnChange) {
           onCacheChange(cache, normalizedOptions, memoized);
+        }
       }
     } else {
       const newValue = fn.apply(this, arguments);
       const newKey = shouldCloneArguments ? key : slice(arguments, 0);
 
-      orderByLru(cache, newKey, newValue, keys.length, maxSize);
+      cache.orderByLru(newKey, newValue, keys.length);
 
-      isPromise && updateAsyncCache(cache, memoized);
+      if (isPromise) {
+        cache.updateAsyncCache(memoized);
+      }
 
-      shouldUpdateOnAdd && onCacheAdd(cache, normalizedOptions, memoized);
-      shouldUpdateOnChange && onCacheChange(cache, normalizedOptions, memoized);
+      if (shouldUpdateOnAdd) {
+        onCacheAdd(cache, normalizedOptions, memoized);
+      }
+
+      if (shouldUpdateOnChange) {
+        onCacheChange(cache, normalizedOptions, memoized);
+      }
     }
 
     return values[0];
@@ -114,11 +110,7 @@ function createMemoizedFunction<Fn extends Function>(
     cacheSnapshot: {
       configurable: true,
       get() {
-        return {
-          keys: slice(cache.keys, 0),
-          size: cache.size,
-          values: slice(cache.values, 0),
-        };
+        return cache.snapshot;
       },
     },
     isMemoized: {

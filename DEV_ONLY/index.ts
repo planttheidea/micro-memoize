@@ -103,7 +103,7 @@ const deepEqualMethod = ({
 };
 
 const deepEqualMemoized = memoize(deepEqualMethod, {
-  isMatchingKey: deepEqual,
+  isEqual: deepEqual,
 });
 
 deepEqualMemoized({ one: 1, two: 2 });
@@ -232,6 +232,7 @@ const matchingKeyMethod = function (object: {
 
 const matchingKeyMemoized = memoize(matchingKeyMethod, {
   isMatchingKey: deepEqual,
+  maxSize: 10,
 });
 
 matchingKeyMemoized({ deeply: { nested: { number: 35 } } });

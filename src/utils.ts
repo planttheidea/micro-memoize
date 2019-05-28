@@ -3,7 +3,6 @@ import {
   Cache,
   Dictionary,
   Key,
-  KeyIndexGetter,
   Keys,
   Memoized,
   StandardOptions,
@@ -216,11 +215,14 @@ export function orderByLru(
   }
 }
 
+export const slice = Function.prototype.bind.call(
+  Function.prototype.call,
+  Array.prototype.slice,
+);
+
 export function createUpdateAsyncCache(
   options: StandardOptions,
 ): AsyncCacheUpdater {
-  const getKeyIndex: KeyIndexGetter = createGetKeyIndex(options);
-
   const { onCacheChange, onCacheHit } = options;
 
   const shouldUpdateOnChange = typeof onCacheChange === 'function';
@@ -247,7 +249,7 @@ export function createUpdateAsyncCache(
         return value;
       })
       .catch((error: Error) => {
-        const keyIndex = getKeyIndex(cache.keys, key);
+        const keyIndex = cache.getKeyIndex(key);
 
         if (keyIndex !== -1) {
           cache.keys.splice(keyIndex, 1);
