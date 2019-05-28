@@ -8,22 +8,7 @@ export type Value = any;
 
 export type RawKey = Key | IArguments;
 
-export interface Cache {
-  canTransformKey: boolean;
-  getKeyIndex: KeyIndexGetter;
-  keys: Key[];
-  options: Options;
-  shouldCloneArguments: boolean;
-  shouldUpdateOnAdd: boolean;
-  shouldUpdateOnChange: boolean;
-  shouldUpdateOnHit: boolean;
-  snapshot: {
-    keys: Key[];
-    size: number;
-    values: Value[];
-  };
-  values: Value[];
-}
+export type Cache = import('./src/Cache').Cache;
 
 export type EqualityComparator = (object1: any, object2: any) => boolean;
 
@@ -37,7 +22,7 @@ export type CacheModifiedHandler = (
 
 export type KeyTransformer = (args: RawKey) => Key;
 
-export type KeyIndexGetter = (allKeys: Key[], keyToMatch: RawKey) => number;
+export type KeyIndexGetter = (keyToMatch: RawKey) => number;
 
 export type StandardOptions = {
   isEqual?: EqualityComparator;
@@ -54,10 +39,10 @@ export type Options = StandardOptions & Dictionary<any>;
 
 export type Memoized<Fn extends Function> = Fn &
   Dictionary<any> & {
-    cache?: Cache;
+    cache: Cache;
     fn: Fn;
-    isMemoized?: boolean;
-    options?: Options;
+    isMemoized: true;
+    options: Options;
   };
 
 export default function memoize<Fn extends Function>(
