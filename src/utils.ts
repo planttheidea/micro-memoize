@@ -1,6 +1,9 @@
-import { Dictionary, Memoized, StandardOptions, Options } from './types';
+import { Dictionary, Memoized, Options, StandardOptions } from './types';
 
-const DEFAULT_OPTIONS_KEYS: { [key: string]: boolean } = {
+/**
+ * @constant DEFAULT_OPTIONS_KEYS the default options keys
+ */
+const DEFAULT_OPTIONS_KEYS: { [key: string]: true } = {
   isEqual: true,
   isMatchingKey: true,
   isPromise: true,
@@ -21,7 +24,7 @@ const DEFAULT_OPTIONS_KEYS: { [key: string]: boolean } = {
  * @returns the custom options passed
  */
 export function getCustomOptions(options: Options) {
-  const customOptions: { [key: string]: any } = {};
+  const customOptions: Dictionary<any> = {};
 
   for (const key in options) {
     if (!DEFAULT_OPTIONS_KEYS[key]) {
@@ -30,10 +33,6 @@ export function getCustomOptions(options: Options) {
   }
 
   return customOptions;
-}
-
-export function isFunction(fn: any): fn is Function {
-  return typeof fn === 'function';
 }
 
 /**
@@ -46,7 +45,7 @@ export function isFunction(fn: any): fn is Function {
  * @returns is the function already memoized
  */
 export function isMemoized(fn: any): fn is Memoized<Function> {
-  return isFunction(fn) && (fn as Memoized<Function>).isMemoized;
+  return typeof fn === 'function' && (fn as Memoized<Function>).isMemoized;
 }
 
 /**
@@ -69,27 +68,33 @@ export function isSameValueZero(object1: any, object2: any) {
  * @description
  * merge the options into the target
  *
- * @param extraOptions the extra options passed
- * @param providedOptions the defaulted options provided
+ * @param existingOptions the options provided
+ * @param newOptions the options to include
  * @returns the merged options
  */
 export function mergeOptions(
-  extraOptions: Dictionary<any>,
-  providedOptions: StandardOptions,
-) {
+  existingOptions: Options,
+  newOptions: Options,
+): Readonly<Options> {
   const target: Options = {};
 
-  for (const key in extraOptions) {
-    target[key] = extraOptions[key];
+  for (const key in existingOptions) {
+    target[key] = existingOptions[key];
   }
 
-  for (const key in providedOptions) {
-    target[key] = providedOptions[key as keyof StandardOptions];
+  for (const key in newOptions) {
+    target[key] = newOptions[key];
   }
 
   return target;
 }
 
+/**
+ * @function slice
+ *
+ * @description
+ * slice.call() pre-bound
+ */
 export const slice = Function.prototype.bind.call(
   Function.prototype.call,
   Array.prototype.slice,

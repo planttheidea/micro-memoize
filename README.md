@@ -372,8 +372,8 @@ The `cache` object that is used internally. The shape of this structure:
 
 ```ts
 {
-  keys: any[][], // available as MicroMemoize.Keys
-  values: any[] // available as MicroMemoize.Values
+  keys: any[][], // available as MicroMemoize.Key[]
+  values: any[] // available as MicroMemoize.Value[]
 }
 ```
 
@@ -397,6 +397,12 @@ console.log(memoized("one", "two")); // 'cached'
 `Object`
 
 This is identical to the `cache` object referenced above, but it is a deep clone created at request, which will provide a persistent snapshot of the values at that time. This is useful when tracking the cache changes over time, as the `cache` object is mutated internally for performance reasons.
+
+### memoized.fn
+
+`function`
+
+The original function passed to be memoized.
 
 ### memoized.isMemoized
 
@@ -429,16 +435,16 @@ This is usually what benchmarks target for ... its the least-likely use-case, bu
 
 |                   | Operations / second |
 | ----------------- | ------------------- |
-| fast-memoize      | 47,878,927          |
-| **micro-memoize** | **40,373,458**      |
-| lru-memoize       | 39,989,466          |
-| Addy Osmani       | 27,782,914          |
-| lodash            | 26,352,951          |
-| ramda             | 22,475,634          |
-| underscore        | 22,030,431          |
-| mem               | 20,299,797          |
-| memoizee          | 16,985,364          |
-| memoizerific      | 5,823,373           |
+| fast-memoize      | 59,069,204          |
+| **micro-memoize** | **48,267,295**      |
+| lru-memoize       | 46,781,143          |
+| Addy Osmani       | 32,372,414          |
+| lodash            | 29,297,916          |
+| ramda             | 25,054,838          |
+| mem               | 24,848,072          |
+| underscore        | 24,847,818          |
+| memoizee          | 18,272,987          |
+| memoizerific      | 7,302,835           |
 
 ### Single parameter (complex object)
 
@@ -446,16 +452,16 @@ This is what most memoization libraries target as the primary use-case, as it re
 
 |                   | Operations / second |
 | ----------------- | ------------------- |
-| **micro-memoize** | **30,040,598**      |
-| lodash            | 29,298,955          |
-| lru-memoize       | 21,341,877          |
-| memoizee          | 11,149,801          |
-| memoizerific      | 5,542,238           |
-| ramda             | 2,112,667           |
-| underscore        | 2,089,144           |
-| Addy Osmani       | 1,973,732           |
-| mem               | 1,853,416           |
-| fast-memoize      | 1,527,852           |
+| **micro-memoize** | **40,360,621**      |
+| lodash            | 30,862,028          |
+| lru-memoize       | 25,740,572          |
+| memoizee          | 12,058,375          |
+| memoizerific      | 6,854,855           |
+| ramda             | 2,287,030           |
+| underscore        | 2,270,574           |
+| Addy Osmani       | 2,076,031           |
+| mem               | 2,001,984           |
+| fast-memoize      | 1,591,019           |
 
 ### Multiple parameters (primitives only)
 
@@ -463,16 +469,16 @@ This is a very common use-case for function calls, but can be more difficult to 
 
 |                   | Operations / second |
 | ----------------- | ------------------- |
-| **micro-memoize** | **27,606,297**      |
-| lru-memoize       | 17,917,076          |
-| memoizee          | 6,778,193           |
-| Addy Osmani       | 5,787,376           |
-| memoizerific      | 4,651,947           |
-| mem               | 2,402,371           |
-| ramda             | 1,548,197           |
-| underscore        | 1,522,849           |
-| lodash            | 1,349,424           |
-| fast-memoize      | 1,300,765           |
+| **micro-memoize** | **33,546,353**      |
+| lru-memoize       | 20,884,669          |
+| memoizee          | 7,831,161           |
+| Addy Osmani       | 6,447,448           |
+| memoizerific      | 5,587,779           |
+| mem               | 2,620,943           |
+| underscore        | 1,617,687           |
+| ramda             | 1,569,167           |
+| lodash            | 1,512,515           |
+| fast-memoize      | 1,376,665           |
 
 ### Multiple parameters (complex objects)
 
@@ -480,16 +486,16 @@ This is the most robust use-case, with the same complexities as multiple primiti
 
 |                   | Operations / second |
 | ----------------- | ------------------- |
-| **micro-memoize** | **25,845,573**      |
-| lru-memoize       | 17,060,727          |
-| memoizee          | 6,708,619           |
-| memoizerific      | 4,719,046           |
-| mem               | 1,045,712           |
-| ramda             | 962,299             |
-| underscore        | 952,825             |
-| Addy Osmani       | 941,157             |
-| fast-memoize      | 872,483             |
-| lodash            | 871,964             |
+| **micro-memoize** | **34,857,438**      |
+| lru-memoize       | 20,838,330          |
+| memoizee          | 7,820,066           |
+| memoizerific      | 5,761,357           |
+| mem               | 1,184,550           |
+| ramda             | 1,034,937           |
+| underscore        | 1,021,480           |
+| Addy Osmani       | 1,014,642           |
+| lodash            | 1,014,060           |
+| fast-memoize      | 949,213             |
 
 ## Browser support
 

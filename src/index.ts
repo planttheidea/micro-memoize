@@ -2,12 +2,11 @@
 import { Cache } from './Cache';
 
 // types
-import { Memoized, Keys, StandardOptions, Values } from './types';
+import { Memoized, StandardOptions } from './types';
 
 // utils
 import {
   getCustomOptions,
-  isFunction,
   isMemoized,
   isSameValueZero,
   mergeOptions,
@@ -15,14 +14,14 @@ import {
 } from './utils';
 
 function createMemoizedFunction<Fn extends Function>(
-  fn: Fn,
+  fn: Fn | Memoized<Fn>,
   options: StandardOptions = {},
 ): Memoized<Fn> {
   if (isMemoized(fn)) {
-    return fn;
+    return createMemoizedFunction(fn.fn, mergeOptions(fn.options, options));
   }
 
-  if (!isFunction(fn)) {
+  if (typeof fn !== 'function') {
     throw new TypeError('You must pass a function to `memoize`.');
   }
 
@@ -37,16 +36,19 @@ function createMemoizedFunction<Fn extends Function>(
     transformKey,
   }: StandardOptions = options;
 
-  const normalizedOptions = mergeOptions(getCustomOptions(options), {
-    isEqual,
-    isMatchingKey,
-    isPromise,
-    maxSize,
-    onCacheAdd,
-    onCacheChange,
-    onCacheHit,
-    transformKey,
-  });
+  const normalizedOptions = mergeOptions(
+    {
+      isEqual,
+      isMatchingKey,
+      isPromise,
+      maxSize,
+      onCacheAdd,
+      onCacheChange,
+      onCacheHit,
+      transformKey,
+    },
+    getCustomOptions(options),
+  );
 
   const cache = new Cache(normalizedOptions);
 
@@ -62,10 +64,12 @@ function createMemoizedFunction<Fn extends Function>(
 
   // @ts-ignore
   const memoized: Memoized<Fn> = function memoized() {
-    const normalizedArgs = shouldCloneArguments
-      ? slice(arguments, 0)
-      : arguments;
-    const key = canTransformKey ? transformKey(normalizedArgs) : normalizedArgs;
+    let key = shouldCloneArguments ? slice(arguments, 0) : arguments;
+
+    if (canTransformKey) {
+      key = transformKey(key);
+    }
+
     const keyIndex = keys.length ? cache.getKeyIndex(key) : -1;
 
     if (keyIndex !== -1) {
@@ -103,7 +107,8 @@ function createMemoizedFunction<Fn extends Function>(
   };
 
   memoized.cache = cache;
-  memoized.isMemoized = true;
+  memoized.fn = fn;
+  memoized.isMemoized = true as const;
   memoized.options = normalizedOptions;
 
   return memoized;

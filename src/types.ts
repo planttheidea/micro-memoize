@@ -4,28 +4,25 @@ export type Dictionary<Type> = {
 };
 
 export type Key = any[];
+export type Value = any;
 
 export type RawKey = Key | IArguments;
-
-export type Keys = Key[];
-
-export type Values = any[];
 
 export type Cache = {
   canTransformKey: boolean;
   getKeyIndex: KeyIndexGetter;
-  keys: Keys;
+  keys: Key[];
   options: Options;
   shouldCloneArguments: boolean;
   shouldUpdateOnAdd: boolean;
   shouldUpdateOnChange: boolean;
   shouldUpdateOnHit: boolean;
   snapshot: {
-    keys: Keys;
+    keys: Key[];
     size: number;
-    values: Values;
+    values: Value[];
   };
-  values: Values;
+  values: Value[];
 };
 
 export type EqualityComparator = (object1: any, object2: any) => boolean;
@@ -55,10 +52,10 @@ export type StandardOptions = {
 
 export type Options = StandardOptions & Dictionary<any>;
 
-export type Memoized<Fn extends Function> = Fn & {
-  [key: string]: any;
-  cache?: Cache;
-  cacheSnapshot?: Cache;
-  isMemoized?: boolean;
-  options?: Options;
-};
+export type Memoized<Fn extends Function> = Fn &
+  Dictionary<any> & {
+    cache: Cache;
+    fn: Fn;
+    isMemoized: true;
+    options: Options;
+  };

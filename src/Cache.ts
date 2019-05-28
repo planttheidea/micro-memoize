@@ -1,19 +1,19 @@
-import { Key, KeyIndexGetter, Keys, Memoized, Options, Values } from './types';
+import { Key, KeyIndexGetter, Memoized, Options, Value } from './types';
 
 // utils
 import { slice } from './utils';
 
 export class Cache {
   readonly canTransformKey: boolean;
+  readonly getKeyIndex: KeyIndexGetter;
   readonly options: Options;
   readonly shouldCloneArguments: boolean;
   readonly shouldUpdateOnAdd: boolean;
   readonly shouldUpdateOnChange: boolean;
   readonly shouldUpdateOnHit: boolean;
 
-  getKeyIndex: KeyIndexGetter;
-  keys: Keys;
-  values: Values;
+  keys: Key[];
+  values: Value[];
 
   constructor(options: Options) {
     this.keys = [];
@@ -129,14 +129,14 @@ export class Cache {
    * @returns the index of the matching key, or -1
    */
   _getKeyIndexForSingle(keyToMatch: Key) {
-    const { isEqual } = this.options;
-
     const existingKey = this.keys[0];
     const keyLength = existingKey.length;
 
     if (keyToMatch.length !== keyLength) {
       return -1;
     }
+
+    const { isEqual } = this.options;
 
     for (let index = 0; index < keyLength; index++) {
       if (!isEqual(existingKey[index], keyToMatch[index])) {
@@ -157,7 +157,7 @@ export class Cache {
    * @param value the new value to move to the front
    * @param startingIndex the index of the item to move to the front
    */
-  orderByLru(key: Key, value: any, startingIndex: number) {
+  orderByLru(key: Key, value: Value, startingIndex: number) {
     let index = startingIndex;
 
     while (index--) {
@@ -171,8 +171,7 @@ export class Cache {
     const { maxSize } = this.options;
 
     if (startingIndex >= maxSize) {
-      this.keys.length = maxSize;
-      this.values.length = maxSize;
+      this.keys.length = this.values.length = maxSize;
     }
   }
 
@@ -188,7 +187,7 @@ export class Cache {
   updateAsyncCache(memoized: Memoized<Function>) {
     const { onCacheChange, onCacheHit } = this.options;
 
-    const [key] = this.keys;
+    const [firstKey] = this.keys;
     const [firstValue] = this.values;
 
     this.values[0] = firstValue
@@ -204,7 +203,7 @@ export class Cache {
         return value;
       })
       .catch((error: Error) => {
-        const keyIndex = this.getKeyIndex(key);
+        const keyIndex = this.getKeyIndex(firstKey);
 
         if (keyIndex !== -1) {
           this.keys.splice(keyIndex, 1);

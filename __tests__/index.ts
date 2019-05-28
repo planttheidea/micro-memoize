@@ -5,23 +5,6 @@ import memoize from '../src';
 import { isSameValueZero } from '../src/utils';
 
 describe('memoize', () => {
-  it('will return the function if already memoized', () => {
-    const fn = () => {};
-
-    fn.isMemoized = true;
-
-    const memoized = memoize(fn);
-
-    expect(memoized).toBe(fn);
-  });
-
-  it('will throw an error if not a function', () => {
-    const fn = 123;
-
-    // @ts-ignore
-    expect(() => memoize(fn)).toThrow();
-  });
-
   it('will return the memoized function', () => {
     let callCount = 0;
 
@@ -648,5 +631,27 @@ describe('memoize', () => {
     const result2 = calc(data, metadata);
 
     expect(result1).toEqual(result2);
+  });
+
+  it('will re-memoize the function with merged options if already memoized', () => {
+    const fn = () => {};
+
+    const maxSize = 5;
+    const isEqual = () => true;
+
+    const memoized = memoize(fn, { maxSize });
+
+    const reMemoized = memoize(memoized, { isEqual });
+
+    expect(reMemoized).not.toBe(memoized);
+    expect(reMemoized.options.maxSize).toBe(maxSize);
+    expect(reMemoized.options.isEqual).toBe(isEqual);
+  });
+
+  it('will throw an error if not a function', () => {
+    const fn = 123;
+
+    // @ts-ignore
+    expect(() => memoize(fn)).toThrow();
   });
 });
