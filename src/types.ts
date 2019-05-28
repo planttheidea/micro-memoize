@@ -8,7 +8,12 @@ export type Value = any;
 
 export type RawKey = Key | IArguments;
 
-export type Cache = import('./Cache').Cache;
+type CacheClass = import('./Cache').Cache;
+
+export interface Cache extends CacheClass {
+  constructor: Cache;
+  new (options: Options): Cache;
+}
 
 export type EqualityComparator = (object1: any, object2: any) => boolean;
 
