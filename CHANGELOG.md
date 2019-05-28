@@ -1,5 +1,18 @@
 # micro-memoize CHANGELOG
 
+## 4.0.0
+
+- Update to use `Cache` class instead of plain object (~10% performance improvement)
+
+#### Breaking changes
+
+- `memoized.cacheSnapshot` has been deprecated in favor of `memoized.cache.snapshot`
+- Memoizing an already-memoized function no longer returns the function passed (now composes, see [Composition](README.md#composition))
+
+#### Enhancements
+
+- You can now compose memoized functions with their options (see [Composition](README.md#composition))
+
 ## 3.0.2
 
 - Fix types declarations to ensure signature of `fn` passed is retained
