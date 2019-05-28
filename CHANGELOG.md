@@ -1,5 +1,13 @@
 # micro-memoize CHANGELOG
 
+## 4.0.3
+
+- Namespace types under `MicroMemoize` namespace (which is how it was for `4.0.0`, but it got lost)
+
+## 4.0.2
+
+- Make Cache class consumable in types
+
 ## 4.0.1
 
 - Fix types for consumption

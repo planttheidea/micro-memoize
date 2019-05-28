@@ -2,7 +2,7 @@
 import { Cache } from './Cache';
 
 // types
-import { Memoized, StandardOptions } from './types';
+import { MicroMemoize } from './types';
 
 // utils
 import {
@@ -14,9 +14,9 @@ import {
 } from './utils';
 
 function createMemoizedFunction<Fn extends Function>(
-  fn: Fn | Memoized<Fn>,
-  options: StandardOptions = {},
-): Memoized<Fn> {
+  fn: Fn | MicroMemoize.Memoized<Fn>,
+  options: MicroMemoize.StandardOptions = {},
+): MicroMemoize.Memoized<Fn> {
   if (isMemoized(fn)) {
     return createMemoizedFunction(fn.fn, mergeOptions(fn.options, options));
   }
@@ -34,7 +34,7 @@ function createMemoizedFunction<Fn extends Function>(
     onCacheChange,
     onCacheHit,
     transformKey,
-  }: StandardOptions = options;
+  }: MicroMemoize.StandardOptions = options;
 
   const normalizedOptions = mergeOptions(
     {
