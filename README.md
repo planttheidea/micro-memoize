@@ -254,7 +254,7 @@ Callback method that executes whenever the cache is added to. This is mainly to 
 const fn = (one: string, two: string) => [one, two];
 
 const memoized = memoize(fn, {
-  onCacheAdd(cache: MicroMemoize.Cache, options: MicroMemoize.Options) {
+  onCacheAdd(cache: Cache, options: Options) {
     console.log("cache has been added to: ", cache);
     console.log("memoized method has the following options applied: ", options);
   }
@@ -285,7 +285,7 @@ Callback method that executes whenever the cache is added to or the order is upd
 const fn = (one: string, two: string) => [one, two];
 
 const memoized = memoize(fn, {
-  onCacheChange(cache: MicroMemoize.Cache, options: MicroMemoize.Options) {
+  onCacheChange(cache: Cache, options: Options) {
     console.log("cache has changed: ", cache);
     console.log("memoized method has the following options applied: ", options);
   }
@@ -317,7 +317,7 @@ const fn = (one: string, two: string) => [one, two];
 
 const memoized = memoize(fn, {
   maxSize: 2,
-  onCacheHit(cache: MicroMemoize.Cache, options: MicroMemoize.Options) {
+  onCacheHit(cache: Cache, options: Options) {
     console.log("cache was hit: ", cache);
     console.log("memoized method has the following options applied: ", options);
   }
@@ -385,8 +385,8 @@ The `cache` object that is used internally. The shape of this structure:
 
 ```ts
 {
-  keys: any[][], // available as MicroMemoize.Key[]
-  values: any[] // available as MicroMemoize.Value[]
+  keys: any[][], // available as Key[]
+  values: any[] // available as Value[]
 }
 ```
 

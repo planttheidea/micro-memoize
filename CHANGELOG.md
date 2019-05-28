@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 4.0.1
+
+- Fix types for consumption
+
 ## 4.0.0
 
 - Update to use `Cache` class instead of plain object (~10% performance improvement)
