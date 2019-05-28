@@ -1,4 +1,4 @@
-import { Dictionary, Memoized, Options, StandardOptions } from './types';
+import { Dictionary, MicroMemoize } from './types';
 
 /**
  * @constant DEFAULT_OPTIONS_KEYS the default options keys
@@ -23,7 +23,7 @@ const DEFAULT_OPTIONS_KEYS: { [key: string]: true } = {
  * @param options the memoization options passed
  * @returns the custom options passed
  */
-export function getCustomOptions(options: Options) {
+export function getCustomOptions(options: MicroMemoize.Options) {
   const customOptions: Dictionary<any> = {};
 
   for (const key in options) {
@@ -44,8 +44,11 @@ export function getCustomOptions(options: Options) {
  * @param fn the function to test
  * @returns is the function already memoized
  */
-export function isMemoized(fn: any): fn is Memoized<Function> {
-  return typeof fn === 'function' && (fn as Memoized<Function>).isMemoized;
+export function isMemoized(fn: any): fn is MicroMemoize.Memoized<Function> {
+  return (
+    typeof fn === 'function' &&
+    (fn as MicroMemoize.Memoized<Function>).isMemoized
+  );
 }
 
 /**
@@ -73,10 +76,10 @@ export function isSameValueZero(object1: any, object2: any) {
  * @returns the merged options
  */
 export function mergeOptions(
-  existingOptions: Options,
-  newOptions: Options,
-): Readonly<Options> {
-  const target: Options = {};
+  existingOptions: MicroMemoize.Options,
+  newOptions: MicroMemoize.Options,
+): Readonly<MicroMemoize.Options> {
+  const target: MicroMemoize.Options = {};
 
   for (const key in existingOptions) {
     target[key] = existingOptions[key];

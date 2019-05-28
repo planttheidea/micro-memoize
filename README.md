@@ -7,6 +7,7 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
 - [Summary](#summary)
 - [Importing](#importing)
 - [Usage](#usage)
+  - [Types](#types)
   - [Composition](#composition)
 - [Options](#options)
   - [isEqual](#isequal)
@@ -63,6 +64,14 @@ const memoized = memoize(assembleToObject);
 
 console.log(memoized("one", "two")); // {one: 'one', two: 'two'}
 console.log(memoized("one", "two")); // pulled from cache, {one: 'one', two: 'two'}
+```
+
+### Types
+
+If you need them, all types are available under the `MicroMemoize` namespace.
+
+```ts
+import { MicroMemoize } from "micro-memoize";
 ```
 
 ### Composition
@@ -385,8 +394,8 @@ The `cache` object that is used internally. The shape of this structure:
 
 ```ts
 {
-  keys: any[][], // available as Key[]
-  values: any[] // available as Value[]
+  keys: any[][], // available as MicroMemoize.Key[]
+  values: any[] // available as MicroMemoize.Value[]
 }
 ```
 

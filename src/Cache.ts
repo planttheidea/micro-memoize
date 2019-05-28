@@ -1,21 +1,21 @@
-import { Key, KeyIndexGetter, Memoized, Options, Value } from './types';
+import { MicroMemoize } from './types';
 
 // utils
 import { slice } from './utils';
 
 export class Cache {
   readonly canTransformKey: boolean;
-  readonly getKeyIndex: KeyIndexGetter;
-  readonly options: Options;
+  readonly getKeyIndex: MicroMemoize.KeyIndexGetter;
+  readonly options: MicroMemoize.Options;
   readonly shouldCloneArguments: boolean;
   readonly shouldUpdateOnAdd: boolean;
   readonly shouldUpdateOnChange: boolean;
   readonly shouldUpdateOnHit: boolean;
 
-  keys: Key[];
-  values: Value[];
+  keys: MicroMemoize.Key[];
+  values: MicroMemoize.Value[];
 
-  constructor(options: Options) {
+  constructor(options: MicroMemoize.Options) {
     this.keys = [];
     this.values = [];
     this.options = options;
@@ -59,7 +59,7 @@ export class Cache {
    * @param keyToMatch the key to match
    * @returns the index of the matching key, or -1
    */
-  _getKeyIndexFromMatchingKey(keyToMatch: Key) {
+  _getKeyIndexFromMatchingKey(keyToMatch: MicroMemoize.Key) {
     const { isMatchingKey, maxSize } = this.options;
     const allKeys = this.keys;
 
@@ -89,7 +89,7 @@ export class Cache {
    * @param keyToMatch the key to match
    * @returns the index of the matching key, or -1
    */
-  _getKeyIndexForMany(keyToMatch: Key) {
+  _getKeyIndexForMany(keyToMatch: MicroMemoize.Key) {
     const { isEqual } = this.options;
     const allKeys = this.keys;
 
@@ -128,7 +128,7 @@ export class Cache {
    * @param keyToMatch the key to match
    * @returns the index of the matching key, or -1
    */
-  _getKeyIndexForSingle(keyToMatch: Key) {
+  _getKeyIndexForSingle(keyToMatch: MicroMemoize.Key) {
     const existingKey = this.keys[0];
     const keyLength = existingKey.length;
 
@@ -157,7 +157,11 @@ export class Cache {
    * @param value the new value to move to the front
    * @param startingIndex the index of the item to move to the front
    */
-  orderByLru(key: Key, value: Value, startingIndex: number) {
+  orderByLru(
+    key: MicroMemoize.Key,
+    value: MicroMemoize.Value,
+    startingIndex: number,
+  ) {
     let index = startingIndex;
 
     while (index--) {
@@ -184,7 +188,7 @@ export class Cache {
    *
    * @param memoized the memoized function
    */
-  updateAsyncCache(memoized: Memoized<Function>) {
+  updateAsyncCache(memoized: MicroMemoize.Memoized<Function>) {
     const { onCacheChange, onCacheHit } = this.options;
 
     const [firstKey] = this.keys;
