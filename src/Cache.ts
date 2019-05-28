@@ -51,6 +51,15 @@ export class Cache {
     };
   }
 
+  /**
+   * @function _getKeyIndexFromMatchingKey
+   *
+   * @description
+   * gets the matching key index when a custom key matcher is used
+   *
+   * @param keyToMatch the key to match
+   * @returns the index of the matching key, or -1
+   */
   _getKeyIndexFromMatchingKey(keyToMatch: Key) {
     const { isMatchingKey, maxSize } = this.options;
     const allKeys = this.keys;
@@ -72,6 +81,15 @@ export class Cache {
     return -1;
   }
 
+  /**
+   * @function _getKeyIndexForMany
+   *
+   * @description
+   * gets the matching key index when multiple keys are used
+   *
+   * @param keyToMatch the key to match
+   * @returns the index of the matching key, or -1
+   */
   _getKeyIndexForMany(keyToMatch: Key) {
     const { isEqual } = this.options;
     const allKeys = this.keys;
@@ -102,6 +120,15 @@ export class Cache {
     return -1;
   }
 
+  /**
+   * @function _getKeyIndexForSingle
+   *
+   * @description
+   * gets the matching key index when a single key is used
+   *
+   * @param keyToMatch the key to match
+   * @returns the index of the matching key, or -1
+   */
   _getKeyIndexForSingle(keyToMatch: Key) {
     const { isEqual } = this.options;
 
@@ -121,10 +148,16 @@ export class Cache {
     return 0;
   }
 
-  add(key: Key, value: any) {
-    this.orderByLru(key, value, this.size);
-  }
-
+  /**
+   * @function orderByLru
+   *
+   * @description
+   * order the array based on a Least-Recently-Used basis
+   *
+   * @param key the new key to move to the front
+   * @param value the new value to move to the front
+   * @param startingIndex the index of the item to move to the front
+   */
   orderByLru(key: Key, value: any, startingIndex: number) {
     let index = startingIndex;
 
@@ -144,6 +177,15 @@ export class Cache {
     }
   }
 
+  /**
+   * @function updateAsyncCache
+   *
+   * @description
+   * update the promise method to auto-remove from cache if rejected, and
+   * if resolved then fire cache hit / changed
+   *
+   * @param memoized the memoized function
+   */
   updateAsyncCache(memoized: Memoized<Function>) {
     const { onCacheChange, onCacheHit } = this.options;
 

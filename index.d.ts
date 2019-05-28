@@ -13,8 +13,19 @@ declare namespace MicroMemoize {
   export type Values = any[];
 
   export type Cache = {
+    canTransformKey: boolean;
+    getKeyIndex: KeyIndexGetter;
     keys: Keys;
-    size: number;
+    options: Options;
+    shouldCloneArguments: boolean;
+    shouldUpdateOnAdd: boolean;
+    shouldUpdateOnChange: boolean;
+    shouldUpdateOnHit: boolean;
+    snapshot: {
+      keys: Keys;
+      size: number;
+      values: Values;
+    };
     values: Values;
   };
 
@@ -31,11 +42,6 @@ declare namespace MicroMemoize {
   export type KeyTransformer = (args: RawKey) => Key;
 
   export type KeyIndexGetter = (allKeys: Keys, keyToMatch: RawKey) => number;
-
-  export type AsyncCacheUpdater = (
-    cache: Cache,
-    memoized: Memoized<Function>,
-  ) => void;
 
   export type StandardOptions = {
     isEqual?: EqualityComparator;

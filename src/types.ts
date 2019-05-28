@@ -20,6 +20,11 @@ export type Cache = {
   shouldUpdateOnAdd: boolean;
   shouldUpdateOnChange: boolean;
   shouldUpdateOnHit: boolean;
+  snapshot: {
+    keys: Keys;
+    size: number;
+    values: Values;
+  };
   values: Values;
 };
 
@@ -36,11 +41,6 @@ export type CacheModifiedHandler = (
 export type KeyTransformer = (args: RawKey) => Key;
 
 export type KeyIndexGetter = (keyToMatch: RawKey) => number;
-
-export type AsyncCacheUpdater = (
-  cache: Cache,
-  memoized: Memoized<Function>,
-) => void;
 
 export type StandardOptions = {
   isEqual?: EqualityComparator;
