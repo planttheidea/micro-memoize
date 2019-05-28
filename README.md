@@ -64,6 +64,18 @@ console.log(memoized("one", "two")); // {one: 'one', two: 'two'}
 console.log(memoized("one", "two")); // pulled from cache, {one: 'one', two: 'two'}
 ```
 
+### Composition
+
+Starting in `4.0.0`, you can compose memoized functions if you want to have multiple types of memoized versions based on different options.
+
+```ts
+const simple = memoized(fn); // { maxSize: 1 }
+const upToFive = memoized(simple, { maxSize: 5 }); // { maxSize: 5 }
+const withCustomEquals = memoized(upToFive, { isEqual: deepEqual }); // { maxSize: 5, isEqual: deepEqual }
+```
+
+**NOTE**: The original function is the function used in the composition, the composition only applies to the options. In the example above, `upToFive` does not call `simple`, it calls `fn`.
+
 ## Options
 
 ### isEqual
