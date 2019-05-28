@@ -41,7 +41,7 @@ describe('memoize', () => {
       size: 0,
       values: [],
     });
-    expect(memoized.cacheSnapshot).toEqual({
+    expect(memoized.cache.snapshot).toEqual({
       keys: [],
       size: 0,
       values: [],
@@ -101,7 +101,7 @@ describe('memoize', () => {
       values: [],
     });
 
-    expect(memoized.cacheSnapshot).toEqual({
+    expect(memoized.cache.snapshot).toEqual({
       keys: [],
       size: 0,
       values: [],
@@ -351,14 +351,14 @@ describe('memoize', () => {
 
     memoized('foo').catch(spy);
 
-    expect(memoized.cacheSnapshot.keys.length).toEqual(1);
-    expect(memoized.cacheSnapshot.values.length).toEqual(1);
+    expect(memoized.cache.snapshot.keys.length).toEqual(1);
+    expect(memoized.cache.snapshot.values.length).toEqual(1);
 
     await new Promise((resolve: Function) => {
       setTimeout(resolve, timeout + 50);
     });
 
-    expect(memoized.cacheSnapshot).toEqual({
+    expect(memoized.cache.snapshot).toEqual({
       keys: [],
       size: 0,
       values: [],

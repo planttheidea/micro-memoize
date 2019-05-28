@@ -1,5 +1,13 @@
 # micro-memoize CHANGELOG
 
+## 4.0.0
+
+- Update to use `Cache` class instead of plain object (~10% performance improvement)
+
+#### BREAKING CHANGES
+
+- `memoized.cacheSnapshot` has been deprecated in favor of `memoized.cache.snapshot`
+
 ## 3.0.2
 
 - Fix types declarations to ensure signature of `fn` passed is retained

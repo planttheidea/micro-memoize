@@ -102,26 +102,9 @@ function createMemoizedFunction<Fn extends Function>(
     return values[0];
   };
 
-  Object.defineProperties(memoized, {
-    cache: {
-      configurable: true,
-      value: cache,
-    },
-    cacheSnapshot: {
-      configurable: true,
-      get() {
-        return cache.snapshot;
-      },
-    },
-    isMemoized: {
-      configurable: true,
-      value: true,
-    },
-    options: {
-      configurable: true,
-      value: normalizedOptions,
-    },
-  });
+  memoized.cache = cache;
+  memoized.isMemoized = true;
+  memoized.options = normalizedOptions;
 
   return memoized;
 }
