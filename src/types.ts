@@ -10,9 +10,6 @@ export declare namespace MicroMemoize {
   export type RawKey = Key | IArguments;
 
   export type Cache = import('./Cache').Cache;
-  export type CacheConstructor = Cache & {
-    new (options: Options): Cache;
-  };
 
   export type EqualityComparator = (object1: any, object2: any) => boolean;
 

@@ -114,4 +114,6 @@ function createMemoizedFunction<Fn extends Function>(
   return memoized;
 }
 
+createMemoizedFunction._Cache = Cache;
+
 export default createMemoizedFunction;

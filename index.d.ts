@@ -3,10 +3,6 @@ type Dictionary<Type> = {
   [index: number]: Type;
 };
 
-type Constructor<Type> = {
-  new (...args: any[]): Type;
-};
-
 export declare namespace MicroMemoize {
   export type Key = any[];
   export type Value = any;
@@ -14,8 +10,6 @@ export declare namespace MicroMemoize {
   export type RawKey = Key | IArguments;
 
   export type Cache = import('./src/Cache').Cache;
-
-  export type CacheConstructor = Constructor<Cache>;
 
   export type EqualityComparator = (object1: any, object2: any) => boolean;
 
