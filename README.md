@@ -7,6 +7,7 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
 - [Summary](#summary)
 - [Importing](#importing)
 - [Usage](#usage)
+  - [Composition](#composition)
 - [Options](#options)
   - [isEqual](#isequal)
   - [isMatchingKey](#ismatchingkey)

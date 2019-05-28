@@ -7,10 +7,11 @@
 #### Breaking changes
 
 - `memoized.cacheSnapshot` has been deprecated in favor of `memoized.cache.snapshot`
+- Memoizing an already-memoized function no longer returns the function passed (now composes, see [Composition](README.md#composition))
 
 #### Enhancements
 
-- You can now compose memoized functions with their options
+- You can now compose memoized functions with their options (see [Composition](README.md#composition))
 
 ## 3.0.2
 
