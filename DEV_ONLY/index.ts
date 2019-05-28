@@ -38,13 +38,13 @@ memoized(bar, foo);
 memoized(foo, bar);
 memoized(foo, bar);
 
-console.log(memoized.cacheSnapshot);
+console.log(memoized.cache.snapshot);
 console.log(memoized.cache);
 
 memoized.cache.keys = [];
 memoized.cache.values = [];
 
-console.log(memoized.cacheSnapshot);
+console.log(memoized.cache.snapshot);
 console.log(memoized.cache);
 
 console.groupEnd();
@@ -66,7 +66,7 @@ memoizedLargerCache(foo, bar);
 memoizedLargerCache(baz, quz);
 memoizedLargerCache(foo, quz);
 
-console.log(memoizedLargerCache.cacheSnapshot);
+console.log(memoizedLargerCache.cache.snapshot);
 
 console.groupEnd();
 
@@ -111,7 +111,7 @@ deepEqualMemoized({ one: 2, two: 1 });
 deepEqualMemoized({ one: 1, two: 2 });
 deepEqualMemoized({ one: 1, two: 2 });
 
-console.log(deepEqualMemoized.cacheSnapshot);
+console.log(deepEqualMemoized.cache.snapshot);
 
 console.groupEnd();
 
@@ -145,7 +145,7 @@ memoizedPromiseRejected(3)
     console.log(value);
   })
   .catch((error: Error) => {
-    console.log(memoizedPromiseRejected.cacheSnapshot);
+    console.log(memoizedPromiseRejected.cache.snapshot);
     console.error(error);
   });
 
@@ -154,7 +154,7 @@ memoizedPromiseRejected(3)
     console.log(value);
   })
   .catch((error: Error) => {
-    console.log(memoizedPromiseRejected.cacheSnapshot);
+    console.log(memoizedPromiseRejected.cache.snapshot);
     console.error(error);
   });
 
@@ -163,7 +163,7 @@ memoizedPromiseRejected(3)
     console.log(value);
   })
   .catch((error: Error) => {
-    console.log(memoizedPromiseRejected.cacheSnapshot);
+    console.log(memoizedPromiseRejected.cache.snapshot);
     console.error(error);
   });
 
@@ -177,7 +177,7 @@ memoizedPromise(2, 2).then((value: string) => {
   console.log(`cached value: ${value}`);
 });
 
-console.log(memoizedPromise.cacheSnapshot.keys);
+console.log(memoizedPromise.cache.snapshot.keys);
 
 console.groupEnd();
 
@@ -299,9 +299,9 @@ const metadata = {
 const result1 = calc(data, metadata);
 
 console.log(result1);
-console.log(calc.cacheSnapshot);
+console.log(calc.cache.snapshot);
 
 const result2 = calc(data, metadata);
 
 console.log(result2);
-console.log(calc.cacheSnapshot);
+console.log(calc.cache.snapshot);

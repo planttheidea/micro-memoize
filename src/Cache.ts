@@ -4,14 +4,15 @@ import { Key, KeyIndexGetter, Keys, Memoized, Options, Values } from './types';
 import { slice } from './utils';
 
 export class Cache {
-  canTransformKey: boolean;
+  readonly canTransformKey: boolean;
+  readonly options: Options;
+  readonly shouldCloneArguments: boolean;
+  readonly shouldUpdateOnAdd: boolean;
+  readonly shouldUpdateOnChange: boolean;
+  readonly shouldUpdateOnHit: boolean;
+
   getKeyIndex: KeyIndexGetter;
   keys: Keys;
-  options: Options;
-  shouldCloneArguments: boolean;
-  shouldUpdateOnAdd: boolean;
-  shouldUpdateOnChange: boolean;
-  shouldUpdateOnHit: boolean;
   values: Values;
 
   constructor(options: Options) {
@@ -19,13 +20,11 @@ export class Cache {
     this.values = [];
     this.options = options;
 
-    const { isMatchingKey, maxSize } = options;
-
-    const isMatchingKeyFunction = typeof isMatchingKey === 'function';
+    const isMatchingKeyFunction = typeof options.isMatchingKey === 'function';
 
     if (isMatchingKeyFunction) {
       this.getKeyIndex = this._getKeyIndexFromMatchingKey;
-    } else if (maxSize > 1) {
+    } else if (options.maxSize > 1) {
       this.getKeyIndex = this._getKeyIndexForMany;
     } else {
       this.getKeyIndex = this._getKeyIndexForSingle;
