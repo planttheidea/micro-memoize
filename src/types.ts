@@ -8,21 +8,11 @@ export type Value = any;
 
 export type RawKey = Key | IArguments;
 
-export interface Cache {
-  canTransformKey: boolean;
-  getKeyIndex: KeyIndexGetter;
-  keys: Key[];
-  options: Options;
-  shouldCloneArguments: boolean;
-  shouldUpdateOnAdd: boolean;
-  shouldUpdateOnChange: boolean;
-  shouldUpdateOnHit: boolean;
-  snapshot: {
-    keys: Key[];
-    size: number;
-    values: Value[];
-  };
-  values: Value[];
+type CacheClass = import('./Cache').Cache;
+
+export interface Cache extends CacheClass {
+  constructor: Cache;
+  new (options: Options): Cache;
 }
 
 export type EqualityComparator = (object1: any, object2: any) => boolean;
