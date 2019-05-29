@@ -8,11 +8,11 @@ const SOURCE_MAP = `${SOURCE}.map`;
 const DESTINATION = path.join(__dirname, 'mjs', 'index.mjs');
 const DESTINATION_MAP = `${DESTINATION}.map`;
 
-const getFileName = filename => {
+function getFilename(filename) {
   const split = filename.split('/');
 
   return split[split.length - 1];
-};
+}
 
 try {
   if (!fs.existsSync(path.join(__dirname, 'mjs'))) {
@@ -23,19 +23,15 @@ try {
 
   const contents = fs
     .readFileSync(DESTINATION, { encoding: 'utf8' })
-    .replace(/\/\/# sourceMappingURL=(.*)/, (match, value) => {
-      return match.replace(value, 'index.mjs.map');
-    });
+    .replace(/\/\/# sourceMappingURL=(.*)/, (match, value) => match.replace(value, 'index.mjs.map'));
 
   fs.writeFileSync(DESTINATION, contents, { encoding: 'utf8' });
 
-  console.log(`Copied ${getFileName(SOURCE)} to ${getFileName(DESTINATION)}`);
+  console.log(`Copied ${getFilename(SOURCE)} to ${getFilename(DESTINATION)}`);
 
   fs.copyFileSync(SOURCE_MAP, DESTINATION_MAP);
 
-  console.log(
-    `Copied ${getFileName(SOURCE_MAP)} to ${getFileName(DESTINATION_MAP)}`,
-  );
+  console.log(`Copied ${getFilename(SOURCE_MAP)} to ${getFilename(DESTINATION_MAP)}`);
 } catch (error) {
   console.error(error);
 

@@ -1,5 +1,6 @@
 import typescript from 'rollup-plugin-typescript';
 import { uglify } from 'rollup-plugin-uglify';
+import tsc from 'typescript';
 
 import pkg from './package.json';
 
@@ -13,9 +14,7 @@ const UMD_CONFIG = {
     sourcemap: true,
   },
   plugins: [
-    typescript({
-      typescript: require('typescript'),
-    }),
+    typescript({ typescript: tsc }),
   ],
 };
 
