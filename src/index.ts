@@ -6,11 +6,7 @@ import { MicroMemoize } from './types';
 
 // utils
 import {
-  getCustomOptions,
-  isMemoized,
-  isSameValueZero,
-  mergeOptions,
-  slice,
+  getCustomOptions, isMemoized, isSameValueZero, mergeOptions, slice,
 } from './utils';
 
 function createMemoizedFunction<Fn extends Function>(
@@ -113,7 +109,5 @@ function createMemoizedFunction<Fn extends Function>(
 
   return memoized;
 }
-
-createMemoizedFunction._Cache = Cache;
 
 export default createMemoizedFunction;

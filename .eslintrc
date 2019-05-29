@@ -1,0 +1,23 @@
+{
+  "extends": ["airbnb"],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    }
+  },
+  "rules": {
+    "guard-for-in": 0,
+    "no-plusplus": 0,
+    "no-underscore-dangle": 0,
+    "no-unused-vars": 0,
+    "prefer-rest-params": 0,
+
+    "import/prefer-default-export": 0,
+
+    "@typescript-eslint/no-unused-vars": 2
+  }
+}

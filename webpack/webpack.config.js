@@ -1,14 +1,14 @@
-"use strict";
 
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const path = require("path");
-const webpack = require("webpack");
 
-const ROOT = path.resolve(__dirname, "..");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require('path');
+const webpack = require('webpack');
+
+const ROOT = path.resolve(__dirname, '..');
 
 module.exports = {
   devServer: {
-    contentBase: "./dist",
+    contentBase: './dist',
     inline: true,
     port: 3000,
     stats: {
@@ -18,46 +18,43 @@ module.exports = {
       colors: true,
       hash: false,
       timings: true,
-      version: false
-    }
+      version: false,
+    },
   },
 
-  devtool: "#source-map",
+  devtool: '#source-map',
 
-  entry: path.join(ROOT, "DEV_ONLY", "index.ts"),
+  entry: path.join(ROOT, 'DEV_ONLY', 'index.ts'),
 
-  mode: "development",
+  mode: 'development',
 
   module: {
     rules: [
       {
-        enforce: "pre",
-        include: [path.resolve(ROOT, "src")],
-        loader: "tslint-loader",
-        test: /\.ts$/
+        enforce: 'pre',
+        include: [path.resolve(ROOT, 'src')],
+        loader: 'eslint-loader',
+        test: /\.ts$/,
       },
       {
-        include: [path.resolve(ROOT, "src"), /DEV_ONLY/],
-        loader: "ts-loader",
-        test: /\.ts$/
-      }
-    ]
+        include: [path.resolve(ROOT, 'src'), /DEV_ONLY/],
+        loader: 'ts-loader',
+        test: /\.ts$/,
+      },
+    ],
   },
 
   output: {
-    filename: "micro-memoize.js",
-    library: "microMemoize",
-    libraryTarget: "umd",
-    path: path.resolve(ROOT, "dist"),
-    umdNamedDefine: true
+    filename: 'micro-memoize.js',
+    library: 'microMemoize',
+    libraryTarget: 'umd',
+    path: path.resolve(ROOT, 'dist'),
+    umdNamedDefine: true,
   },
 
-  plugins: [
-    new webpack.EnvironmentPlugin(["NODE_ENV"]),
-    new HtmlWebpackPlugin()
-  ],
+  plugins: [new webpack.EnvironmentPlugin(['NODE_ENV']), new HtmlWebpackPlugin()],
 
   resolve: {
-    extensions: [".tsx", ".ts", ".js"]
-  }
+    extensions: ['.tsx', '.ts', '.js'],
+  },
 };

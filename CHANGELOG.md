@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 4.0.4
+
+- Use `.pop()` to cap cache to `maxSize` when possible (slight performance improvement)
+
 ## 4.0.3
 
 - Namespace types under `MicroMemoize` namespace (which is how it was for `4.0.0`, but it got lost)

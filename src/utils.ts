@@ -3,7 +3,7 @@ import { Dictionary, MicroMemoize } from './types';
 /**
  * @constant DEFAULT_OPTIONS_KEYS the default options keys
  */
-const DEFAULT_OPTIONS_KEYS: { [key: string]: true } = {
+const DEFAULT_OPTIONS_KEYS: Dictionary<true> = {
   isEqual: true,
   isMatchingKey: true,
   isPromise: true,
@@ -26,11 +26,15 @@ const DEFAULT_OPTIONS_KEYS: { [key: string]: true } = {
 export function getCustomOptions(options: MicroMemoize.Options) {
   const customOptions: Dictionary<any> = {};
 
+  /* eslint-disable no-restricted-syntax */
+
   for (const key in options) {
     if (!DEFAULT_OPTIONS_KEYS[key]) {
       customOptions[key] = options[key];
     }
   }
+
+  /* eslint-enable */
 
   return customOptions;
 }
@@ -45,10 +49,7 @@ export function getCustomOptions(options: MicroMemoize.Options) {
  * @returns is the function already memoized
  */
 export function isMemoized(fn: any): fn is MicroMemoize.Memoized<Function> {
-  return (
-    typeof fn === 'function' &&
-    (fn as MicroMemoize.Memoized<Function>).isMemoized
-  );
+  return typeof fn === 'function' && (fn as MicroMemoize.Memoized<Function>).isMemoized;
 }
 
 /**
@@ -62,6 +63,7 @@ export function isMemoized(fn: any): fn is MicroMemoize.Memoized<Function> {
  * @returns are the two objects equal
  */
 export function isSameValueZero(object1: any, object2: any) {
+  // eslint-disable-next-line no-self-compare
   return object1 === object2 || (object1 !== object1 && object2 !== object2);
 }
 
@@ -81,6 +83,8 @@ export function mergeOptions(
 ): Readonly<MicroMemoize.Options> {
   const target: MicroMemoize.Options = {};
 
+  /* eslint-disable no-restricted-syntax */
+
   for (const key in existingOptions) {
     target[key] = existingOptions[key];
   }
@@ -88,6 +92,8 @@ export function mergeOptions(
   for (const key in newOptions) {
     target[key] = newOptions[key];
   }
+
+  /* eslint-enable */
 
   return target;
 }
@@ -98,7 +104,4 @@ export function mergeOptions(
  * @description
  * slice.call() pre-bound
  */
-export const slice = Function.prototype.bind.call(
-  Function.prototype.call,
-  Array.prototype.slice,
-);
+export const slice = Function.prototype.bind.call(Function.prototype.call, Array.prototype.slice);

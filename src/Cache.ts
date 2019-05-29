@@ -5,14 +5,21 @@ import { slice } from './utils';
 
 export class Cache {
   readonly canTransformKey: boolean;
+
   readonly getKeyIndex: MicroMemoize.KeyIndexGetter;
+
   readonly options: MicroMemoize.Options;
+
   readonly shouldCloneArguments: boolean;
+
   readonly shouldUpdateOnAdd: boolean;
+
   readonly shouldUpdateOnChange: boolean;
+
   readonly shouldUpdateOnHit: boolean;
 
   keys: MicroMemoize.Key[];
+
   values: MicroMemoize.Value[];
 
   constructor(options: MicroMemoize.Options) {
@@ -61,17 +68,18 @@ export class Cache {
    */
   _getKeyIndexFromMatchingKey(keyToMatch: MicroMemoize.Key) {
     const { isMatchingKey, maxSize } = this.options;
-    const allKeys = this.keys;
 
-    if (isMatchingKey(allKeys[0], keyToMatch)) {
+    const { keys } = this;
+
+    if (isMatchingKey(keys[0], keyToMatch)) {
       return 0;
     }
 
     if (maxSize > 1) {
-      const keysLength = allKeys.length;
+      const keysLength = keys.length;
 
       for (let index = 1; index < keysLength; index++) {
-        if (isMatchingKey(allKeys[index], keyToMatch)) {
+        if (isMatchingKey(keys[index], keyToMatch)) {
           return index;
         }
       }
@@ -91,18 +99,20 @@ export class Cache {
    */
   _getKeyIndexForMany(keyToMatch: MicroMemoize.Key) {
     const { isEqual } = this.options;
-    const allKeys = this.keys;
 
-    const keysLength = allKeys.length;
+    const { keys } = this;
+    const keysLength = keys.length;
+
     const keyLength = keyToMatch.length;
 
     let existingKey;
+    let argIndex;
 
     for (let index = 0; index < keysLength; index++) {
-      existingKey = allKeys[index];
+      existingKey = keys[index];
 
       if (existingKey.length === keyLength) {
-        let argIndex = 0;
+        argIndex = 0;
 
         for (; argIndex < keyLength; argIndex++) {
           if (!isEqual(existingKey[argIndex], keyToMatch[argIndex])) {
@@ -157,25 +167,30 @@ export class Cache {
    * @param value the new value to move to the front
    * @param startingIndex the index of the item to move to the front
    */
-  orderByLru(
-    key: MicroMemoize.Key,
-    value: MicroMemoize.Value,
-    startingIndex: number,
-  ) {
+  orderByLru(key: MicroMemoize.Key, value: MicroMemoize.Value, startingIndex: number) {
+    const { keys } = this;
+    const { values } = this;
+
+    const currentLength = keys.length;
+
     let index = startingIndex;
 
     while (index--) {
-      this.keys[index + 1] = this.keys[index];
-      this.values[index + 1] = this.values[index];
+      keys[index + 1] = keys[index];
+      values[index + 1] = values[index];
     }
 
-    this.keys[0] = key;
-    this.values[0] = value;
+    keys[0] = key;
+    values[0] = value;
 
     const { maxSize } = this.options;
 
-    if (startingIndex >= maxSize) {
-      this.keys.length = this.values.length = maxSize;
+    if (currentLength === maxSize && startingIndex === currentLength) {
+      keys.pop();
+      values.pop();
+    } else if (startingIndex >= maxSize) {
+      // eslint-disable-next-line no-multi-assign
+      keys.length = values.length = maxSize;
     }
   }
 
