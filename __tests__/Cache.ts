@@ -352,7 +352,7 @@ describe('cache methods', () => {
       });
     });
 
-    it('will add the new item to the array when the itemIndex is the array length', () => {
+    it('will add the new item to the array and remove the last when the itemIndex is the array length', () => {
       const cache = new Cache({ maxSize: 10 });
 
       cache.keys = [['first'], ['second'], ['third']];
@@ -368,6 +368,25 @@ describe('cache methods', () => {
         keys: [key, ['first'], ['second'], ['third']],
         size: 4,
         values: [value, 'first', 'second', 'third'],
+      });
+    });
+
+    it('will truncate the cache to the max size if too large by manual additions', () => {
+      const cache = new Cache({ maxSize: 2 });
+
+      cache.keys = [['first'], ['second'], ['third']];
+      cache.values = ['first', 'second', 'third'];
+
+      const itemIndex = cache.keys.length;
+      const key = ['key'];
+      const value = 'new';
+
+      cache.orderByLru(key, value, itemIndex);
+
+      expect(cache.snapshot).toEqual({
+        keys: [key, ['first']],
+        size: 2,
+        values: [value, 'first'],
       });
     });
   });
