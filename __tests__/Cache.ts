@@ -64,6 +64,18 @@ describe('create cache', () => {
 
 describe('cache methods', () => {
   describe('getKeyIndex', () => {
+    it('will return -1 if no keys exist', () => {
+      const isEqual = (o1: any, o2: any) => o1 === o2;
+
+      const cache = new Cache({ isEqual });
+
+      const keyToMatch = ['key'];
+
+      const result = cache.getKeyIndex(keyToMatch);
+
+      expect(result).toEqual(-1);
+    });
+
     it('will return the index of the match found', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
@@ -100,6 +112,18 @@ describe('cache methods', () => {
       cache.keys = [['key']];
 
       const keyToMatch = ['other key'];
+
+      const result = cache.getKeyIndex(keyToMatch);
+
+      expect(result).toEqual(-1);
+    });
+
+    it('will return -1 if no keys exist with larger maxSize', () => {
+      const isEqual = (o1: any, o2: any) => o1 === o2;
+
+      const cache = new Cache({ isEqual, maxSize: 2 });
+
+      const keyToMatch = ['key'];
 
       const result = cache.getKeyIndex(keyToMatch);
 
@@ -227,6 +251,28 @@ describe('cache methods', () => {
       const result = cache.getKeyIndex(keyToMatch);
 
       expect(result).toEqual(1);
+    });
+
+    it('will return -1 if the isMatchingKey method is passed and there are no keys', () => {
+      const isEqual = (o1: any, o2: any) => o1 === o2;
+      const isMatchingKey = (o1: any, o2: any) => {
+        const existingKey = o1[0];
+        const key = o2[0];
+
+        return (
+          existingKey.hasOwnProperty('foo') &&
+          key.hasOwnProperty('foo') &&
+          (existingKey.bar === 'bar' || key.bar === 'baz')
+        );
+      };
+
+      const cache = new Cache({ isEqual, isMatchingKey });
+
+      const keyToMatch = ['key'];
+
+      const result = cache.getKeyIndex(keyToMatch);
+
+      expect(result).toEqual(-1);
     });
 
     it('will return -1 if the isMatchingKey method is passed and no match is found', () => {

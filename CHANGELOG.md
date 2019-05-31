@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 4.0.5
+
+- Fix failure when `getKeyIndex` is used and no keys are in the cache
+
 ## 4.0.4
 
 - Use `.pop()` to cap cache to `maxSize` when possible (slight performance improvement)
