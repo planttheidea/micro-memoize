@@ -70,14 +70,17 @@ export class Cache {
     const { isMatchingKey, maxSize } = this.options;
 
     const { keys } = this;
+    const keysLength = keys.length;
+
+    if (!keysLength) {
+      return -1;
+    }
 
     if (isMatchingKey(keys[0], keyToMatch)) {
       return 0;
     }
 
     if (maxSize > 1) {
-      const keysLength = keys.length;
-
       for (let index = 1; index < keysLength; index++) {
         if (isMatchingKey(keys[index], keyToMatch)) {
           return index;
@@ -102,6 +105,10 @@ export class Cache {
 
     const { keys } = this;
     const keysLength = keys.length;
+
+    if (!keysLength) {
+      return -1;
+    }
 
     const keyLength = keyToMatch.length;
 
@@ -139,16 +146,22 @@ export class Cache {
    * @returns the index of the matching key, or -1
    */
   _getKeyIndexForSingle(keyToMatch: MicroMemoize.Key) {
-    const existingKey = this.keys[0];
-    const keyLength = existingKey.length;
+    const { keys } = this;
 
-    if (keyToMatch.length !== keyLength) {
+    if (!keys.length) {
+      return -1;
+    }
+
+    const existingKey = keys[0];
+    const { length } = existingKey;
+
+    if (keyToMatch.length !== length) {
       return -1;
     }
 
     const { isEqual } = this.options;
 
-    for (let index = 0; index < keyLength; index++) {
+    for (let index = 0; index < length; index++) {
       if (!isEqual(existingKey[index], keyToMatch[index])) {
         return -1;
       }
