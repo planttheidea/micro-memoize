@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 4.0.6
+
+- Use standard `then` interface (`.then(onFulfilled, onRejected)`) instead of ES spec (`.then(onFulfilled).catch(onRejected)`) for broader support
+
 ## 4.0.5
 
 - Fix failure when `getKeyIndex` is used and no keys are in the cache
