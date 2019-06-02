@@ -222,8 +222,8 @@ export class Cache {
     const [firstKey] = this.keys;
     const [firstValue] = this.values;
 
-    this.values[0] = firstValue
-      .then((value: any) => {
+    this.values[0] = firstValue.then(
+      (value: any) => {
         if (this.shouldUpdateOnHit) {
           onCacheHit(this, this.options, memoized);
         }
@@ -233,8 +233,8 @@ export class Cache {
         }
 
         return value;
-      })
-      .catch((error: Error) => {
+      },
+      (error: Error) => {
         const keyIndex = this.getKeyIndex(firstKey);
 
         if (keyIndex !== -1) {
@@ -243,6 +243,7 @@ export class Cache {
         }
 
         throw error;
-      });
+      },
+    );
   }
 }
