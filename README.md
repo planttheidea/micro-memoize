@@ -522,7 +522,7 @@ This is the most robust use-case, with the same complexities as multiple primiti
 ## Browser support
 
 - Chrome (all versions)
-- executefox (all versions)
+- Firefox (all versions)
 - Edge (all versions)
 - Opera 15+
 - IE 9+
