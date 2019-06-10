@@ -1,7 +1,7 @@
 import { MicroMemoize } from './types';
 
 // utils
-import { slice } from './utils';
+import { cloneArray } from './utils';
 
 export class Cache {
   readonly canTransformKey: boolean;
@@ -51,9 +51,9 @@ export class Cache {
 
   get snapshot() {
     return {
-      keys: slice(this.keys, 0),
+      keys: cloneArray(this.keys),
       size: this.size,
-      values: slice(this.values, 0),
+      values: cloneArray(this.values),
     };
   }
 
@@ -110,24 +110,41 @@ export class Cache {
       return -1;
     }
 
+    if (keysLength === 1) {
+      return this._getKeyIndexForSingle(keyToMatch);
+    }
+
     const keyLength = keyToMatch.length;
 
     let existingKey;
     let argIndex;
 
-    for (let index = 0; index < keysLength; index++) {
-      existingKey = keys[index];
+    if (keyLength > 1) {
+      for (let index = 0; index < keysLength; index++) {
+        existingKey = keys[index];
 
-      if (existingKey.length === keyLength) {
-        argIndex = 0;
+        if (existingKey.length === keyLength) {
+          argIndex = 0;
 
-        for (; argIndex < keyLength; argIndex++) {
-          if (!isEqual(existingKey[argIndex], keyToMatch[argIndex])) {
-            break;
+          for (; argIndex < keyLength; argIndex++) {
+            if (!isEqual(existingKey[argIndex], keyToMatch[argIndex])) {
+              break;
+            }
+          }
+
+          if (argIndex === keyLength) {
+            return index;
           }
         }
+      }
+    } else {
+      for (let index = 0; index < keysLength; index++) {
+        existingKey = keys[index];
 
-        if (argIndex === keyLength) {
+        if (
+          existingKey.length === keyLength &&
+          isEqual(existingKey[0], keyToMatch[0])
+        ) {
           return index;
         }
       }
@@ -161,13 +178,17 @@ export class Cache {
 
     const { isEqual } = this.options;
 
-    for (let index = 0; index < length; index++) {
-      if (!isEqual(existingKey[index], keyToMatch[index])) {
-        return -1;
+    if (length > 1) {
+      for (let index = 0; index < length; index++) {
+        if (!isEqual(existingKey[index], keyToMatch[index])) {
+          return -1;
+        }
       }
+
+      return 0;
     }
 
-    return 0;
+    return isEqual(existingKey[0], keyToMatch[0]) ? 0 : -1;
   }
 
   /**
@@ -180,7 +201,11 @@ export class Cache {
    * @param value the new value to move to the front
    * @param startingIndex the index of the item to move to the front
    */
-  orderByLru(key: MicroMemoize.Key, value: MicroMemoize.Value, startingIndex: number) {
+  orderByLru(
+    key: MicroMemoize.Key,
+    value: MicroMemoize.Value,
+    startingIndex: number,
+  ) {
     const { keys } = this;
     const { values } = this;
 

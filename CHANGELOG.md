@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 4.0.7
+
+- Create more targeted `getKeyIndex` helpers for more speed in each key situation
+
 ## 4.0.6
 
 - Use standard `then` interface (`.then(onFulfilled, onRejected)`) instead of ES spec (`.then(onFulfilled).catch(onRejected)`) for broader support

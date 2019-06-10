@@ -90,6 +90,20 @@ describe('cache methods', () => {
       expect(result).toEqual(0);
     });
 
+    it('will return the index of the match found with a larger key', () => {
+      const isEqual = (o1: any, o2: any) => o1 === o2;
+
+      const cache = new Cache({ isEqual });
+
+      cache.keys = [['key1', 'key2']];
+
+      const keyToMatch = ['key1', 'key2'];
+
+      const result = cache.getKeyIndex(keyToMatch);
+
+      expect(result).toEqual(0);
+    });
+
     it('will return -1 if the key length is different', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
@@ -112,6 +126,20 @@ describe('cache methods', () => {
       cache.keys = [['key']];
 
       const keyToMatch = ['other key'];
+
+      const result = cache.getKeyIndex(keyToMatch);
+
+      expect(result).toEqual(-1);
+    });
+
+    it('will return -1 if no match found with a larger key', () => {
+      const isEqual = (o1: any, o2: any) => o1 === o2;
+
+      const cache = new Cache({ isEqual });
+
+      cache.keys = [['key1', 'key2']];
+
+      const keyToMatch = ['keyA', 'keyB'];
 
       const result = cache.getKeyIndex(keyToMatch);
 
@@ -144,7 +172,7 @@ describe('cache methods', () => {
       expect(result).toEqual(1);
     });
 
-    it('will return -1 if the key length is different and maxSize is larger', () => {
+    it('will return -1 if the key length is different with larger maxSize', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
       const cache = new Cache({ isEqual, maxSize: 2 });
@@ -158,7 +186,7 @@ describe('cache methods', () => {
       expect(result).toEqual(-1);
     });
 
-    it('will return -1 if no match found and maxSize is larger', () => {
+    it('will return -1 if no match found with larger maxSize', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
       const cache = new Cache({ isEqual, maxSize: 2 });
@@ -449,7 +477,9 @@ describe('cache methods', () => {
         return 'resolved';
       };
       const key = ['foo'];
-      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<Function>;
+      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<
+        Function
+      >;
 
       const value = fn();
 
@@ -496,7 +526,9 @@ describe('cache methods', () => {
         return 'resolved';
       };
       const key = ['foo'];
-      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<Function>;
+      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<
+        Function
+      >;
 
       const value = fn();
 
@@ -567,7 +599,9 @@ describe('cache methods', () => {
       cache.keys = [key];
       cache.values = [value];
 
-      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<Function>;
+      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<
+        Function
+      >;
 
       cache.updateAsyncCache(memoized);
 
@@ -620,7 +654,9 @@ describe('cache methods', () => {
       cache.keys = [key];
       cache.values = [value];
 
-      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<Function>;
+      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<
+        Function
+      >;
 
       cache.updateAsyncCache(memoized);
 
