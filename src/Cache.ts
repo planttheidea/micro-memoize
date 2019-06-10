@@ -115,19 +115,32 @@ export class Cache {
     let existingKey;
     let argIndex;
 
-    for (let index = 0; index < keysLength; index++) {
-      existingKey = keys[index];
+    if (keyLength > 1) {
+      for (let index = 0; index < keysLength; index++) {
+        existingKey = keys[index];
 
-      if (existingKey.length === keyLength) {
-        argIndex = 0;
+        if (existingKey.length === keyLength) {
+          argIndex = 0;
 
-        for (; argIndex < keyLength; argIndex++) {
-          if (!isEqual(existingKey[argIndex], keyToMatch[argIndex])) {
-            break;
+          for (; argIndex < keyLength; argIndex++) {
+            if (!isEqual(existingKey[argIndex], keyToMatch[argIndex])) {
+              break;
+            }
+          }
+
+          if (argIndex === keyLength) {
+            return index;
           }
         }
+      }
+    } else {
+      for (let index = 0; index < keysLength; index++) {
+        existingKey = keys[index];
 
-        if (argIndex === keyLength) {
+        if (
+          existingKey.length === keyLength &&
+          isEqual(existingKey[0], keyToMatch[0])
+        ) {
           return index;
         }
       }
@@ -161,13 +174,17 @@ export class Cache {
 
     const { isEqual } = this.options;
 
-    for (let index = 0; index < length; index++) {
-      if (!isEqual(existingKey[index], keyToMatch[index])) {
-        return -1;
+    if (length > 1) {
+      for (let index = 0; index < length; index++) {
+        if (!isEqual(existingKey[index], keyToMatch[index])) {
+          return -1;
+        }
       }
+
+      return 0;
     }
 
-    return 0;
+    return isEqual(existingKey[0], keyToMatch[0]) ? 0 : -1;
   }
 
   /**
