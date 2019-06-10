@@ -110,6 +110,10 @@ export class Cache {
       return -1;
     }
 
+    if (keysLength === 1) {
+      return this._getKeyIndexForSingle(keyToMatch);
+    }
+
     const keyLength = keyToMatch.length;
 
     let existingKey;
