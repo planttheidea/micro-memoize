@@ -1,7 +1,7 @@
 import { MicroMemoize } from './types';
 
 // utils
-import { slice } from './utils';
+import { cloneArray } from './utils';
 
 export class Cache {
   readonly canTransformKey: boolean;
@@ -51,9 +51,9 @@ export class Cache {
 
   get snapshot() {
     return {
-      keys: slice(this.keys, 0),
+      keys: cloneArray(this.keys),
       size: this.size,
-      values: slice(this.values, 0),
+      values: cloneArray(this.values),
     };
   }
 
@@ -180,7 +180,11 @@ export class Cache {
    * @param value the new value to move to the front
    * @param startingIndex the index of the item to move to the front
    */
-  orderByLru(key: MicroMemoize.Key, value: MicroMemoize.Value, startingIndex: number) {
+  orderByLru(
+    key: MicroMemoize.Key,
+    value: MicroMemoize.Value,
+    startingIndex: number,
+  ) {
     const { keys } = this;
     const { values } = this;
 

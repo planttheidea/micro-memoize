@@ -15,6 +15,45 @@ const DEFAULT_OPTIONS_KEYS: Dictionary<true> = {
 };
 
 /**
+ * @function slice
+ *
+ * @description
+ * slice.call() pre-bound
+ */
+export const { slice } = Array.prototype;
+
+/**
+ * @function cloneArray
+ *
+ * @description
+ * clone the array-like object and return the new array
+ *
+ * @param arrayLike the array-like object to clone
+ * @returns the clone as an array
+ */
+export function cloneArray(arrayLike: any[] | IArguments) {
+  const { length } = arrayLike;
+
+  if (!length) {
+    return [];
+  }
+
+  if (length === 1) {
+    return [arrayLike[0]];
+  }
+
+  if (length === 2) {
+    return [arrayLike[0], arrayLike[1]];
+  }
+
+  if (length === 3) {
+    return [arrayLike[0], arrayLike[1], arrayLike[2]];
+  }
+
+  return slice.call(arrayLike, 0);
+}
+
+/**
  * @function getCustomOptions
  *
  * @description
@@ -49,7 +88,10 @@ export function getCustomOptions(options: MicroMemoize.Options) {
  * @returns is the function already memoized
  */
 export function isMemoized(fn: any): fn is MicroMemoize.Memoized<Function> {
-  return typeof fn === 'function' && (fn as MicroMemoize.Memoized<Function>).isMemoized;
+  return (
+    typeof fn === 'function' &&
+    (fn as MicroMemoize.Memoized<Function>).isMemoized
+  );
 }
 
 /**
@@ -97,11 +139,3 @@ export function mergeOptions(
 
   return target;
 }
-
-/**
- * @function slice
- *
- * @description
- * slice.call() pre-bound
- */
-export const slice = Function.prototype.bind.call(Function.prototype.call, Array.prototype.slice);

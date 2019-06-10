@@ -6,7 +6,11 @@ import { MicroMemoize } from './types';
 
 // utils
 import {
-  getCustomOptions, isMemoized, isSameValueZero, mergeOptions, slice,
+  cloneArray,
+  getCustomOptions,
+  isMemoized,
+  isSameValueZero,
+  mergeOptions,
 } from './utils';
 
 function createMemoizedFunction<Fn extends Function>(
@@ -60,7 +64,7 @@ function createMemoizedFunction<Fn extends Function>(
 
   // @ts-ignore
   const memoized: Memoized<Fn> = function memoized() {
-    let key = shouldCloneArguments ? slice(arguments, 0) : arguments;
+    let key = shouldCloneArguments ? cloneArray(arguments) : arguments;
 
     if (canTransformKey) {
       key = transformKey(key);
@@ -82,7 +86,7 @@ function createMemoizedFunction<Fn extends Function>(
       }
     } else {
       const newValue = fn.apply(this, arguments);
-      const newKey = shouldCloneArguments ? key : slice(arguments, 0);
+      const newKey = shouldCloneArguments ? key : cloneArray(arguments);
 
       cache.orderByLru(newKey, newValue, keys.length);
 
