@@ -62,8 +62,8 @@ export function cloneArray(arrayLike: any[] | IArguments) {
  * @param options the memoization options passed
  * @returns the custom options passed
  */
-export function getCustomOptions(options: MicroMemoize.PassedOptions) {
-  const customOptions: MicroMemoize.PassedOptions = {};
+export function getCustomOptions(options: MicroMemoize.Options) {
+  const customOptions: MicroMemoize.Options = {};
 
   /* eslint-disable no-restricted-syntax */
 
@@ -121,10 +121,10 @@ export function isSameValueZero(object1: any, object2: any) {
  */
 export function mergeOptions(
   existingOptions: MicroMemoize.NormalizedOptions,
-  newOptions: MicroMemoize.PassedOptions,
+  newOptions: MicroMemoize.Options,
 ): Readonly<MicroMemoize.NormalizedOptions> {
   // @ts-ignore
-  const target: MicroMemoize.Options = {};
+  const target: MicroMemoize.NormalizedOptions = {};
 
   /* eslint-disable no-restricted-syntax */
 

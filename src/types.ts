@@ -36,8 +36,8 @@ export declare namespace MicroMemoize {
     transformKey?: KeyTransformer;
   };
 
-  export type PassedOptions = StandardOptions & Dictionary<any>;
-  export type NormalizedOptions = PassedOptions & {
+  export type Options = StandardOptions & Dictionary<any>;
+  export type NormalizedOptions = Options & {
     isEqual: EqualityComparator;
     isPromise: boolean;
     maxSize: number;

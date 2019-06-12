@@ -15,7 +15,7 @@ import {
 
 function createMemoizedFunction<Fn extends Function>(
   fn: Fn | MicroMemoize.Memoized<Fn>,
-  options: MicroMemoize.PassedOptions = {},
+  options: MicroMemoize.Options = {},
 ): MicroMemoize.Memoized<Fn> {
   if (isMemoized(fn)) {
     return createMemoizedFunction(fn.fn, mergeOptions(fn.options, options));
