@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { Cache } from '../src/Cache';
 import { MicroMemoize } from '../src/types';
 
@@ -5,7 +7,8 @@ import { isSameValueZero } from '../src/utils';
 
 describe('create cache', () => {
   it('should create a new cache instance with correct defaults', () => {
-    const options = {};
+    // @ts-ignore
+    const options: MicroMemoize.NormalizedOptions = {};
 
     const cache = new Cache(options);
 
@@ -20,7 +23,8 @@ describe('create cache', () => {
   });
 
   it('should create a new cache instance with correct values when not matching key', () => {
-    const options = {
+    // @ts-ignore
+    const options: MicroMemoize.NormalizedOptions = {
       maxSize: 5,
       transformKey(): any[] {
         return [];
@@ -43,7 +47,8 @@ describe('create cache', () => {
   });
 
   it('should create a new cache instance with correct values when matching key', () => {
-    const options = {
+    // @ts-ignore
+    const options: MicroMemoize.NormalizedOptions = {
       isMatchingKey() {
         return true;
       },
@@ -67,7 +72,10 @@ describe('cache methods', () => {
     it('will return -1 if no keys exist', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      const cache = new Cache({ isEqual });
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = { isEqual };
+
+      const cache = new Cache(options);
 
       const keyToMatch = ['key'];
 
@@ -79,7 +87,10 @@ describe('cache methods', () => {
     it('will return the index of the match found', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      const cache = new Cache({ isEqual });
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = { isEqual };
+
+      const cache = new Cache(options);
 
       cache.keys = [['key']];
 
@@ -93,7 +104,10 @@ describe('cache methods', () => {
     it('will return the index of the match found with a larger key', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      const cache = new Cache({ isEqual });
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = { isEqual };
+
+      const cache = new Cache(options);
 
       cache.keys = [['key1', 'key2']];
 
@@ -107,7 +121,10 @@ describe('cache methods', () => {
     it('will return -1 if the key length is different', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      const cache = new Cache({ isEqual });
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = { isEqual };
+
+      const cache = new Cache(options);
 
       cache.keys = [['key']];
 
@@ -121,7 +138,10 @@ describe('cache methods', () => {
     it('will return -1 if no match found', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      const cache = new Cache({ isEqual });
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = { isEqual };
+
+      const cache = new Cache(options);
 
       cache.keys = [['key']];
 
@@ -135,7 +155,10 @@ describe('cache methods', () => {
     it('will return -1 if no match found with a larger key', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      const cache = new Cache({ isEqual });
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = { isEqual };
+
+      const cache = new Cache(options);
 
       cache.keys = [['key1', 'key2']];
 
@@ -149,7 +172,10 @@ describe('cache methods', () => {
     it('will return -1 if no keys exist with larger maxSize', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      const cache = new Cache({ isEqual, maxSize: 2 });
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = { isEqual, maxSize: 2 };
+
+      const cache = new Cache(options);
 
       const keyToMatch = ['key'];
 
@@ -161,7 +187,10 @@ describe('cache methods', () => {
     it('will return the index of the match found with larger maxSize', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      const cache = new Cache({ isEqual, maxSize: 2 });
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = { isEqual, maxSize: 2 };
+
+      const cache = new Cache(options);
 
       cache.keys = [['key'], ['other key']];
 
@@ -175,7 +204,10 @@ describe('cache methods', () => {
     it('will return -1 if the key length is different with larger maxSize', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      const cache = new Cache({ isEqual, maxSize: 2 });
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = { isEqual, maxSize: 2 };
+
+      const cache = new Cache(options);
 
       cache.keys = [['key'], ['not other key']];
 
@@ -189,7 +221,10 @@ describe('cache methods', () => {
     it('will return -1 if no match found with larger maxSize', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      const cache = new Cache({ isEqual, maxSize: 2 });
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = { isEqual, maxSize: 2 };
+
+      const cache = new Cache(options);
 
       cache.keys = [['key'], ['other key']];
 
@@ -213,7 +248,13 @@ describe('cache methods', () => {
         );
       };
 
-      const cache = new Cache({ isEqual, isMatchingKey });
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = {
+        isEqual,
+        isMatchingKey,
+      };
+
+      const cache = new Cache(options);
 
       cache.keys = [
         [
@@ -249,11 +290,14 @@ describe('cache methods', () => {
         );
       };
 
-      const cache = new Cache({
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = {
         isEqual,
         isMatchingKey,
         maxSize: 2,
-      });
+      };
+
+      const cache = new Cache(options);
 
       cache.keys = [
         [
@@ -294,7 +338,13 @@ describe('cache methods', () => {
         );
       };
 
-      const cache = new Cache({ isEqual, isMatchingKey });
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = {
+        isEqual,
+        isMatchingKey,
+      };
+
+      const cache = new Cache(options);
 
       const keyToMatch = ['key'];
 
@@ -316,10 +366,13 @@ describe('cache methods', () => {
         );
       };
 
-      const cache = new Cache({
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = {
         isEqual,
         isMatchingKey,
-      });
+      };
+
+      const cache = new Cache(options);
 
       cache.keys = [
         [
@@ -355,11 +408,14 @@ describe('cache methods', () => {
         );
       };
 
-      const cache = new Cache({
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = {
         isEqual,
         isMatchingKey,
         maxSize: 2,
-      });
+      };
+
+      const cache = new Cache(options);
 
       cache.keys = [
         [
@@ -389,7 +445,12 @@ describe('cache methods', () => {
 
   describe('orderByLru', () => {
     it('will do nothing if the itemIndex is 0', () => {
-      const cache = new Cache({ maxSize: 3 });
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = {
+        maxSize: 3,
+      };
+
+      const cache = new Cache(options);
 
       cache.keys = [['first'], ['second'], ['third']];
       cache.values = ['first', 'second', 'third'];
@@ -408,7 +469,12 @@ describe('cache methods', () => {
     });
 
     it('will place the itemIndex first in order when non-zero', () => {
-      const cache = new Cache({ maxSize: 3 });
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = {
+        maxSize: 3,
+      };
+
+      const cache = new Cache(options);
 
       cache.keys = [['first'], ['second'], ['third']];
       cache.values = ['first', 'second', 'third'];
@@ -427,7 +493,12 @@ describe('cache methods', () => {
     });
 
     it('will add the new item to the array and remove the last when the itemIndex is the array length', () => {
-      const cache = new Cache({ maxSize: 10 });
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = {
+        maxSize: 10,
+      };
+
+      const cache = new Cache(options);
 
       cache.keys = [['first'], ['second'], ['third']];
       cache.values = ['first', 'second', 'third'];
@@ -446,7 +517,12 @@ describe('cache methods', () => {
     });
 
     it('will truncate the cache to the max size if too large by manual additions', () => {
-      const cache = new Cache({ maxSize: 2 });
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = {
+        maxSize: 2,
+      };
+
+      const cache = new Cache(options);
 
       cache.keys = [['first'], ['second'], ['third']];
       cache.values = ['first', 'second', 'third'];
@@ -483,7 +559,8 @@ describe('cache methods', () => {
 
       const value = fn();
 
-      const options = {
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = {
         isEqual: isSameValueZero,
         isPromise: true,
       };
@@ -532,7 +609,8 @@ describe('cache methods', () => {
 
       const value = fn();
 
-      const options = {
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = {
         isEqual: isSameValueZero,
         isPromise: true,
         onCacheChange: jest.fn(),
@@ -587,7 +665,8 @@ describe('cache methods', () => {
       const key = ['foo'];
       const value = fn();
 
-      const options = {
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = {
         isEqual: isSameValueZero,
         isPromise: true,
         onCacheChange: jest.fn(),
@@ -642,7 +721,8 @@ describe('cache methods', () => {
       const key = ['foo'];
       const value = fn();
 
-      const options = {
+      // @ts-ignore
+      const options: MicroMemoize.NormalizedOptions = {
         isEqual: isSameValueZero,
         isPromise: true,
         onCacheChange: jest.fn(),

@@ -1,8 +1,12 @@
+/* globals document */
+
+/* eslint-disable */
+
 import Bluebird from 'bluebird';
 import { deepEqual } from 'fast-equals';
 
 import memoize from '../src';
-import { __ } from 'ramda';
+import { MicroMemoize } from '../src/types';
 
 // import '../benchmarks';
 
@@ -24,11 +28,11 @@ const bar = 'bar';
 const baz = 'baz';
 const quz = 'quz';
 
-const method = function (one: string, two: string) {
+function method(one: string, two: string) {
   console.log('standard method fired', one, two);
 
   return [one, two].join(' ');
-};
+}
 
 const memoized = memoize(method);
 
@@ -74,11 +78,9 @@ console.group('maxArgs');
 
 // limit to testing the first args
 const isMatchingKeyMaxArgs = (
-  originalKey: string[],
-  newKey: string[],
-): boolean => {
-  return originalKey[0] === newKey[0];
-};
+  originalKey: MicroMemoize.Key,
+  newKey: MicroMemoize.RawKey,
+): boolean => originalKey[0] === newKey[0];
 
 const memoizedMax = memoize(method, { isMatchingKey: isMatchingKeyMaxArgs });
 
@@ -131,7 +133,7 @@ const promiseMethodRejected = (number: number) => {
   return new Bluebird((resolve, reject) => {
     setTimeout(() => {
       reject(new Error(foo));
-    },         100);
+    }, 100);
   });
 };
 
@@ -168,12 +170,12 @@ memoizedPromiseRejected(3)
   });
 
 // get result
-memoizedPromise(2, 2).then((value: string) => {
+memoizedPromise(2, 2).then((value: unknown) => {
   console.log(`computed value: ${value}`);
 });
 
 // pull from cache
-memoizedPromise(2, 2).then((value: string) => {
+memoizedPromise(2, 2).then((value: unknown) => {
   console.log(`cached value: ${value}`);
 });
 
@@ -188,7 +190,7 @@ const withDefault = (foo: string, bar: string = 'default') => {
 
   return `${foo} ${bar}`;
 };
-'';
+
 const moizedWithDefault = memoize(withDefault, { maxSize: 5 });
 
 console.log(moizedWithDefault(foo));
@@ -214,9 +216,9 @@ const memoizedNoFns = memoize(noFns, {
   },
 });
 
-console.log(memoizedNoFns('one', 'two', function three() {}));
-console.log(memoizedNoFns('one', 'two', function four() {}));
-console.log(memoizedNoFns('one', 'two', function five() {}));
+console.log(memoizedNoFns('one', 'two', () => {}));
+console.log(memoizedNoFns('one', 'two', () => {}));
+console.log(memoizedNoFns('one', 'two', () => {}));
 
 console.log(memoizedNoFns.cache);
 
@@ -224,7 +226,7 @@ console.groupEnd();
 
 console.group('matching whole key');
 
-const matchingKeyMethod = function (object: {
+const matchingKeyMethod = function(object: {
   deeply: { nested: { number: number } };
 }) {
   return object.deeply.nested.number;
@@ -262,7 +264,7 @@ const calc = memoize(
       }
 
       return totals;
-    },                         {}),
+    }, {}),
   {
     maxSize: 10,
   },

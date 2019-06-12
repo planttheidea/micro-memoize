@@ -1,4 +1,7 @@
+/* eslint-disable */
+
 import { getCustomOptions, isSameValueZero, mergeOptions } from '../src/utils';
+import { MicroMemoize } from 'types';
 
 describe('getCustomOptions', () => {
   it('will return the custom options and no default options', () => {
@@ -45,7 +48,10 @@ describe('mergeOptions', () => {
       isPromise: true,
     };
 
-    const result = mergeOptions(extraOptions, providedOptions);
+    const result = mergeOptions(
+      (extraOptions as unknown) as MicroMemoize.NormalizedOptions,
+      providedOptions,
+    );
 
     expect(result).not.toBe(extraOptions);
     expect(result).not.toBe(providedOptions);

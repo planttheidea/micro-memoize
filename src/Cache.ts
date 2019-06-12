@@ -8,7 +8,7 @@ export class Cache {
 
   readonly getKeyIndex: MicroMemoize.KeyIndexGetter;
 
-  readonly options: MicroMemoize.Options;
+  readonly options: MicroMemoize.NormalizedOptions;
 
   readonly shouldCloneArguments: boolean;
 
@@ -22,7 +22,7 @@ export class Cache {
 
   values: MicroMemoize.Value[];
 
-  constructor(options: MicroMemoize.Options) {
+  constructor(options: MicroMemoize.NormalizedOptions) {
     this.keys = [];
     this.values = [];
     this.options = options;
@@ -66,8 +66,11 @@ export class Cache {
    * @param keyToMatch the key to match
    * @returns the index of the matching key, or -1
    */
-  _getKeyIndexFromMatchingKey(keyToMatch: MicroMemoize.Key) {
-    const { isMatchingKey, maxSize } = this.options;
+  _getKeyIndexFromMatchingKey(keyToMatch: MicroMemoize.RawKey) {
+    const { isMatchingKey, maxSize } = this.options as {
+      isMatchingKey: MicroMemoize.MatchingKeyComparator;
+      maxSize: number;
+    };
 
     const { keys } = this;
     const keysLength = keys.length;
@@ -100,7 +103,7 @@ export class Cache {
    * @param keyToMatch the key to match
    * @returns the index of the matching key, or -1
    */
-  _getKeyIndexForMany(keyToMatch: MicroMemoize.Key) {
+  _getKeyIndexForMany(keyToMatch: MicroMemoize.RawKey) {
     const { isEqual } = this.options;
 
     const { keys } = this;
@@ -162,7 +165,7 @@ export class Cache {
    * @param keyToMatch the key to match
    * @returns the index of the matching key, or -1
    */
-  _getKeyIndexForSingle(keyToMatch: MicroMemoize.Key) {
+  _getKeyIndexForSingle(keyToMatch: MicroMemoize.RawKey) {
     const { keys } = this;
 
     if (!keys.length) {
@@ -242,7 +245,10 @@ export class Cache {
    * @param memoized the memoized function
    */
   updateAsyncCache(memoized: MicroMemoize.Memoized<Function>) {
-    const { onCacheChange, onCacheHit } = this.options;
+    const { onCacheChange, onCacheHit } = this.options as {
+      onCacheChange: MicroMemoize.CacheModifiedHandler;
+      onCacheHit: MicroMemoize.CacheModifiedHandler;
+    };
 
     const [firstKey] = this.keys;
     const [firstValue] = this.values;
