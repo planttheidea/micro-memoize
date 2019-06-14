@@ -15,7 +15,7 @@ import {
 
 function createMemoizedFunction<Fn extends Function>(
   fn: Fn | MicroMemoize.Memoized<Fn>,
-  options: MicroMemoize.StandardOptions = {},
+  options: MicroMemoize.Options = {},
 ): MicroMemoize.Memoized<Fn> {
   if (isMemoized(fn)) {
     return createMemoizedFunction(fn.fn, mergeOptions(fn.options, options));
@@ -34,7 +34,7 @@ function createMemoizedFunction<Fn extends Function>(
     onCacheChange,
     onCacheHit,
     transformKey,
-  }: MicroMemoize.StandardOptions = options;
+  } = options;
 
   const normalizedOptions = mergeOptions(
     {
@@ -63,30 +63,43 @@ function createMemoizedFunction<Fn extends Function>(
   } = cache;
 
   // @ts-ignore
-  const memoized: Memoized<Fn> = function memoized() {
-    let key = shouldCloneArguments ? cloneArray(arguments) : arguments;
+  const memoized: Memoized<Fn> = function memoized(this) {
+    // @ts-ignore
+    let key: MicroMemoize.Key = shouldCloneArguments
+      ? cloneArray(arguments)
+      : arguments;
 
     if (canTransformKey) {
-      key = transformKey(key);
+      key = (transformKey as MicroMemoize.KeyTransformer)(key);
     }
 
     const keyIndex = keys.length ? cache.getKeyIndex(key) : -1;
 
     if (keyIndex !== -1) {
       if (shouldUpdateOnHit) {
-        onCacheHit(cache, normalizedOptions, memoized);
+        (onCacheHit as MicroMemoize.CacheModifiedHandler)(
+          cache,
+          normalizedOptions,
+          memoized,
+        );
       }
 
       if (keyIndex) {
         cache.orderByLru(keys[keyIndex], values[keyIndex], keyIndex);
 
         if (shouldUpdateOnChange) {
-          onCacheChange(cache, normalizedOptions, memoized);
+          (onCacheChange as MicroMemoize.CacheModifiedHandler)(
+            cache,
+            normalizedOptions,
+            memoized,
+          );
         }
       }
     } else {
       const newValue = fn.apply(this, arguments);
-      const newKey = shouldCloneArguments ? key : cloneArray(arguments);
+      const newKey = shouldCloneArguments
+        ? (key as any[])
+        : cloneArray(arguments);
 
       cache.orderByLru(newKey, newValue, keys.length);
 
@@ -95,11 +108,19 @@ function createMemoizedFunction<Fn extends Function>(
       }
 
       if (shouldUpdateOnAdd) {
-        onCacheAdd(cache, normalizedOptions, memoized);
+        (onCacheAdd as MicroMemoize.CacheModifiedHandler)(
+          cache,
+          normalizedOptions,
+          memoized,
+        );
       }
 
       if (shouldUpdateOnChange) {
-        onCacheChange(cache, normalizedOptions, memoized);
+        (onCacheChange as MicroMemoize.CacheModifiedHandler)(
+          cache,
+          normalizedOptions,
+          memoized,
+        );
       }
     }
 

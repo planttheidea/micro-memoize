@@ -17,11 +17,11 @@ export declare namespace MicroMemoize {
 
   export type CacheModifiedHandler = (
     cache: Cache,
-    options: StandardOptions,
+    options: NormalizedOptions,
     memoized: Function,
   ) => void;
 
-  export type KeyTransformer = (args: RawKey) => Key;
+  export type KeyTransformer = (args: Key) => Key;
 
   export type KeyIndexGetter = (keyToMatch: RawKey) => number;
 
@@ -37,13 +37,18 @@ export declare namespace MicroMemoize {
   };
 
   export type Options = StandardOptions & Dictionary<any>;
+  export type NormalizedOptions = Options & {
+    isEqual: EqualityComparator;
+    isPromise: boolean;
+    maxSize: number;
+  };
 
   export type Memoized<Fn extends Function> = Fn &
     Dictionary<any> & {
       cache: Cache;
       fn: Fn;
       isMemoized: true;
-      options: Options;
+      options: NormalizedOptions;
     };
 }
 

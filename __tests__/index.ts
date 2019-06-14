@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 // external dependencies
 import { deepEqual } from 'fast-equals';
 
@@ -204,13 +206,11 @@ describe('memoize', () => {
         two,
       };
     };
-    const transformKey = function (args: any[]) {
+    const transformKey = function(args: any[]) {
       return [JSON.stringify(args)];
     };
 
-    const memoized = memoize(fn, {
-      transformKey,
-    });
+    const memoized = memoize(fn, { transformKey });
 
     expect(memoized.options.transformKey).toBe(transformKey);
 
@@ -256,10 +256,10 @@ describe('memoize', () => {
         two,
       };
     };
-    const isEqual = function (key1: any, key2: any) {
+    const isEqual = function(key1: any, key2: any) {
       return key1.args === key2.args;
     };
-    const transformKey = function (args: any[]) {
+    const transformKey = function(args: any[]) {
       return [
         {
           args: JSON.stringify(args),
@@ -593,7 +593,7 @@ describe('memoize', () => {
           }
 
           return totals;
-        },                         {}),
+        }, {}),
       {
         maxSize: 10,
       },
