@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 4.0.8
+
+- Improve typings to support `strict` mode in TypeScript
+
 ## 4.0.7
 
 - Create more targeted `getKeyIndex` helpers for more speed in each key situation
