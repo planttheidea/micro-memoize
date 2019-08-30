@@ -4,32 +4,36 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
 
 ## Table of contents
 
-- [Summary](#summary)
-- [Importing](#importing)
-- [Usage](#usage)
-  - [Types](#types)
-  - [Composition](#composition)
-- [Options](#options)
-  - [isEqual](#isequal)
-  - [isMatchingKey](#ismatchingkey)
-  - [isPromise](#ispromise)
-  - [maxSize](#maxsize)
-  - [onCacheAdd](#oncacheadd)
-  - [onCacheChange](#oncachechange)
-  - [onCacheHit](#oncachehit)
-  - [transformKey](#transformkey)
-- [Additional properties](#additional-properties)
-  - [cache](#cache)
-  - [isMemoized](#ismemoized)
-  - [options](#options)
-- [Benchmarks](#benchmarks)
-  - [Single parameter (primitive only)](#single-parameter-primitive-only)
-  - [Single parameter (complex object)](#single-parameter-complex-object)
-  - [Multiple parameters (primitives only)](#multiple-parameters-primitives-only)
-  - [Multiple parameters (complex objects)](#multiple-parameters-complex-objects)
-- [Browser support](#browser-support)
-- [Node support](#node-support)
-- [Development](#development)
+- [micro-memoize](#micro-memoize)
+  - [Table of contents](#table-of-contents)
+  - [Summary](#summary)
+  - [Importing](#importing)
+  - [Usage](#usage)
+    - [Types](#types)
+    - [Composition](#composition)
+  - [Options](#options)
+    - [isEqual](#isequal)
+    - [isMatchingKey](#ismatchingkey)
+    - [isPromise](#ispromise)
+    - [maxSize](#maxsize)
+    - [onCacheAdd](#oncacheadd)
+    - [onCacheChange](#oncachechange)
+    - [onCacheHit](#oncachehit)
+    - [transformKey](#transformkey)
+  - [Additional properties](#additional-properties)
+    - [memoized.cache](#memoizedcache)
+      - [memoized.cache.snapshot](#memoizedcachesnapshot)
+    - [memoized.fn](#memoizedfn)
+    - [memoized.isMemoized](#memoizedismemoized)
+    - [memoized.options](#memoizedoptions)
+  - [Benchmarks](#benchmarks)
+    - [Single parameter (primitive only)](#single-parameter-primitive-only)
+    - [Single parameter (complex object)](#single-parameter-complex-object)
+    - [Multiple parameters (primitives only)](#multiple-parameters-primitives-only)
+    - [Multiple parameters (complex objects)](#multiple-parameters-complex-objects)
+  - [Browser support](#browser-support)
+  - [Node support](#node-support)
+  - [Development](#development)
 
 ## Summary
 
@@ -170,7 +174,8 @@ const deepObject = (object: ContrivedObject) => ({
 });
 
 const memoizedShape = memoize(deepObject, {
-  isMatchingKey(object1: ContrivedObject, object2: ContrivedObject) {
+  // receives the full key in cache and the full key of the most recent call
+  isMatchingKey([object1]: [ContrivedObject], [object2]: [ContrivedObject]) {
     return (
       object1.hasOwnProperty("foo") &&
       object2.hasOwnProperty("foo") &&
