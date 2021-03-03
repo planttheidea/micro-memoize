@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import { getCustomOptions, isSameValueZero, mergeOptions } from '../src/utils';
 import { MicroMemoize } from 'types';
 
