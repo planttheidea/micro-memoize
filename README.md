@@ -175,7 +175,10 @@ const deepObject = (object: ContrivedObject) => ({
 
 const memoizedShape = memoize(deepObject, {
   // receives the full key in cache and the full key of the most recent call
-  isMatchingKey([object1]: [ContrivedObject], [object2]: [ContrivedObject]) {
+  isMatchingKey(key1, key2) {
+    const object1 = key1[0];
+    const object2 = key2[0];
+
     return (
       object1.hasOwnProperty('foo') &&
       object2.hasOwnProperty('foo') &&
@@ -187,7 +190,7 @@ const memoizedShape = memoize(deepObject, {
 console.log(
   memoizedShape({
     foo: 'foo',
-    bar: 'bar',
+    bar: 123,
     baz: 'baz',
   }),
 ); // {foo: {deep: 'foo'}, bar: {deep: 'bar'}}
@@ -195,7 +198,7 @@ console.log(
 console.log(
   memoizedShape({
     foo: 'not foo',
-    bar: 'bar',
+    bar: 123,
     baz: 'baz',
   }),
 ); // pulled from cache
@@ -214,7 +217,7 @@ Identifies the value returned from the method as a `Promise`, which will result 
 const fn = async (one: string, two: string) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      reject(new Error({ one, two }));
+      reject(new Error(JSON.stringify({ one, two })));
     }, 500);
   });
 };
@@ -268,7 +271,8 @@ Callback method that executes whenever the cache is added to. This is mainly to 
 const fn = (one: string, two: string) => [one, two];
 
 const memoized = memoize(fn, {
-  onCacheAdd(cache: Cache, options: Options) {
+  maxSize: 2,
+  onCacheAdd(cache, options) {
     console.log('cache has been added to: ', cache);
     console.log('memoized method has the following options applied: ', options);
   },
@@ -299,7 +303,8 @@ Callback method that executes whenever the cache is added to or the order is upd
 const fn = (one: string, two: string) => [one, two];
 
 const memoized = memoize(fn, {
-  onCacheChange(cache: Cache, options: Options) {
+  maxSize: 2,
+  onCacheChange(cache, options) {
     console.log('cache has changed: ', cache);
     console.log('memoized method has the following options applied: ', options);
   },
@@ -331,7 +336,7 @@ const fn = (one: string, two: string) => [one, two];
 
 const memoized = memoize(fn, {
   maxSize: 2,
-  onCacheHit(cache: Cache, options: Options) {
+  onCacheHit(cache, options) {
     console.log('cache was hit: ', cache);
     console.log('memoized method has the following options applied: ', options);
   },
