@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 // external dependencies
 import { deepEqual } from 'fast-equals';
 
@@ -124,7 +122,11 @@ describe('memoize', () => {
     expect(callCount).toEqual(4);
 
     expect(memoized.cache.snapshot).toEqual({
-      keys: [['three', 'four'], ['two', 'three'], ['four', 'five']],
+      keys: [
+        ['three', 'four'],
+        ['two', 'three'],
+        ['four', 'five'],
+      ],
       size: 3,
       values: [
         {
@@ -206,7 +208,7 @@ describe('memoize', () => {
         two,
       };
     };
-    const transformKey = function(args: any[]) {
+    const transformKey = function (args: any[]) {
       return [JSON.stringify(args)];
     };
 
@@ -256,10 +258,10 @@ describe('memoize', () => {
         two,
       };
     };
-    const isEqual = function(key1: any, key2: any) {
+    const isEqual = function (key1: any, key2: any) {
       return key1.args === key2.args;
     };
-    const transformKey = function(args: any[]) {
+    const transformKey = function (args: any[]) {
       return [
         {
           args: JSON.stringify(args),
@@ -584,9 +586,10 @@ describe('memoize', () => {
       ): Dictionary<any> =>
         Object.keys(object).reduce((totals: { [key: string]: number }, key) => {
           if (Array.isArray(object[key])) {
-            totals[key] = object[key].map(
-              (subObject: { [key: string]: number }) =>
-                calc(subObject, metadata),
+            totals[key] = object[
+              key
+            ].map((subObject: { [key: string]: number }) =>
+              calc(subObject, metadata),
             );
           } else {
             totals[key] = object[key].a + object[key].b + metadata.c;
@@ -653,5 +656,23 @@ describe('memoize', () => {
 
     // @ts-ignore
     expect(() => memoize(fn)).toThrow();
+  });
+
+  it('will match documentation for `transformKey`', () => {
+    const ignoreFunctionArg = jest.fn((one: string, two: () => void) => [
+      one,
+      two,
+    ]);
+
+    const memoized = memoize(ignoreFunctionArg, {
+      isMatchingKey: (key1, key2) => key1[0] === key2[0],
+      // Cache based on the serialized first parameter
+      transformKey: (args) => [JSON.stringify(args[0])],
+    });
+
+    memoized('one', () => {});
+    memoized('one', () => {});
+
+    expect(ignoreFunctionArg).toHaveBeenCalledTimes(1);
   });
 });

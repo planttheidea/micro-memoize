@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import { Cache } from '../src/Cache';
 import { MicroMemoize } from '../src/types';
 
@@ -553,9 +551,7 @@ describe('cache methods', () => {
         return 'resolved';
       };
       const key = ['foo'];
-      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<
-        Function
-      >;
+      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<Function>;
 
       const value = fn();
 
@@ -603,9 +599,7 @@ describe('cache methods', () => {
         return 'resolved';
       };
       const key = ['foo'];
-      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<
-        Function
-      >;
+      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<Function>;
 
       const value = fn();
 
@@ -678,9 +672,7 @@ describe('cache methods', () => {
       cache.keys = [key];
       cache.values = [value];
 
-      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<
-        Function
-      >;
+      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<Function>;
 
       cache.updateAsyncCache(memoized);
 
@@ -734,9 +726,7 @@ describe('cache methods', () => {
       cache.keys = [key];
       cache.values = [value];
 
-      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<
-        Function
-      >;
+      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<Function>;
 
       cache.updateAsyncCache(memoized);
 
