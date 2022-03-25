@@ -367,7 +367,7 @@ A method that allows you transform the key that is used for caching, if you want
 const ignoreFunctionArgs = (one: string, two: () => {}) => [one, two];
 
 const memoized = memoize(ignoreFunctionArgs, {
-  transformKey: JSON.stringify,
+  transformKey: (args) => [JSON.stringify(args[0])],
 });
 
 console.log(memoized('one', () => {})); // ['one', () => {}]
