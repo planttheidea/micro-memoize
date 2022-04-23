@@ -1,5 +1,3 @@
-
-
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
@@ -52,7 +50,10 @@ module.exports = {
     umdNamedDefine: true,
   },
 
-  plugins: [new webpack.EnvironmentPlugin(['NODE_ENV']), new HtmlWebpackPlugin()],
+  plugins: [
+    new webpack.EnvironmentPlugin(['NODE_ENV']),
+    new HtmlWebpackPlugin(),
+  ],
 
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],

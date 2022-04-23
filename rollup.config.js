@@ -1,5 +1,5 @@
-import typescript from 'rollup-plugin-typescript';
-import { uglify } from 'rollup-plugin-uglify';
+import typescript from '@rollup/plugin-typescript';
+import { terser } from 'rollup-plugin-terser';
 import tsc from 'typescript';
 
 import pkg from './package.json';
@@ -13,9 +13,7 @@ const UMD_CONFIG = {
     name: pkg.name,
     sourcemap: true,
   },
-  plugins: [
-    typescript({ typescript: tsc }),
-  ],
+  plugins: [typescript({ typescript: tsc })],
 };
 
 const FORMATTED_CONFIG = Object.assign({}, UMD_CONFIG, {
@@ -36,7 +34,7 @@ const MINIFIED_CONFIG = Object.assign({}, UMD_CONFIG, {
     file: pkg.browser.replace('.js', '.min.js'),
     sourcemap: false,
   }),
-  plugins: UMD_CONFIG.plugins.concat([uglify()]),
+  plugins: UMD_CONFIG.plugins.concat([terser()]),
 });
 
 export default [UMD_CONFIG, FORMATTED_CONFIG, MINIFIED_CONFIG];

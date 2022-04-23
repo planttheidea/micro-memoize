@@ -454,7 +454,7 @@ describe('cache methods', () => {
       cache.values = ['first', 'second', 'third'];
 
       const itemIndex = 0;
-      const key = cache.keys[itemIndex];
+      const key = cache.keys[itemIndex]!;
       const value = cache.values[itemIndex];
 
       cache.orderByLru(key, value, itemIndex);
@@ -478,7 +478,7 @@ describe('cache methods', () => {
       cache.values = ['first', 'second', 'third'];
 
       const itemIndex = 1;
-      const key = cache.keys[itemIndex];
+      const key = cache.keys[itemIndex]!;
       const value = cache.values[itemIndex];
 
       cache.orderByLru(key, value, itemIndex);
@@ -551,7 +551,7 @@ describe('cache methods', () => {
         return 'resolved';
       };
       const key = ['foo'];
-      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<Function>;
+      const memoized = (() => {}) as unknown as MicroMemoize.Memoized<Function>;
 
       const value = fn();
 
@@ -599,7 +599,7 @@ describe('cache methods', () => {
         return 'resolved';
       };
       const key = ['foo'];
-      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<Function>;
+      const memoized = (() => {}) as unknown as MicroMemoize.Memoized<Function>;
 
       const value = fn();
 
@@ -672,7 +672,7 @@ describe('cache methods', () => {
       cache.keys = [key];
       cache.values = [value];
 
-      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<Function>;
+      const memoized = (() => {}) as unknown as MicroMemoize.Memoized<Function>;
 
       cache.updateAsyncCache(memoized);
 
@@ -726,7 +726,7 @@ describe('cache methods', () => {
       cache.keys = [key];
       cache.values = [value];
 
-      const memoized = ((() => {}) as unknown) as MicroMemoize.Memoized<Function>;
+      const memoized = (() => {}) as unknown as MicroMemoize.Memoized<Function>;
 
       cache.updateAsyncCache(memoized);
 

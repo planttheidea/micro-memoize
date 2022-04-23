@@ -63,7 +63,7 @@ function createMemoizedFunction<Fn extends Function>(
   } = cache;
 
   // @ts-ignore
-  const memoized: Memoized<Fn> = function memoized(this) {
+  const memoized: MicroMemoize.Memoized<Fn> = function memoized(this) {
     // @ts-ignore
     let key: MicroMemoize.Key = shouldCloneArguments
       ? cloneArray(arguments)
