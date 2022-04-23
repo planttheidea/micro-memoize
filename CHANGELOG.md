@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 4.0.9
+
+- Fix [#76](https://github.com/planttheidea/micro-memoize/issues/76) - `noUncheckedIndexedAccess` support on TS 4.1+
+
 ## 4.0.8
 
 - Improve typings to support `strict` mode in TypeScript
