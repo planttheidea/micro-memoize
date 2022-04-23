@@ -79,13 +79,13 @@ export class Cache {
       return -1;
     }
 
-    if (isMatchingKey(keys[0], keyToMatch)) {
+    if (isMatchingKey(keys[0]!, keyToMatch)) {
       return 0;
     }
 
     if (maxSize > 1) {
       for (let index = 1; index < keysLength; index++) {
-        if (isMatchingKey(keys[index], keyToMatch)) {
+        if (isMatchingKey(keys[index]!, keyToMatch)) {
           return index;
         }
       }
@@ -124,7 +124,7 @@ export class Cache {
 
     if (keyLength > 1) {
       for (let index = 0; index < keysLength; index++) {
-        existingKey = keys[index];
+        existingKey = keys[index]!;
 
         if (existingKey.length === keyLength) {
           argIndex = 0;
@@ -142,7 +142,7 @@ export class Cache {
       }
     } else {
       for (let index = 0; index < keysLength; index++) {
-        existingKey = keys[index];
+        existingKey = keys[index]!;
 
         if (
           existingKey.length === keyLength &&
@@ -172,7 +172,7 @@ export class Cache {
       return -1;
     }
 
-    const existingKey = keys[0];
+    const existingKey = keys[0]!;
     const { length } = existingKey;
 
     if (keyToMatch.length !== length) {
@@ -217,7 +217,7 @@ export class Cache {
     let index = startingIndex;
 
     while (index--) {
-      keys[index + 1] = keys[index];
+      keys[index + 1] = keys[index]!;
       values[index + 1] = values[index];
     }
 
@@ -266,7 +266,7 @@ export class Cache {
         return value;
       },
       (error: Error) => {
-        const keyIndex = this.getKeyIndex(firstKey);
+        const keyIndex = this.getKeyIndex(firstKey!);
 
         if (keyIndex !== -1) {
           this.keys.splice(keyIndex, 1);

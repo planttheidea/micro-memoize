@@ -85,7 +85,7 @@ function createMemoizedFunction<Fn extends Function>(
       }
 
       if (keyIndex) {
-        cache.orderByLru(keys[keyIndex], values[keyIndex], keyIndex);
+        cache.orderByLru(keys[keyIndex]!, values[keyIndex], keyIndex);
 
         if (shouldUpdateOnChange) {
           (onCacheChange as MicroMemoize.CacheModifiedHandler)(

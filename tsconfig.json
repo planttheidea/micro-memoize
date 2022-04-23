@@ -8,6 +8,7 @@
     "module": "esnext",
     "moduleResolution": "node",
     "noImplicitAny": true,
+    "noUncheckedIndexedAccess": true,
     "outDir": "./dist",
     "sourceMap": true,
     "strict": true,
