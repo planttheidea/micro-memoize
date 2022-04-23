@@ -1,8 +1,12 @@
 # micro-memoize CHANGELOG
 
-## 4.0.9
+## 4.0.10
 
 - Fix [#76](https://github.com/planttheidea/micro-memoize/issues/76) - `noUncheckedIndexedAccess` support on TS 4.1+
+
+## 4.0.9
+
+- Update npm search keywords and documentation
 
 ## 4.0.8
 
