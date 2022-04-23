@@ -63,7 +63,7 @@ function createMemoizedFunction<Fn extends Function>(
   } = cache;
 
   // @ts-ignore
-  const memoized: Memoized<Fn> = function memoized(this) {
+  const memoized: MicroMemoize.Memoized<Fn> = function memoized(this) {
     // @ts-ignore
     let key: MicroMemoize.Key = shouldCloneArguments
       ? cloneArray(arguments)
@@ -85,7 +85,7 @@ function createMemoizedFunction<Fn extends Function>(
       }
 
       if (keyIndex) {
-        cache.orderByLru(keys[keyIndex], values[keyIndex], keyIndex);
+        cache.orderByLru(keys[keyIndex]!, values[keyIndex], keyIndex);
 
         if (shouldUpdateOnChange) {
           (onCacheChange as MicroMemoize.CacheModifiedHandler)(

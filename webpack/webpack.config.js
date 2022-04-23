@@ -1,5 +1,4 @@
-
-
+const ESLintWebpackPlugin = require('eslint-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
@@ -8,21 +7,10 @@ const ROOT = path.resolve(__dirname, '..');
 
 module.exports = {
   devServer: {
-    contentBase: './dist',
-    inline: true,
     port: 3000,
-    stats: {
-      assets: false,
-      chunks: true,
-      chunkModules: false,
-      colors: true,
-      hash: false,
-      timings: true,
-      version: false,
-    },
   },
 
-  devtool: '#source-map',
+  devtool: 'source-map',
 
   entry: path.join(ROOT, 'DEV_ONLY', 'index.ts'),
 
@@ -30,12 +18,6 @@ module.exports = {
 
   module: {
     rules: [
-      {
-        enforce: 'pre',
-        include: [path.resolve(ROOT, 'src')],
-        loader: 'eslint-loader',
-        test: /\.ts$/,
-      },
       {
         include: [path.resolve(ROOT, 'src'), /DEV_ONLY/],
         loader: 'ts-loader',
@@ -52,7 +34,11 @@ module.exports = {
     umdNamedDefine: true,
   },
 
-  plugins: [new webpack.EnvironmentPlugin(['NODE_ENV']), new HtmlWebpackPlugin()],
+  plugins: [
+    new webpack.EnvironmentPlugin(['NODE_ENV']),
+    new HtmlWebpackPlugin(),
+    new ESLintWebpackPlugin(),
+  ],
 
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
