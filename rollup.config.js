@@ -1,10 +1,11 @@
 import typescript from '@rollup/plugin-typescript';
 import { terser } from 'rollup-plugin-terser';
+import localTypescript from 'typescript';
 
 import pkg from './package.json';
 
 const UMD_CONFIG = {
-  input: './src/index.ts',
+  input: 'src/index.ts',
   output: {
     exports: 'default',
     file: pkg.browser,
@@ -17,7 +18,7 @@ const UMD_CONFIG = {
       return `../src/${sourceFile}`;
     },
   },
-  plugins: [typescript()],
+  plugins: [typescript({ typescript: localTypescript })],
 };
 
 const FORMATTED_CONFIG = {
