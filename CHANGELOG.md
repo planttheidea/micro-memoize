@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 4.0.11
+
+- Fix [#79](https://github.com/planttheidea/micro-memoize/issues/79) - Sourcemaps referencing incorrect hierarchy
+
 ## 4.0.10
 
 - Fix [#76](https://github.com/planttheidea/micro-memoize/issues/76) - `noUncheckedIndexedAccess` support on TS 4.1+
