@@ -226,7 +226,7 @@ console.groupEnd();
 
 console.group('matching whole key');
 
-const matchingKeyMethod = function(object: {
+const matchingKeyMethod = function (object: {
   deeply: { nested: { number: number } };
 }) {
   return object.deeply.nested.number;
