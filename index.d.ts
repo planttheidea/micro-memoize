@@ -3,6 +3,8 @@ type Dictionary<Type> = {
   [index: number]: Type;
 };
 
+declare type TFunction = (...a: any[]) => any
+
 export declare namespace MicroMemoize {
   export type Key = any[];
   export type Value = any;
@@ -18,7 +20,7 @@ export declare namespace MicroMemoize {
   export type CacheModifiedHandler = (
     cache: Cache,
     options: NormalizedOptions,
-    memoized: Function,
+    memoized: TFunction,
   ) => void;
 
   export type KeyTransformer = (args: Key) => Key;
@@ -43,7 +45,7 @@ export declare namespace MicroMemoize {
     maxSize: number;
   };
 
-  export type Memoized<Fn extends Function> = Fn &
+  export type Memoized<Fn extends TFunction> = Fn &
     Dictionary<any> & {
       cache: Cache;
       fn: Fn;
@@ -52,7 +54,7 @@ export declare namespace MicroMemoize {
     };
 }
 
-export default function memoize<Fn extends Function>(
+export default function memoize<Fn extends TFunction>(
   fn: Fn | MicroMemoize.Memoized<Fn>,
   options?: MicroMemoize.Options,
 ): MicroMemoize.Memoized<Fn>;
