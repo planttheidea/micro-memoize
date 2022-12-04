@@ -1,11 +1,8 @@
 const _ = require('lodash');
-// const fs = require("fs");
-const React = require('react');
-
 const { createSuite } = require('benchee');
 const Table = require('cli-table2');
 
-const resolveArguments = function() {
+const resolveArguments = function () {
   return arguments.length > 1
     ? JSON.stringify(arguments)
     : typeof arguments[0] === 'object'
@@ -13,7 +10,7 @@ const resolveArguments = function() {
     : arguments[0];
 };
 
-const getResults = results => {
+const getResults = (results) => {
   const table = new Table({
     head: ['Name', 'Ops / sec'],
   });
@@ -25,35 +22,32 @@ const getResults = results => {
   return table.toString();
 };
 
-const addyOsmani = require('./addy-osmani');
+const addyOsmani = require('./addy-osmani.cjs');
 const fastMemoize = require('fast-memoize');
 const lodash = _.memoize;
 const lruMemoize = require('lru-memoize').default;
 const mem = require('mem');
 const memoizee = require('memoizee');
 const memoizerific = require('memoizerific');
-const memoize = require('../dist/micro-memoize.cjs');
+const memoize = require('../dist/micro-memoize.cjs.js');
 const ramda = require('ramda').memoizeWith(resolveArguments);
 const underscore = require('underscore').memoize;
 
-const deepEqualFastEquals = require('fast-equals').deepEqual;
-const deepEqualLodash = _.isEqual;
-
 /************* tests *************/
 
-const fibonacciSinglePrimitive = number =>
+const fibonacciSinglePrimitive = (number) =>
   number < 2
     ? number
     : fibonacciSinglePrimitive(number - 1) +
       fibonacciSinglePrimitive(number - 2);
 
-const fibonacciSingleArray = array =>
+const fibonacciSingleArray = (array) =>
   array[0] < 2
     ? array[0]
     : fibonacciSingleArray([array[0] - 1]) +
       fibonacciSingleArray([array[0] - 2]);
 
-const fibonacciSingleObject = object =>
+const fibonacciSingleObject = (object) =>
   object.number < 2
     ? object.number
     : fibonacciSingleObject({ number: object.number - 1 }) +
@@ -270,7 +264,7 @@ const suite = createSuite({
   },
 });
 
-Object.keys(singularPrimitive).forEach(name => {
+Object.keys(singularPrimitive).forEach((name) => {
   const fn = singularPrimitive[name];
 
   suite.add(name, 'singular primitive', () => {
@@ -282,7 +276,7 @@ Object.keys(singularPrimitive).forEach(name => {
   });
 });
 
-Object.keys(singularArray).forEach(name => {
+Object.keys(singularArray).forEach((name) => {
   const fn = singularArray[name];
 
   suite.add(name, 'singular array', () => {
@@ -290,7 +284,7 @@ Object.keys(singularArray).forEach(name => {
   });
 });
 
-Object.keys(singularObject).forEach(name => {
+Object.keys(singularObject).forEach((name) => {
   const fn = singularObject[name];
 
   suite.add(name, 'singular object', () => {
@@ -298,7 +292,7 @@ Object.keys(singularObject).forEach(name => {
   });
 });
 
-Object.keys(multiplePrimitive).forEach(name => {
+Object.keys(multiplePrimitive).forEach((name) => {
   const fn = multiplePrimitive[name];
 
   suite.add(name, 'multiple primitive', () => {
@@ -306,7 +300,7 @@ Object.keys(multiplePrimitive).forEach(name => {
   });
 });
 
-Object.keys(multipleArray).forEach(name => {
+Object.keys(multipleArray).forEach((name) => {
   const fn = multipleArray[name];
 
   suite.add(name, 'multiple array', () => {
@@ -314,7 +308,7 @@ Object.keys(multipleArray).forEach(name => {
   });
 });
 
-Object.keys(multipleObject).forEach(name => {
+Object.keys(multipleObject).forEach((name) => {
   const fn = multipleObject[name];
 
   suite.add(name, 'multiple object', () => {

@@ -1,18 +1,23 @@
 'use strict';
 
-const memoize = require('../lib').default;
-
 const fibonacciSinglePrimitive = (number) => {
-  return number < 2 ? number : fibonacciSinglePrimitive(number - 1) + fibonacciSinglePrimitive(number - 2);
+  return number < 2
+    ? number
+    : fibonacciSinglePrimitive(number - 1) +
+        fibonacciSinglePrimitive(number - 2);
 };
 
 const fibonacciSingleArray = (array) => {
-  return array[0] < 2 ? array[0] : fibonacciSingleArray([array[0] - 1]) + fibonacciSingleArray([array[0] - 2]);
+  return array[0] < 2
+    ? array[0]
+    : fibonacciSingleArray([array[0] - 1]) +
+        fibonacciSingleArray([array[0] - 2]);
 };
 const fibonacciSingleObject = (object) => {
   return object.number < 2
     ? object.number
-    : fibonacciSingleObject({number: object.number - 1}) + fibonacciSingleObject({number: object.number - 2});
+    : fibonacciSingleObject({ number: object.number - 1 }) +
+        fibonacciSingleObject({ number: object.number - 2 });
 };
 
 const fibonacciMultiplePrimitive = (number, isComplete) => {
@@ -24,7 +29,8 @@ const fibonacciMultiplePrimitive = (number, isComplete) => {
   const secondValue = number - 2;
 
   return (
-    fibonacciMultiplePrimitive(firstValue, firstValue < 2) + fibonacciMultiplePrimitive(secondValue, secondValue < 2)
+    fibonacciMultiplePrimitive(firstValue, firstValue < 2) +
+    fibonacciMultiplePrimitive(secondValue, secondValue < 2)
   );
 };
 
@@ -37,7 +43,8 @@ const fibonacciMultipleArray = (array, check) => {
   const secondValue = array[0] - 2;
 
   return (
-    fibonacciMultipleArray([firstValue], [firstValue < 2]) + fibonacciMultipleArray([secondValue], [secondValue < 2])
+    fibonacciMultipleArray([firstValue], [firstValue < 2]) +
+    fibonacciMultipleArray([secondValue], [secondValue < 2])
   );
 };
 
@@ -50,17 +57,23 @@ const fibonacciMultipleObject = (object, check) => {
   const secondValue = object.number - 2;
 
   return (
-    fibonacciMultipleObject({number: firstValue}, {isComplete: firstValue < 2}) +
-    fibonacciMultipleObject({number: secondValue}, {isComplete: secondValue < 2})
+    fibonacciMultipleObject(
+      { number: firstValue },
+      { isComplete: firstValue < 2 },
+    ) +
+    fibonacciMultipleObject(
+      { number: secondValue },
+      { isComplete: secondValue < 2 },
+    )
   );
 };
 
 const number = 35;
 const array = [number];
-const object = {number};
+const object = { number };
 const isCompleteBoolean = false;
 const isCompleteArray = [false];
-const isCompleteObject = {isComplete: false};
+const isCompleteObject = { isComplete: false };
 
 fibonacciSinglePrimitive(number);
 fibonacciSinglePrimitive(number);
