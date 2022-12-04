@@ -1,14 +1,14 @@
-import { MicroMemoize } from './types';
+import type { AnyFn, MicroMemoize } from './types';
 
 // utils
 import { cloneArray } from './utils';
 
-export class Cache {
+export class Cache<Fn extends AnyFn> {
   readonly canTransformKey: boolean;
 
   readonly getKeyIndex: MicroMemoize.KeyIndexGetter;
 
-  readonly options: MicroMemoize.NormalizedOptions;
+  readonly options: MicroMemoize.NormalizedOptions<Fn>;
 
   readonly shouldCloneArguments: boolean;
 
@@ -22,7 +22,7 @@ export class Cache {
 
   values: MicroMemoize.Value[];
 
-  constructor(options: MicroMemoize.NormalizedOptions) {
+  constructor(options: MicroMemoize.NormalizedOptions<Fn>) {
     this.keys = [];
     this.values = [];
     this.options = options;
@@ -244,10 +244,10 @@ export class Cache {
    *
    * @param memoized the memoized function
    */
-  updateAsyncCache(memoized: MicroMemoize.Memoized<Function>) {
+  updateAsyncCache(memoized: MicroMemoize.Memoized<Fn>) {
     const { onCacheChange, onCacheHit } = this.options as {
-      onCacheChange: MicroMemoize.CacheModifiedHandler;
-      onCacheHit: MicroMemoize.CacheModifiedHandler;
+      onCacheChange: MicroMemoize.CacheModifiedHandler<Fn>;
+      onCacheHit: MicroMemoize.CacheModifiedHandler<Fn>;
     };
 
     const [firstKey] = this.keys;

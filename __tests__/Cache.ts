@@ -1,12 +1,17 @@
 import { Cache } from '../src/Cache';
-import { MicroMemoize } from '../src/types';
+import { AnyFn, MicroMemoize } from '../src/types';
 
 import { isSameValueZero } from '../src/utils';
 
+const has = (object: any, property: string) =>
+  Object.prototype.hasOwnProperty.call(object, property);
+
+const mockNormalizedOptions = (options: any) =>
+  options as MicroMemoize.NormalizedOptions<AnyFn>;
+
 describe('create cache', () => {
   it('should create a new cache instance with correct defaults', () => {
-    // @ts-ignore
-    const options: MicroMemoize.NormalizedOptions = {};
+    const options = mockNormalizedOptions({});
 
     const cache = new Cache(options);
 
@@ -21,8 +26,7 @@ describe('create cache', () => {
   });
 
   it('should create a new cache instance with correct values when not matching key', () => {
-    // @ts-ignore
-    const options: MicroMemoize.NormalizedOptions = {
+    const options = mockNormalizedOptions({
       maxSize: 5,
       transformKey(): any[] {
         return [];
@@ -30,7 +34,7 @@ describe('create cache', () => {
       onCacheAdd() {},
       onCacheChange() {},
       onCacheHit() {},
-    };
+    });
 
     const cache = new Cache(options);
 
@@ -45,12 +49,11 @@ describe('create cache', () => {
   });
 
   it('should create a new cache instance with correct values when matching key', () => {
-    // @ts-ignore
-    const options: MicroMemoize.NormalizedOptions = {
+    const options = mockNormalizedOptions({
       isMatchingKey() {
         return true;
       },
-    };
+    });
 
     const cache = new Cache(options);
 
@@ -70,8 +73,7 @@ describe('cache methods', () => {
     it('will return -1 if no keys exist', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = { isEqual };
+      const options = mockNormalizedOptions({ isEqual });
 
       const cache = new Cache(options);
 
@@ -85,8 +87,7 @@ describe('cache methods', () => {
     it('will return the index of the match found', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = { isEqual };
+      const options = mockNormalizedOptions({ isEqual });
 
       const cache = new Cache(options);
 
@@ -102,8 +103,7 @@ describe('cache methods', () => {
     it('will return the index of the match found with a larger key', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = { isEqual };
+      const options = mockNormalizedOptions({ isEqual });
 
       const cache = new Cache(options);
 
@@ -119,8 +119,7 @@ describe('cache methods', () => {
     it('will return -1 if the key length is different', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = { isEqual };
+      const options = mockNormalizedOptions({ isEqual });
 
       const cache = new Cache(options);
 
@@ -136,8 +135,7 @@ describe('cache methods', () => {
     it('will return -1 if no match found', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = { isEqual };
+      const options = mockNormalizedOptions({ isEqual });
 
       const cache = new Cache(options);
 
@@ -153,8 +151,7 @@ describe('cache methods', () => {
     it('will return -1 if no match found with a larger key', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = { isEqual };
+      const options = mockNormalizedOptions({ isEqual });
 
       const cache = new Cache(options);
 
@@ -170,8 +167,7 @@ describe('cache methods', () => {
     it('will return -1 if no keys exist with larger maxSize', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = { isEqual, maxSize: 2 };
+      const options = mockNormalizedOptions({ isEqual, maxSize: 2 });
 
       const cache = new Cache(options);
 
@@ -185,8 +181,7 @@ describe('cache methods', () => {
     it('will return the index of the match found with larger maxSize', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = { isEqual, maxSize: 2 };
+      const options = mockNormalizedOptions({ isEqual, maxSize: 2 });
 
       const cache = new Cache(options);
 
@@ -202,8 +197,7 @@ describe('cache methods', () => {
     it('will return -1 if the key length is different with larger maxSize', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = { isEqual, maxSize: 2 };
+      const options = mockNormalizedOptions({ isEqual, maxSize: 2 });
 
       const cache = new Cache(options);
 
@@ -219,8 +213,7 @@ describe('cache methods', () => {
     it('will return -1 if no match found with larger maxSize', () => {
       const isEqual = (o1: any, o2: any) => o1 === o2;
 
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = { isEqual, maxSize: 2 };
+      const options = mockNormalizedOptions({ isEqual, maxSize: 2 });
 
       const cache = new Cache(options);
 
@@ -240,17 +233,16 @@ describe('cache methods', () => {
         const key = o2[0];
 
         return (
-          existingKey.hasOwnProperty('foo') &&
-          key.hasOwnProperty('foo') &&
+          has(existingKey, 'foo') &&
+          has(key, 'foo') &&
           (existingKey.bar === 'bar' || key.bar === 'baz')
         );
       };
 
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = {
+      const options = mockNormalizedOptions({
         isEqual,
         isMatchingKey,
-      };
+      });
 
       const cache = new Cache(options);
 
@@ -282,18 +274,17 @@ describe('cache methods', () => {
         const key = o2[0];
 
         return (
-          existingKey.hasOwnProperty('foo') &&
-          key.hasOwnProperty('foo') &&
+          has(existingKey, 'foo') &&
+          has(key, 'foo') &&
           (existingKey.bar === 'bar' || key.bar === 'baz')
         );
       };
 
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = {
+      const options = mockNormalizedOptions({
         isEqual,
         isMatchingKey,
         maxSize: 2,
-      };
+      });
 
       const cache = new Cache(options);
 
@@ -330,17 +321,16 @@ describe('cache methods', () => {
         const key = o2[0];
 
         return (
-          existingKey.hasOwnProperty('foo') &&
-          key.hasOwnProperty('foo') &&
+          has(existingKey, 'foo') &&
+          has(key, 'foo') &&
           (existingKey.bar === 'bar' || key.bar === 'baz')
         );
       };
 
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = {
+      const options = mockNormalizedOptions({
         isEqual,
         isMatchingKey,
-      };
+      });
 
       const cache = new Cache(options);
 
@@ -358,17 +348,16 @@ describe('cache methods', () => {
         const key = o2[0];
 
         return (
-          existingKey.hasOwnProperty('foo') &&
-          key.hasOwnProperty('foo') &&
+          has(existingKey, 'foo') &&
+          has(key, 'foo') &&
           (existingKey.bar === 'bar' || key.bar === 'baz')
         );
       };
 
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = {
+      const options = mockNormalizedOptions({
         isEqual,
         isMatchingKey,
-      };
+      });
 
       const cache = new Cache(options);
 
@@ -400,18 +389,17 @@ describe('cache methods', () => {
         const key = o2[0];
 
         return (
-          existingKey.hasOwnProperty('foo') &&
-          key.hasOwnProperty('foo') &&
+          has(existingKey, 'foo') &&
+          has(key, 'foo') &&
           (existingKey.bar === 'bar' || key.bar === 'baz')
         );
       };
 
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = {
+      const options = mockNormalizedOptions({
         isEqual,
         isMatchingKey,
         maxSize: 2,
-      };
+      });
 
       const cache = new Cache(options);
 
@@ -443,10 +431,9 @@ describe('cache methods', () => {
 
   describe('orderByLru', () => {
     it('will do nothing if the itemIndex is 0', () => {
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = {
+      const options = mockNormalizedOptions({
         maxSize: 3,
-      };
+      });
 
       const cache = new Cache(options);
 
@@ -467,10 +454,7 @@ describe('cache methods', () => {
     });
 
     it('will place the itemIndex first in order when non-zero', () => {
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = {
-        maxSize: 3,
-      };
+      const options = mockNormalizedOptions({ maxSize: 3 });
 
       const cache = new Cache(options);
 
@@ -491,10 +475,7 @@ describe('cache methods', () => {
     });
 
     it('will add the new item to the array and remove the last when the itemIndex is the array length', () => {
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = {
-        maxSize: 10,
-      };
+      const options = mockNormalizedOptions({ maxSize: 10 });
 
       const cache = new Cache(options);
 
@@ -515,10 +496,7 @@ describe('cache methods', () => {
     });
 
     it('will truncate the cache to the max size if too large by manual additions', () => {
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = {
-        maxSize: 2,
-      };
+      const options = mockNormalizedOptions({ maxSize: 2 });
 
       const cache = new Cache(options);
 
@@ -544,22 +522,21 @@ describe('cache methods', () => {
       const timeout = 200;
 
       const fn = async () => {
-        await new Promise((resolve: Function) => {
+        await new Promise((resolve) => {
           setTimeout(resolve, timeout);
         });
 
         return 'resolved';
       };
       const key = ['foo'];
-      const memoized = (() => {}) as unknown as MicroMemoize.Memoized<Function>;
+      const memoized = (() => {}) as unknown as MicroMemoize.Memoized<AnyFn>;
 
       const value = fn();
 
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = {
+      const options = mockNormalizedOptions({
         isEqual: isSameValueZero,
         isPromise: true,
-      };
+      });
 
       const cache = new Cache(options);
 
@@ -577,7 +554,7 @@ describe('cache methods', () => {
         values: [value],
       });
 
-      await new Promise((resolve: Function) => {
+      await new Promise((resolve) => {
         setTimeout(resolve, timeout + 50);
       });
 
@@ -592,24 +569,23 @@ describe('cache methods', () => {
       const timeout = 200;
 
       const fn = async () => {
-        await new Promise((resolve: Function) => {
+        await new Promise((resolve) => {
           setTimeout(resolve, timeout);
         });
 
         return 'resolved';
       };
       const key = ['foo'];
-      const memoized = (() => {}) as unknown as MicroMemoize.Memoized<Function>;
+      const memoized = (() => {}) as unknown as MicroMemoize.Memoized<AnyFn>;
 
       const value = fn();
 
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = {
+      const options = mockNormalizedOptions({
         isEqual: isSameValueZero,
         isPromise: true,
         onCacheChange: jest.fn(),
         onCacheHit: jest.fn(),
-      };
+      });
 
       const cache = new Cache(options);
 
@@ -627,7 +603,7 @@ describe('cache methods', () => {
         values: [value],
       });
 
-      await new Promise((resolve: Function) => {
+      await new Promise((resolve) => {
         setTimeout(resolve, timeout + 50);
       });
 
@@ -652,27 +628,26 @@ describe('cache methods', () => {
       const timeout = 200;
 
       const fn = async () => {
-        await new Promise((resolve: Function, reject: Function) => {
+        await new Promise((resolve, reject) => {
           setTimeout(() => reject(new Error('boom')), timeout);
         });
       };
       const key = ['foo'];
       const value = fn();
 
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = {
+      const options = mockNormalizedOptions({
         isEqual: isSameValueZero,
         isPromise: true,
         onCacheChange: jest.fn(),
         onCacheHit: jest.fn(),
-      };
+      });
 
       const cache = new Cache(options);
 
       cache.keys = [key];
       cache.values = [value];
 
-      const memoized = (() => {}) as unknown as MicroMemoize.Memoized<Function>;
+      const memoized = (() => {}) as unknown as MicroMemoize.Memoized<AnyFn>;
 
       cache.updateAsyncCache(memoized);
 
@@ -686,7 +661,7 @@ describe('cache methods', () => {
         values: [value],
       });
 
-      await new Promise((resolve: Function) => {
+      await new Promise((resolve) => {
         setTimeout(resolve, timeout + 50);
       });
 
@@ -706,27 +681,26 @@ describe('cache methods', () => {
       const timeout = 200;
 
       const fn = async () => {
-        await new Promise((resolve: Function, reject: Function) => {
+        await new Promise((resolve, reject) => {
           setTimeout(() => reject(new Error('boom')), timeout);
         });
       };
       const key = ['foo'];
       const value = fn();
 
-      // @ts-ignore
-      const options: MicroMemoize.NormalizedOptions = {
+      const options = mockNormalizedOptions({
         isEqual: isSameValueZero,
         isPromise: true,
         onCacheChange: jest.fn(),
         onCacheHit: jest.fn(),
-      };
+      });
 
       const cache = new Cache(options);
 
       cache.keys = [key];
       cache.values = [value];
 
-      const memoized = (() => {}) as unknown as MicroMemoize.Memoized<Function>;
+      const memoized = (() => {}) as unknown as MicroMemoize.Memoized<AnyFn>;
 
       cache.updateAsyncCache(memoized);
 
@@ -743,10 +717,10 @@ describe('cache methods', () => {
       });
 
       cache.keys = [['bar']];
-      // @ts-ignore
+
       cache.values = [Promise.resolve('baz')];
 
-      await new Promise((resolve: Function) => {
+      await new Promise((resolve) => {
         setTimeout(resolve, timeout + 50);
       });
 

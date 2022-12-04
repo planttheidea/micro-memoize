@@ -4,6 +4,9 @@ import { deepEqual } from 'fast-equals';
 import memoize from '../src';
 import { isSameValueZero } from '../src/utils';
 
+const has = (object: any, property: string) =>
+  Object.prototype.hasOwnProperty.call(object, property);
+
 describe('memoize', () => {
   it('will return the memoized function', () => {
     let callCount = 0;
@@ -319,8 +322,9 @@ describe('memoize', () => {
 
     const error = new Error('boom');
 
-    const fn = async (ignored: string) => {
-      await new Promise((resolve: Function) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const fn = async (_ignored: string) => {
+      await new Promise((resolve) => {
         setTimeout(resolve, timeout);
       });
 
@@ -339,7 +343,7 @@ describe('memoize', () => {
     expect(memoized.cache.snapshot.keys.length).toEqual(1);
     expect(memoized.cache.snapshot.values.length).toEqual(1);
 
-    await new Promise((resolve: Function) => {
+    await new Promise((resolve) => {
       setTimeout(resolve, timeout + 50);
     });
 
@@ -586,10 +590,9 @@ describe('memoize', () => {
       ): Dictionary<any> =>
         Object.keys(object).reduce((totals: { [key: string]: number }, key) => {
           if (Array.isArray(object[key])) {
-            totals[key] = object[
-              key
-            ].map((subObject: { [key: string]: number }) =>
-              calc(subObject, metadata),
+            totals[key] = object[key].map(
+              (subObject: { [key: string]: number }) =>
+                calc(subObject, metadata),
             );
           } else {
             totals[key] = object[key].a + object[key].b + metadata.c;
@@ -654,8 +657,7 @@ describe('memoize', () => {
   it('will throw an error if not a function', () => {
     const fn = 123;
 
-    // @ts-ignore
-    expect(() => memoize(fn)).toThrow();
+    expect(() => memoize(fn as any)).toThrow();
   });
 
   describe('documentation examples', () => {
@@ -732,8 +734,8 @@ describe('memoize', () => {
           const object2 = key2[0];
 
           return (
-            object1.hasOwnProperty('foo') &&
-            object2.hasOwnProperty('foo') &&
+            has(object1, 'foo') &&
+            has(object2, 'foo') &&
             object1.bar === object2.bar
           );
         },

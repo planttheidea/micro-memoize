@@ -3,51 +3,53 @@ export type Dictionary<Type> = {
   [index: number]: Type;
 };
 
+export type AnyFn = (...args: any[]) => any;
+
 export declare namespace MicroMemoize {
   export type Key = any[];
   export type Value = any;
 
   export type RawKey = Key | IArguments;
 
-  export type Cache = import('./Cache').Cache;
+  export type Cache<Fn extends AnyFn> = import('./Cache').Cache<Fn>;
 
   export type EqualityComparator = (object1: any, object2: any) => boolean;
 
   export type MatchingKeyComparator = (key1: Key, key2: RawKey) => boolean;
 
-  export type CacheModifiedHandler = (
-    cache: Cache,
-    options: NormalizedOptions,
-    memoized: Function,
+  export type CacheModifiedHandler<Fn extends AnyFn> = (
+    cache: Cache<Fn>,
+    options: NormalizedOptions<Fn>,
+    memoized: Memoized<Fn>
   ) => void;
 
   export type KeyTransformer = (args: Key) => Key;
 
   export type KeyIndexGetter = (keyToMatch: RawKey) => number;
 
-  export type StandardOptions = {
+  export type StandardOptions<Fn extends AnyFn> = {
     isEqual?: EqualityComparator;
     isMatchingKey?: MatchingKeyComparator;
     isPromise?: boolean;
     maxSize?: number;
-    onCacheAdd?: CacheModifiedHandler;
-    onCacheChange?: CacheModifiedHandler;
-    onCacheHit?: CacheModifiedHandler;
+    onCacheAdd?: CacheModifiedHandler<Fn>;
+    onCacheChange?: CacheModifiedHandler<Fn>;
+    onCacheHit?: CacheModifiedHandler<Fn>;
     transformKey?: KeyTransformer;
   };
 
-  export type Options = StandardOptions & Dictionary<any>;
-  export type NormalizedOptions = Options & {
+  export type Options<Fn extends AnyFn> = StandardOptions<Fn> & Dictionary<any>;
+  export type NormalizedOptions<Fn extends AnyFn> = Options<Fn> & {
     isEqual: EqualityComparator;
     isPromise: boolean;
     maxSize: number;
   };
 
-  export type Memoized<Fn extends Function> = Fn &
+  export type Memoized<Fn extends AnyFn> = Fn &
     Dictionary<any> & {
-      cache: Cache;
+      cache: Cache<Fn>;
       fn: Fn;
       isMemoized: true;
-      options: NormalizedOptions;
+      options: NormalizedOptions<Fn>;
     };
 }

@@ -1,6 +1,21 @@
 {
-  "extends": ["airbnb"],
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:import/recommended",
+    "plugin:react/recommended"
+  ],
   "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2019,
+    "sourceType": "module"
+  },
   "plugins": ["@typescript-eslint"],
   "settings": {
     "import/resolver": {
@@ -21,6 +36,10 @@
     "import/extensions": 0,
     "import/prefer-default-export": 0,
 
+    "@typescript-eslint/no-empty-function": 0,
+    "@typescript-eslint/no-explicit-any": 0,
+    "@typescript-eslint/no-namespace": 0,
+    "@typescript-eslint/no-non-null-assertion": 0,
     "@typescript-eslint/no-unused-vars": 2,
     "@typescript-eslint/no-use-before-define": 2
   }
