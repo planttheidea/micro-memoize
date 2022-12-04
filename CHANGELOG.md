@@ -1,5 +1,10 @@
 # micro-memoize CHANGELOG
 
+## 4.0.12
+
+- [#84](https://github.com/planttheidea/micro-memoize/pull/84) - Fix inferred typing of memoized function
+- [#85](https://github.com/planttheidea/micro-memoize/pull/85) - Follow-up on [#84](https://github.com/planttheidea/micro-memoize/pull/84), further improving inferred typing via pass-throughs.
+
 ## 4.0.11
 
 - Fix [#79](https://github.com/planttheidea/micro-memoize/issues/79) - Sourcemaps referencing incorrect hierarchy
