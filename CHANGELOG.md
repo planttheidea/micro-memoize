@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 4.0.13
+
+- [#87](https://github.com/planttheidea/micro-memoize/pull/87) - Default generic values for exposed types, to avoid unintentional breaking changes from [#85](https://github.com/planttheidea/micro-memoize/pull/85)
+
 ## 4.0.12
 
 - [#84](https://github.com/planttheidea/micro-memoize/pull/84) - Fix inferred typing of memoized function

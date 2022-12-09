@@ -11,13 +11,13 @@ export declare namespace MicroMemoize {
 
   export type RawKey = Key | IArguments;
 
-  export type Cache<Fn extends AnyFn> = import('./src/Cache').Cache<Fn>;
+  export type Cache<Fn extends AnyFn = AnyFn> = import('./src/Cache').Cache<Fn>;
 
   export type EqualityComparator = (object1: any, object2: any) => boolean;
 
   export type MatchingKeyComparator = (key1: Key, key2: RawKey) => boolean;
 
-  export type CacheModifiedHandler<Fn extends AnyFn> = (
+  export type CacheModifiedHandler<Fn extends AnyFn = AnyFn> = (
     cache: Cache<Fn>,
     options: NormalizedOptions<Fn>,
     memoized: Fn,
@@ -27,7 +27,7 @@ export declare namespace MicroMemoize {
 
   export type KeyIndexGetter = (keyToMatch: RawKey) => number;
 
-  export type StandardOptions<Fn extends AnyFn> = {
+  export type StandardOptions<Fn extends AnyFn = AnyFn> = {
     isEqual?: EqualityComparator;
     isMatchingKey?: MatchingKeyComparator;
     isPromise?: boolean;
@@ -38,14 +38,15 @@ export declare namespace MicroMemoize {
     transformKey?: KeyTransformer;
   };
 
-  export type Options<Fn extends AnyFn> = StandardOptions<Fn> & Dictionary<any>;
-  export type NormalizedOptions<Fn extends AnyFn> = Options<Fn> & {
+  export type Options<Fn extends AnyFn = AnyFn> = StandardOptions<Fn> &
+    Dictionary<any>;
+  export type NormalizedOptions<Fn extends AnyFn = AnyFn> = Options<Fn> & {
     isEqual: EqualityComparator;
     isPromise: boolean;
     maxSize: number;
   };
 
-  export type Memoized<Fn extends AnyFn> = Fn &
+  export type Memoized<Fn extends AnyFn = AnyFn> = Fn &
     Dictionary<any> & {
       cache: Cache<Fn>;
       fn: Fn;
