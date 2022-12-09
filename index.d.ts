@@ -17,7 +17,7 @@ export declare namespace MicroMemoize {
 
   export type MatchingKeyComparator = (key1: Key, key2: RawKey) => boolean;
 
-  export type CacheModifiedHandler<Fn extends AnyFn> = (
+  export type CacheModifiedHandler<Fn extends AnyFn = AnyFn> = (
     cache: Cache<Fn>,
     options: NormalizedOptions<Fn>,
     memoized: Fn,
