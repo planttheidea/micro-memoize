@@ -1,6 +1,10 @@
 # micro-memoize CHANGELOG
 
-## 4.0.13
+## 4.0.14
+
+- Republish of [#87](https://github.com/planttheidea/micro-memoize/pull/87)
+
+## 4.0.13 (Bad version - do not use)
 
 - [#87](https://github.com/planttheidea/micro-memoize/pull/87) - Default generic values for exposed types, to avoid unintentional breaking changes from [#85](https://github.com/planttheidea/micro-memoize/pull/85)
 
