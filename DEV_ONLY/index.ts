@@ -6,7 +6,7 @@ import Bluebird from 'bluebird';
 import { deepEqual } from 'fast-equals';
 
 import memoize from '../src';
-import { MicroMemoize } from '../src/types';
+import { Key, RawKey } from '../src';
 
 // import '../benchmarks';
 
@@ -77,10 +77,8 @@ console.groupEnd();
 console.group('maxArgs');
 
 // limit to testing the first args
-const isMatchingKeyMaxArgs = (
-  originalKey: MicroMemoize.Key,
-  newKey: MicroMemoize.RawKey,
-): boolean => originalKey[0] === newKey[0];
+const isMatchingKeyMaxArgs = (originalKey: Key, newKey: RawKey): boolean =>
+  originalKey[0] === newKey[0];
 
 const memoizedMax = memoize(method, { isMatchingKey: isMatchingKeyMaxArgs });
 
