@@ -1,6 +1,4 @@
-// external dependencies
 import { deepEqual } from 'fast-equals';
-
 import memoize from '../src';
 import { isSameValueZero } from '../src/utils';
 

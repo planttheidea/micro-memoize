@@ -1,28 +1,38 @@
-import type { AnyFn, MicroMemoize } from './types';
+import type {
+  AnyFn,
+  CacheModifiedHandler,
+  CacheSnapshot,
+  Key,
+  KeyIndexGetter,
+  MatchingKeyComparator,
+  Memoized,
+  NormalizedOptions,
+  RawKey,
+  Value,
+} from '../index.d';
 
 // utils
 import { cloneArray } from './utils';
 
 export class Cache<Fn extends AnyFn> {
   readonly canTransformKey: boolean;
-
-  readonly getKeyIndex: MicroMemoize.KeyIndexGetter;
-
-  readonly options: MicroMemoize.NormalizedOptions<Fn>;
-
+  readonly getKeyIndex: KeyIndexGetter;
+  readonly options: NormalizedOptions<Fn>;
   readonly shouldCloneArguments: boolean;
-
   readonly shouldUpdateOnAdd: boolean;
-
   readonly shouldUpdateOnChange: boolean;
-
   readonly shouldUpdateOnHit: boolean;
 
-  keys: MicroMemoize.Key[];
+  /**
+   * The prevents call arguments which have cached results.
+   */
+  keys: Key[];
+  /**
+   * The results of previous cached calls.
+   */
+  values: Value[];
 
-  values: MicroMemoize.Value[];
-
-  constructor(options: MicroMemoize.NormalizedOptions<Fn>) {
+  constructor(options: NormalizedOptions<Fn>) {
     this.keys = [];
     this.values = [];
     this.options = options;
@@ -45,11 +55,19 @@ export class Cache<Fn extends AnyFn> {
     this.shouldUpdateOnHit = typeof options.onCacheHit === 'function';
   }
 
-  get size() {
+  /**
+   * The number of cached [key,value] results.
+   */
+  get size(): number {
     return this.keys.length;
   }
 
-  get snapshot() {
+  /**
+   * A copy of the cache at a moment in time. This is useful
+   * to compare changes over time, since the cache mutates
+   * internally for performance reasons.
+   */
+  get snapshot(): CacheSnapshot {
     return {
       keys: cloneArray(this.keys),
       size: this.size,
@@ -58,17 +76,11 @@ export class Cache<Fn extends AnyFn> {
   }
 
   /**
-   * @function _getKeyIndexFromMatchingKey
-   *
-   * @description
-   * gets the matching key index when a custom key matcher is used
-   *
-   * @param keyToMatch the key to match
-   * @returns the index of the matching key, or -1
+   * Gets the matching key index when a custom key matcher is used.
    */
-  _getKeyIndexFromMatchingKey(keyToMatch: MicroMemoize.RawKey) {
+  _getKeyIndexFromMatchingKey(keyToMatch: RawKey) {
     const { isMatchingKey, maxSize } = this.options as {
-      isMatchingKey: MicroMemoize.MatchingKeyComparator;
+      isMatchingKey: MatchingKeyComparator;
       maxSize: number;
     };
 
@@ -95,15 +107,9 @@ export class Cache<Fn extends AnyFn> {
   }
 
   /**
-   * @function _getKeyIndexForMany
-   *
-   * @description
-   * gets the matching key index when multiple keys are used
-   *
-   * @param keyToMatch the key to match
-   * @returns the index of the matching key, or -1
+   * Gets the matching key index when multiple keys are used.
    */
-  _getKeyIndexForMany(keyToMatch: MicroMemoize.RawKey) {
+  _getKeyIndexForMany(keyToMatch: RawKey) {
     const { isEqual } = this.options;
 
     const { keys } = this;
@@ -157,15 +163,9 @@ export class Cache<Fn extends AnyFn> {
   }
 
   /**
-   * @function _getKeyIndexForSingle
-   *
-   * @description
-   * gets the matching key index when a single key is used
-   *
-   * @param keyToMatch the key to match
-   * @returns the index of the matching key, or -1
+   * Gets the matching key index when a single key is used.
    */
-  _getKeyIndexForSingle(keyToMatch: MicroMemoize.RawKey) {
+  _getKeyIndexForSingle(keyToMatch: RawKey) {
     const { keys } = this;
 
     if (!keys.length) {
@@ -195,20 +195,9 @@ export class Cache<Fn extends AnyFn> {
   }
 
   /**
-   * @function orderByLru
-   *
-   * @description
-   * order the array based on a Least-Recently-Used basis
-   *
-   * @param key the new key to move to the front
-   * @param value the new value to move to the front
-   * @param startingIndex the index of the item to move to the front
+   * Order the array based on a Least-Recently-Used basis.
    */
-  orderByLru(
-    key: MicroMemoize.Key,
-    value: MicroMemoize.Value,
-    startingIndex: number,
-  ) {
+  orderByLru(key: Key, value: Value, startingIndex: number) {
     const { keys } = this;
     const { values } = this;
 
@@ -236,18 +225,13 @@ export class Cache<Fn extends AnyFn> {
   }
 
   /**
-   * @function updateAsyncCache
-   *
-   * @description
-   * update the promise method to auto-remove from cache if rejected, and
-   * if resolved then fire cache hit / changed
-   *
-   * @param memoized the memoized function
+   * Update the promise method to auto-remove from cache if rejected, and
+   * if resolved then fire cache hit / changed.
    */
-  updateAsyncCache(memoized: MicroMemoize.Memoized<Fn>) {
+  updateAsyncCache(memoized: Memoized<Fn>) {
     const { onCacheChange, onCacheHit } = this.options as {
-      onCacheChange: MicroMemoize.CacheModifiedHandler<Fn>;
-      onCacheHit: MicroMemoize.CacheModifiedHandler<Fn>;
+      onCacheChange: CacheModifiedHandler<Fn>;
+      onCacheHit: CacheModifiedHandler<Fn>;
     };
 
     const [firstKey] = this.keys;
