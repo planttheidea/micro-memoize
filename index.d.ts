@@ -1,7 +1,7 @@
-export type Dictionary<Type> = {
+export interface Dictionary<Type> {
   [key: string]: Type;
   [index: number]: Type;
-};
+}
 
 export type AnyFn = (...args: any[]) => any;
 
@@ -9,11 +9,11 @@ export type Key = any[];
 export type RawKey = Key | IArguments;
 export type Value = any;
 
-export type CacheSnapshot = {
+export interface CacheSnapshot {
   keys: Key[];
   size: number;
   values: Value[];
-};
+}
 
 export class Cache<Fn extends AnyFn> {
   readonly canTransformKey: boolean;
@@ -73,7 +73,7 @@ export type KeyTransformer = (args: Key) => Key;
 
 export type KeyIndexGetter = (keyToMatch: RawKey) => number;
 
-export type StandardOptions<Fn extends AnyFn> = {
+export interface StandardOptions<Fn extends AnyFn> {
   isEqual?: EqualityComparator;
   isMatchingKey?: MatchingKeyComparator;
   isPromise?: boolean;
@@ -82,14 +82,17 @@ export type StandardOptions<Fn extends AnyFn> = {
   onCacheChange?: CacheModifiedHandler<Fn>;
   onCacheHit?: CacheModifiedHandler<Fn>;
   transformKey?: KeyTransformer;
-};
+}
 
-export type Options<Fn extends AnyFn> = StandardOptions<Fn> & Dictionary<any>;
-export type NormalizedOptions<Fn extends AnyFn> = Options<Fn> & {
+export interface Options<Fn extends AnyFn>
+  extends StandardOptions<Fn>,
+    Dictionary<any> {}
+
+export interface NormalizedOptions<Fn extends AnyFn> extends Options<Fn> {
   isEqual: EqualityComparator;
   isPromise: boolean;
   maxSize: number;
-};
+}
 
 export type Memoized<Fn extends AnyFn> = Fn &
   Dictionary<any> & {
