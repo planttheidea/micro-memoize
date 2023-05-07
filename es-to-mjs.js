@@ -3,35 +3,49 @@ const path = require('path');
 
 const pkg = require('./package.json');
 
-const SOURCE = path.join(__dirname, pkg.module);
-const SOURCE_MAP = `${SOURCE}.map`;
-const DESTINATION = path.join(__dirname, 'mjs', 'index.mjs');
-const DESTINATION_MAP = `${DESTINATION}.map`;
+const BASE_PATH = __dirname;
+const SOURCE_ENTRY = path.join(BASE_PATH, pkg.module);
+const SOURCE_MAP = `${SOURCE_ENTRY}.map`;
+const SOURCE_TYPES = path.join(BASE_PATH, 'index.d.ts');
+const DESTINATION = 'mjs';
+const DESTINATION_ENTRY = path.join(BASE_PATH, DESTINATION, 'index.mjs');
+const DESTINATION_MAP = `${DESTINATION_ENTRY}.map`;
+const DESTINATION_TYPES = path.join(BASE_PATH, DESTINATION, 'index.d.ts');
 
 function getFilename(filename) {
-  const split = filename.split('/');
-
-  return split[split.length - 1];
+  return filename.replace(`${BASE_PATH}/`, '');
 }
 
 try {
-  if (!fs.existsSync(path.join(__dirname, 'mjs'))) {
-    fs.mkdirSync(path.join(__dirname, 'mjs'));
+  if (!fs.existsSync(path.join(BASE_PATH, 'mjs'))) {
+    fs.mkdirSync(path.join(BASE_PATH, 'mjs'));
   }
 
-  fs.copyFileSync(SOURCE, DESTINATION);
+  fs.copyFileSync(SOURCE_ENTRY, DESTINATION_ENTRY);
 
   const contents = fs
-    .readFileSync(DESTINATION, { encoding: 'utf8' })
-    .replace(/\/\/# sourceMappingURL=(.*)/, (match, value) => match.replace(value, 'index.mjs.map'));
+    .readFileSync(DESTINATION_ENTRY, { encoding: 'utf8' })
+    .replace(/\/\/# sourceMappingURL=(.*)/, (match, value) =>
+      match.replace(value, 'index.mjs.map'),
+    );
 
-  fs.writeFileSync(DESTINATION, contents, { encoding: 'utf8' });
+  fs.writeFileSync(DESTINATION_ENTRY, contents, { encoding: 'utf8' });
 
-  console.log(`Copied ${getFilename(SOURCE)} to ${getFilename(DESTINATION)}`);
+  console.log(
+    `Copied ${getFilename(SOURCE_ENTRY)} to ${getFilename(DESTINATION_ENTRY)}`,
+  );
 
   fs.copyFileSync(SOURCE_MAP, DESTINATION_MAP);
 
-  console.log(`Copied ${getFilename(SOURCE_MAP)} to ${getFilename(DESTINATION_MAP)}`);
+  console.log(
+    `Copied ${getFilename(SOURCE_MAP)} to ${getFilename(DESTINATION_MAP)}`,
+  );
+
+  fs.copyFileSync(SOURCE_TYPES, DESTINATION_TYPES);
+
+  console.log(
+    `Copied ${getFilename(SOURCE_TYPES)} to ${getFilename(DESTINATION_TYPES)}`,
+  );
 } catch (error) {
   console.error(error);
 
