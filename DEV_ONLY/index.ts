@@ -6,7 +6,7 @@ import Bluebird from 'bluebird';
 import { deepEqual } from 'fast-equals';
 
 import memoize from '../src';
-import { Key, RawKey } from '../src';
+import { Key, RawKey } from '../index.d';
 
 // import '../benchmarks';
 

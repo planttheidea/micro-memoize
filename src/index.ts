@@ -15,8 +15,6 @@ import {
   mergeOptions,
 } from './utils';
 
-export type * from '../index.d';
-
 function createMemoizedFunction<Fn extends AnyFn>(
   fn: Fn | Memoized<Fn>,
   options: Options<Fn> = {},
