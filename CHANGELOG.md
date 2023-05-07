@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 4.0.15
+
+- [#99](https://github.com/planttheidea/micro-memoize/issues/99) - `mjs` import does not have typings surfaced
+
 ## 4.0.14
 
 - Republish of [#87](https://github.com/planttheidea/micro-memoize/pull/87)
