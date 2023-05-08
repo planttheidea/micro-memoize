@@ -1,4 +1,10 @@
-import type { AnyFn, Dictionary, MicroMemoize } from './types';
+import type {
+  AnyFn,
+  Dictionary,
+  Memoized,
+  NormalizedOptions,
+  Options,
+} from '../index.d';
 
 /**
  * @constant DEFAULT_OPTIONS_KEYS the default options keys
@@ -62,10 +68,8 @@ export function cloneArray(arrayLike: any[] | IArguments) {
  * @param options the memoization options passed
  * @returns the custom options passed
  */
-export function getCustomOptions<Fn extends AnyFn>(
-  options: MicroMemoize.Options<Fn>,
-) {
-  const customOptions: MicroMemoize.Options<Fn> = {};
+export function getCustomOptions<Fn extends AnyFn>(options: Options<Fn>) {
+  const customOptions: Options<Fn> = {};
 
   /* eslint-disable no-restricted-syntax */
 
@@ -89,10 +93,8 @@ export function getCustomOptions<Fn extends AnyFn>(
  * @param fn the function to test
  * @returns is the function already memoized
  */
-export function isMemoized(fn: any): fn is MicroMemoize.Memoized<AnyFn> {
-  return (
-    typeof fn === 'function' && (fn as MicroMemoize.Memoized<AnyFn>).isMemoized
-  );
+export function isMemoized(fn: any): fn is Memoized<AnyFn> {
+  return typeof fn === 'function' && (fn as Memoized<AnyFn>).isMemoized;
 }
 
 /**
@@ -121,12 +123,10 @@ export function isSameValueZero(object1: any, object2: any) {
  * @returns the merged options
  */
 export function mergeOptions<Fn extends AnyFn>(
-  existingOptions:
-    | MicroMemoize.NormalizedOptions<AnyFn>
-    | MicroMemoize.NormalizedOptions<Fn>,
-  newOptions: MicroMemoize.Options<Fn>,
-): Readonly<MicroMemoize.NormalizedOptions<Fn>> {
-  const target = {} as MicroMemoize.NormalizedOptions<Fn>;
+  existingOptions: NormalizedOptions<AnyFn> | NormalizedOptions<Fn>,
+  newOptions: Options<Fn>,
+): Readonly<NormalizedOptions<Fn>> {
+  const target = {} as NormalizedOptions<Fn>;
 
   /* eslint-disable no-restricted-syntax */
 

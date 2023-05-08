@@ -91,15 +91,16 @@
     "lint": "NODE_ENV=test eslint src/*.ts",
     "lint:fix": "npm run lint -- --fix",
     "prepublish": "if in-publish; then npm run prepublish:compile; fi",
-    "prepublish:compile": "npm run lint && npm run test:coverage && npm run dist",
+    "prepublish:compile": "npm run typecheck && npm run lint && npm run test:coverage && npm run dist",
     "release": "release-it",
     "release:beta": "release-it --config=.release-it.beta.json",
     "start": "npm run dev",
     "test": "NODE_PATH=. jest",
     "test:coverage": "npm run test -- --coverage",
-    "test:watch": "npm run test -- --watch"
+    "test:watch": "npm run test -- --watch",
+    "typecheck": "tsc --noEmit"
   },
   "sideEffects": false,
   "types": "./index.d.ts",
-  "version": "4.0.15"
+  "version": "4.1.0-beta.4"
 }

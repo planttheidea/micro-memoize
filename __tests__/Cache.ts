@@ -1,13 +1,12 @@
+import type { AnyFn, Memoized, NormalizedOptions } from '../index.d';
 import { Cache } from '../src/Cache';
-import { AnyFn, MicroMemoize } from '../src/types';
-
 import { isSameValueZero } from '../src/utils';
 
 const has = (object: any, property: string) =>
   Object.prototype.hasOwnProperty.call(object, property);
 
 const mockNormalizedOptions = (options: any) =>
-  options as MicroMemoize.NormalizedOptions<AnyFn>;
+  options as NormalizedOptions<AnyFn>;
 
 describe('create cache', () => {
   it('should create a new cache instance with correct defaults', () => {
@@ -529,7 +528,7 @@ describe('cache methods', () => {
         return 'resolved';
       };
       const key = ['foo'];
-      const memoized = (() => {}) as unknown as MicroMemoize.Memoized<AnyFn>;
+      const memoized = (() => {}) as unknown as Memoized<AnyFn>;
 
       const value = fn();
 
@@ -576,7 +575,7 @@ describe('cache methods', () => {
         return 'resolved';
       };
       const key = ['foo'];
-      const memoized = (() => {}) as unknown as MicroMemoize.Memoized<AnyFn>;
+      const memoized = (() => {}) as unknown as Memoized<AnyFn>;
 
       const value = fn();
 
@@ -647,7 +646,7 @@ describe('cache methods', () => {
       cache.keys = [key];
       cache.values = [value];
 
-      const memoized = (() => {}) as unknown as MicroMemoize.Memoized<AnyFn>;
+      const memoized = (() => {}) as unknown as Memoized<AnyFn>;
 
       cache.updateAsyncCache(memoized);
 
@@ -700,7 +699,7 @@ describe('cache methods', () => {
       cache.keys = [key];
       cache.values = [value];
 
-      const memoized = (() => {}) as unknown as MicroMemoize.Memoized<AnyFn>;
+      const memoized = (() => {}) as unknown as Memoized<AnyFn>;
 
       cache.updateAsyncCache(memoized);
 

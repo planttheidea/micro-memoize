@@ -1,5 +1,5 @@
+import type { AnyFn, NormalizedOptions } from '../index.d';
 import { getCustomOptions, isSameValueZero, mergeOptions } from '../src/utils';
-import { AnyFn, MicroMemoize } from '../src/types';
 
 describe('getCustomOptions', () => {
   it('will return the custom options and no default options', () => {
@@ -47,7 +47,7 @@ describe('mergeOptions', () => {
     };
 
     const result = mergeOptions(
-      extraOptions as unknown as MicroMemoize.NormalizedOptions<AnyFn>,
+      extraOptions as unknown as NormalizedOptions<AnyFn>,
       providedOptions,
     );
 

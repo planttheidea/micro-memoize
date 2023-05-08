@@ -1,10 +1,12 @@
-// cache
 import { Cache } from './Cache';
-
-// types
-import { AnyFn, MicroMemoize } from './types';
-
-// utils
+import type {
+  AnyFn,
+  CacheModifiedHandler,
+  Key,
+  KeyTransformer,
+  Memoized,
+  Options,
+} from '../index.d';
 import {
   cloneArray,
   getCustomOptions,
@@ -14,9 +16,9 @@ import {
 } from './utils';
 
 function createMemoizedFunction<Fn extends AnyFn>(
-  fn: Fn | MicroMemoize.Memoized<Fn>,
-  options: MicroMemoize.Options<Fn> = {},
-): MicroMemoize.Memoized<Fn> {
+  fn: Fn | Memoized<Fn>,
+  options: Options<Fn> = {},
+): Memoized<Fn> {
   if (isMemoized(fn)) {
     return createMemoizedFunction<Fn>(
       fn.fn as Fn,
@@ -68,17 +70,17 @@ function createMemoizedFunction<Fn extends AnyFn>(
   const memoized = function (this: any) {
     let key = shouldCloneArguments
       ? cloneArray(arguments)
-      : (arguments as unknown as MicroMemoize.Key);
+      : (arguments as unknown as Key);
 
     if (canTransformKey) {
-      key = (transformKey as MicroMemoize.KeyTransformer)(key);
+      key = (transformKey as KeyTransformer)(key);
     }
 
     const keyIndex = keys.length ? cache.getKeyIndex(key) : -1;
 
     if (keyIndex !== -1) {
       if (shouldUpdateOnHit) {
-        (onCacheHit as MicroMemoize.CacheModifiedHandler<Fn>)(
+        (onCacheHit as CacheModifiedHandler<Fn>)(
           cache,
           normalizedOptions,
           memoized,
@@ -89,7 +91,7 @@ function createMemoizedFunction<Fn extends AnyFn>(
         cache.orderByLru(keys[keyIndex]!, values[keyIndex], keyIndex);
 
         if (shouldUpdateOnChange) {
-          (onCacheChange as MicroMemoize.CacheModifiedHandler<Fn>)(
+          (onCacheChange as CacheModifiedHandler<Fn>)(
             cache,
             normalizedOptions,
             memoized,
@@ -109,7 +111,7 @@ function createMemoizedFunction<Fn extends AnyFn>(
       }
 
       if (shouldUpdateOnAdd) {
-        (onCacheAdd as MicroMemoize.CacheModifiedHandler<Fn>)(
+        (onCacheAdd as CacheModifiedHandler<Fn>)(
           cache,
           normalizedOptions,
           memoized,
@@ -117,7 +119,7 @@ function createMemoizedFunction<Fn extends AnyFn>(
       }
 
       if (shouldUpdateOnChange) {
-        (onCacheChange as MicroMemoize.CacheModifiedHandler<Fn>)(
+        (onCacheChange as CacheModifiedHandler<Fn>)(
           cache,
           normalizedOptions,
           memoized,
@@ -126,7 +128,7 @@ function createMemoizedFunction<Fn extends AnyFn>(
     }
 
     return values[0];
-  } as MicroMemoize.Memoized<Fn>;
+  } as Memoized<Fn>;
 
   memoized.cache = cache;
   memoized.fn = fn;
