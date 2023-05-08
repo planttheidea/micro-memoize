@@ -1,5 +1,5 @@
 import typescript from '@rollup/plugin-typescript';
-import { terser } from 'rollup-plugin-terser';
+import terser from '@rollup/plugin-terser';
 import localTypescript from 'typescript';
 
 import pkg from './package.json';

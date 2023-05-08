@@ -10,6 +10,7 @@
 
 - [#97](https://github.com/planttheidea/micro-memoize/issues/97) - `src` files included in publish, and referenced from `*.d.ts` files
 - `mjs/*d.ts` files renamed to `mjs/*.d.mts` to align with NodeJS standard
+- [#101](https://github.com/planttheidea/micro-memoize/pull/101) - fixed benchmark using `mem` incorrectly for complex object parameters or multiple parameter calls
 
 ## 4.0.15
 
