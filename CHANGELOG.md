@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 4.1.1
+
+- [#102](https://github.com/planttheidea/micro-memoize/pull/102) - avoid publishing development-only files for less `node_modules` bloat
+
 ## 4.1.0
 
 #### Enhancements
