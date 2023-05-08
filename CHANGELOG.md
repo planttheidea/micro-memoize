@@ -1,6 +1,10 @@
 # micro-memoize CHANGELOG
 
-## 4.1.1
+## 4.1.2
+
+- Republish of [#102](https://github.com/planttheidea/micro-memoize/pull/102)
+
+## 4.1.1 (Bad version - do not use)
 
 - [#102](https://github.com/planttheidea/micro-memoize/pull/102) - avoid publishing development-only files for less `node_modules` bloat
 
