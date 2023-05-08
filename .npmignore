@@ -4,9 +4,15 @@
 .idea
 .npmignore
 .nyc_output
+__tests__
+.prettierrc.js
+.release-it*
+benchmarks
 coverage
 DEV_ONLY
+es-to-mjs.js
+jest.config.js
 node_modules
+rollup.config.js
 src
-test
 webpack
