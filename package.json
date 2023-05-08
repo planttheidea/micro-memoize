@@ -36,7 +36,7 @@
     "jest": "^29.5.0",
     "lodash": "^4.17.21",
     "lru-memoize": "^1.1.0",
-    "mem": "^9.0.2",
+    "mem": "^8.1.1",
     "memoizee": "^0.4.15",
     "memoizerific": "^1.11.3",
     "mini-bench": "^1.0.0",
