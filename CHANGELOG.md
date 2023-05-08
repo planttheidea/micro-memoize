@@ -1,5 +1,16 @@
 # micro-memoize CHANGELOG
 
+## 4.1.0
+
+#### Enhancements
+
+- Types now have direct exports instead of requiring the `MicroMemoize` namespace. That namespace has been labeled as deprecated, and will be removed in the next major version change in favor of the direct type exports.
+
+#### Bugfixes
+
+- [#97](https://github.com/planttheidea/micro-memoize/issues/97) - `src` files included in publish, and referenced from `*.d.ts` files
+- `mjs/*d.ts` files renamed to `mjs/*.d.mts` to align with NodeJS standard
+
 ## 4.0.15
 
 - [#99](https://github.com/planttheidea/micro-memoize/issues/99) - `mjs` import does not have typings surfaced
