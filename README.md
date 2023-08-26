@@ -241,7 +241,7 @@ setTimeout(() => {
 
 `number`, _defaults to `1`_
 
-The number of values to store in cache, based on a [Least Recently Used](https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_Recently_Used_.28LRU.29) basis. This operates the same as [`maxSize`](https://github.com/planttheidea/moize#maxsize) on `moize`, with the exception of the default being different.
+The number of values to store in cache, based on a [Least Recently Used](https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_Recently_Used_.28LRU.29) basis. This operates the same as [`maxSize`](https://github.com/planttheidea/moize#maxsize) on `moize`.
 
 ```ts
 const manyPossibleArgs = (one: string, two: string) => [one, two];
@@ -258,8 +258,6 @@ console.log(memoized('three', 'four')); // pulled from cache
 
 console.log(memoized('four', 'five')); // ['four', 'five'], drops ['one', 'two'] from cache
 ```
-
-**NOTE**: The default for `micro-memoize` differs from the default implementation of `moize`. `moize` will store an infinite number of results unless restricted, whereas `micro-memoize` will only store the most recent result. In this way, the default implementation of `micro-memoize` operates more like [`moize.simple`](https://github.com/planttheidea/moize#moizesimple).
 
 ### onCacheAdd
 
