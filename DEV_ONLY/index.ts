@@ -5,8 +5,9 @@
 import Bluebird from 'bluebird';
 import { deepEqual } from 'fast-equals';
 
-import memoize from '../src';
-import { Key, RawKey } from '../index.d';
+import memoize from '../src-next';
+import { Key, RawKey } from '../src-next';
+// import { Key, RawKey } from '../index.d';
 
 // import '../benchmarks';
 
@@ -42,13 +43,12 @@ memoized(bar, foo);
 memoized(foo, bar);
 memoized(foo, bar);
 
-console.log(memoized.cache.snapshot);
+console.log(memoized.cache.snapshot());
 console.log(memoized.cache);
 
-memoized.cache.keys = [];
-memoized.cache.values = [];
+memoized.cache.clear();
 
-console.log(memoized.cache.snapshot);
+console.log(memoized.cache.snapshot());
 console.log(memoized.cache);
 
 console.groupEnd();
@@ -56,8 +56,8 @@ console.groupEnd();
 console.group('standard with larger cache size');
 
 const memoizedLargerCache = memoize(method, {
-  onCacheChange(cache) {
-    console.log([...cache.keys]);
+  onChange(type, entry) {
+    console.log(type, entry);
   },
   maxSize: 3,
 });
@@ -70,7 +70,7 @@ memoizedLargerCache(foo, bar);
 memoizedLargerCache(baz, quz);
 memoizedLargerCache(foo, quz);
 
-console.log(memoizedLargerCache.cache.snapshot);
+console.log(memoizedLargerCache.cache.snapshot());
 
 console.groupEnd();
 
@@ -80,7 +80,7 @@ console.group('maxArgs');
 const isMatchingKeyMaxArgs = (originalKey: Key, newKey: RawKey): boolean =>
   originalKey[0] === newKey[0];
 
-const memoizedMax = memoize(method, { isMatchingKey: isMatchingKeyMaxArgs });
+const memoizedMax = memoize(method, { matchesKey: isMatchingKeyMaxArgs });
 
 memoizedMax(foo, bar);
 memoizedMax(foo, baz);
@@ -103,7 +103,7 @@ const deepEqualMethod = ({
 };
 
 const deepEqualMemoized = memoize(deepEqualMethod, {
-  isEqual: deepEqual,
+  matchesArg: deepEqual,
 });
 
 deepEqualMemoized({ one: 1, two: 2 });
@@ -111,7 +111,7 @@ deepEqualMemoized({ one: 2, two: 1 });
 deepEqualMemoized({ one: 1, two: 2 });
 deepEqualMemoized({ one: 1, two: 2 });
 
-console.log(deepEqualMemoized.cache.snapshot);
+console.log(deepEqualMemoized.cache.snapshot());
 
 console.groupEnd();
 
@@ -145,7 +145,7 @@ memoizedPromiseRejected(3)
     console.log(value);
   })
   .catch((error: Error) => {
-    console.log(memoizedPromiseRejected.cache.snapshot);
+    console.log(memoizedPromiseRejected.cache.snapshot());
     console.error(error);
   });
 
@@ -154,7 +154,7 @@ memoizedPromiseRejected(3)
     console.log(value);
   })
   .catch((error: Error) => {
-    console.log(memoizedPromiseRejected.cache.snapshot);
+    console.log(memoizedPromiseRejected.cache.snapshot());
     console.error(error);
   });
 
@@ -163,7 +163,7 @@ memoizedPromiseRejected(3)
     console.log(value);
   })
   .catch((error: Error) => {
-    console.log(memoizedPromiseRejected.cache.snapshot);
+    console.log(memoizedPromiseRejected.cache.snapshot());
     console.error(error);
   });
 
@@ -177,7 +177,7 @@ memoizedPromise(2, 2).then((value: unknown) => {
   console.log(`cached value: ${value}`);
 });
 
-console.log(memoizedPromise.cache.snapshot.keys);
+console.log(memoizedPromise.cache.snapshot().keys);
 
 console.groupEnd();
 
@@ -206,7 +206,7 @@ const noFns = (one: string, two: string, three: Function) => {
 };
 
 const memoizedNoFns = memoize(noFns, {
-  isEqual(key1: string, key2: string) {
+  matchesArg(key1: string, key2: string) {
     return key1 === key2;
   },
   transformKey(args: any) {
@@ -231,7 +231,7 @@ const matchingKeyMethod = function (object: {
 };
 
 const matchingKeyMemoized = memoize(matchingKeyMethod, {
-  isMatchingKey: deepEqual,
+  matchesKey: deepEqual,
   maxSize: 10,
 });
 
@@ -299,9 +299,9 @@ const metadata = {
 const result1 = calc(data, metadata);
 
 console.log(result1);
-console.log(calc.cache.snapshot);
+console.log(calc.cache.snapshot());
 
 const result2 = calc(data, metadata);
 
 console.log(result2);
-console.log(calc.cache.snapshot);
+console.log(calc.cache.snapshot());
