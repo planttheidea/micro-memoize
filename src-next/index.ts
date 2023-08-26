@@ -108,7 +108,7 @@ function updateAsyncEntry<Fn extends (...args: any[]) => any>(
 }
 
 class Cache<Fn extends (...args: any[]) => any> {
-  private shouldClone: boolean;
+  private c: boolean;
 
   entries: Array<CacheEntry<Fn>> = [];
   matchesArg: (a: Arg, b: Arg) => boolean;
@@ -123,27 +123,22 @@ class Cache<Fn extends (...args: any[]) => any> {
 
     this.isPromise = getDefault('boolean', options.isPromise, false);
     this.matchesArg = getDefault('function', options.matchesArg, sameValueZero);
-    this.matchesKey = getDefault(
-      'function',
-      options.matchesKey,
-      this.areKeysEqual,
-    );
+    this.matchesKey = getDefault('function', options.matchesKey, this.e);
     this.maxSize = getDefault('number', options.maxSize, 1);
     this.onChange = getDefault('function', options.onChange);
-    this.shouldClone = !!transformKey || options.matchesKey === this.matchesKey;
-    this.transformKey = this.shouldClone
+    this.c = !!transformKey || options.matchesKey === this.matchesKey;
+    this.transformKey = this.c
       ? transformKey
         ? (args: RawKey) => transformKey(cloneKey(args))
         : cloneKey
       : undefined;
   }
 
-  add(args: RawKey, value: ReturnType<Fn>): CacheEntry<Fn> {
-    const key = cloneKey(args);
+  add(key: Key, value: ReturnType<Fn>): CacheEntry<Fn> {
     const entry = { key, value };
 
+    this.r(entry, this.entries.length);
     this.onChange && this.onChange('add', entry, this);
-    this.reorder(entry, this.entries.length);
 
     return entry;
   }
@@ -174,7 +169,7 @@ class Cache<Fn extends (...args: any[]) => any> {
       entry = this.entries[index]!;
 
       if (this.matchesKey(entry.key, key)) {
-        this.reorder(entry, index);
+        this.r(entry, index);
         this.onChange && this.onChange('update', entry, this);
         return entry;
       }
@@ -194,7 +189,7 @@ class Cache<Fn extends (...args: any[]) => any> {
     return this.entries.map(({ key, value }) => ({ key, value }));
   }
 
-  private areKeysEqual(prevKey: Key, nextKey: Key): boolean {
+  private e(prevKey: Key, nextKey: Key): boolean {
     const length = nextKey.length;
 
     if (prevKey.length !== length) {
@@ -214,7 +209,7 @@ class Cache<Fn extends (...args: any[]) => any> {
     return true;
   }
 
-  private reorder(entry: CacheEntry<Fn>, startingIndex: number) {
+  private r(entry: CacheEntry<Fn>, startingIndex: number) {
     const currentLength = this.entries.length;
 
     let index = startingIndex;
@@ -243,29 +238,24 @@ export default function memoize<Fn extends (...args: any[]) => any>(
   passedOptions: Options<Fn> = {},
 ): Memoized<Fn> {
   const cache = new Cache(passedOptions);
+  const transformed = !!cache.transformKey;
 
   const memoized: Memoized<Fn> = function memoized(this: any) {
-    // console.group(`call - ${cloneKey(arguments)}`);
-
-    const key = cache.transformKey
-      ? // eslint-disable-next-line prefer-rest-params
-        cache.transformKey(arguments)
-      : // eslint-disable-next-line prefer-rest-params
-        (arguments as unknown as Key);
+    const key = transformed
+      ? cache.transformKey!(arguments)
+      : (arguments as unknown as Key);
     let cached = cache.match(key);
 
     if (cached) {
-      //   console.groupEnd();
       return cached.value;
     }
 
-    cached = cache.add(key, fn.apply(this, key));
+    cached = cache.add(transformed ? key : cloneKey(key), fn.apply(this, key));
 
     if (cache.isPromise) {
       updateAsyncEntry(cache, cached);
     }
 
-    // console.groupEnd();
     return cached.value;
   };
 

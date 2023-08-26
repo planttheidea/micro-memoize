@@ -31,21 +31,20 @@ var Cache = /** @class */ (function () {
         var transformKey = getDefault('function', options.transformKey);
         this.isPromise = getDefault('boolean', options.isPromise, false);
         this.matchesArg = getDefault('function', options.matchesArg, sameValueZero);
-        this.matchesKey = getDefault('function', options.matchesKey, this.areKeysEqual);
+        this.matchesKey = getDefault('function', options.matchesKey, this.e);
         this.maxSize = getDefault('number', options.maxSize, 1);
         this.onChange = getDefault('function', options.onChange);
-        this.shouldClone = !!transformKey || options.matchesKey === this.matchesKey;
-        this.transformKey = this.shouldClone
+        this.c = !!transformKey || options.matchesKey === this.matchesKey;
+        this.transformKey = this.c
             ? transformKey
                 ? function (args) { return transformKey(cloneKey(args)); }
                 : cloneKey
             : undefined;
     }
-    Cache.prototype.add = function (args, value) {
-        var key = cloneKey(args);
+    Cache.prototype.add = function (key, value) {
         var entry = { key: key, value: value };
+        this.r(entry, this.entries.length);
         this.onChange && this.onChange('add', entry, this);
-        this.reorder(entry, this.entries.length);
         return entry;
     };
     Cache.prototype.clear = function () {
@@ -67,7 +66,7 @@ var Cache = /** @class */ (function () {
         for (var index = 1; index < length; ++index) {
             entry = this.entries[index];
             if (this.matchesKey(entry.key, key)) {
-                this.reorder(entry, index);
+                this.r(entry, index);
                 this.onChange && this.onChange('update', entry, this);
                 return entry;
             }
@@ -86,7 +85,7 @@ var Cache = /** @class */ (function () {
             return ({ key: key, value: value });
         });
     };
-    Cache.prototype.areKeysEqual = function (prevKey, nextKey) {
+    Cache.prototype.e = function (prevKey, nextKey) {
         var length = nextKey.length;
         if (prevKey.length !== length) {
             return false;
@@ -101,7 +100,7 @@ var Cache = /** @class */ (function () {
         }
         return true;
     };
-    Cache.prototype.reorder = function (entry, startingIndex) {
+    Cache.prototype.r = function (entry, startingIndex) {
         var currentLength = this.entries.length;
         var index = startingIndex;
         while (index--) {
@@ -124,23 +123,19 @@ function sameValueZero(a, b) {
 function memoize(fn, passedOptions) {
     if (passedOptions === void 0) { passedOptions = {}; }
     var cache = new Cache(passedOptions);
+    var transformed = !!cache.transformKey;
     var memoized = function memoized() {
-        // console.group(`call - ${cloneKey(arguments)}`);
-        var key = cache.transformKey
-            ? // eslint-disable-next-line prefer-rest-params
-                cache.transformKey(arguments)
-            : // eslint-disable-next-line prefer-rest-params
-                arguments;
+        var key = transformed
+            ? cache.transformKey(arguments)
+            : arguments;
         var cached = cache.match(key);
         if (cached) {
-            //   console.groupEnd();
             return cached.value;
         }
-        cached = cache.add(key, fn.apply(this, key));
+        cached = cache.add(transformed ? key : cloneKey(key), fn.apply(this, key));
         if (cache.isPromise) {
             updateAsyncEntry(cache, cached);
         }
-        // console.groupEnd();
         return cached.value;
     };
     memoized.cache = cache;
