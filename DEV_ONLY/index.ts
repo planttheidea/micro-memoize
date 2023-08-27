@@ -1,13 +1,9 @@
-/* globals document */
-
 /* eslint-disable */
 
 import Bluebird from 'bluebird';
 import { deepEqual } from 'fast-equals';
 
 import memoize from '../src-next';
-import { Key, RawKey } from '../src-next';
-// import { Key, RawKey } from '../index.d';
 
 // import '../benchmarks';
 
@@ -56,7 +52,7 @@ console.groupEnd();
 console.group('standard with larger cache size');
 
 const memoizedLargerCache = memoize(method, {
-  onChange(type, entry) {
+  onCache(type, entry) {
     console.log(type, entry);
   },
   maxSize: 3,
@@ -76,11 +72,9 @@ console.groupEnd();
 
 console.group('maxArgs');
 
-// limit to testing the first args
-const isMatchingKeyMaxArgs = (originalKey: Key, newKey: RawKey): boolean =>
-  originalKey[0] === newKey[0];
-
-const memoizedMax = memoize(method, { matchesKey: isMatchingKeyMaxArgs });
+const memoizedMax = memoize(method, {
+  matchesKey: (originalKey, newKey) => originalKey[0] === newKey[0],
+});
 
 memoizedMax(foo, bar);
 memoizedMax(foo, baz);
@@ -135,9 +129,9 @@ const promiseMethodRejected = (number: number) => {
   });
 };
 
-const memoizedPromise = memoize(promiseMethod, { isPromise: true });
+const memoizedPromise = memoize(promiseMethod, { async: true });
 const memoizedPromiseRejected = memoize(promiseMethodRejected, {
-  isPromise: true,
+  async: true,
 });
 
 memoizedPromiseRejected(3)
@@ -177,7 +171,7 @@ memoizedPromise(2, 2).then((value: unknown) => {
   console.log(`cached value: ${value}`);
 });
 
-console.log(memoizedPromise.cache.snapshot().keys);
+console.log(memoizedPromise.cache.snapshot().map(({ key }) => key));
 
 console.groupEnd();
 
@@ -206,13 +200,15 @@ const noFns = (one: string, two: string, three: Function) => {
 };
 
 const memoizedNoFns = memoize(noFns, {
-  matchesArg(key1: string, key2: string) {
+  matchesArg(key1, key2) {
     return key1 === key2;
   },
-  transformKey(args: any) {
+  transformKey(args) {
     return [JSON.stringify(args)];
   },
 });
+
+const options = memoizedNoFns.options;
 
 console.log(memoizedNoFns('one', 'two', () => {}));
 console.log(memoizedNoFns('one', 'two', () => {}));

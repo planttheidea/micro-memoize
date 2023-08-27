@@ -112,8 +112,8 @@ const singularPrimitive = {
   mem: mem(fibonacciSinglePrimitive),
   memoizee: memoizee(fibonacciSinglePrimitive),
   memoizerific: memoizerific(1)(fibonacciSinglePrimitive),
-  'micro-memoize (next)': memoizeNext(fibonacciSinglePrimitive),
   'micro-memoize': memoize(fibonacciSinglePrimitive),
+  'micro-memoize (next)': memoizeNext(fibonacciSinglePrimitive),
   ramda: ramda(fibonacciSinglePrimitive),
   underscore: underscore(fibonacciSinglePrimitive),
 };
@@ -126,8 +126,8 @@ const singularArray = {
   mem: mem(fibonacciSingleArray, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciSingleArray),
   memoizerific: memoizerific(1)(fibonacciSingleArray),
-  'micro-memoize (next)': memoizeNext(fibonacciSingleArray),
   'micro-memoize': memoize(fibonacciSingleArray),
+  'micro-memoize (next)': memoizeNext(fibonacciSingleArray),
   ramda: ramda(fibonacciSingleArray),
   underscore: underscore(fibonacciSingleArray, resolveArguments),
 };
@@ -140,8 +140,8 @@ const singularObject = {
   mem: mem(fibonacciSingleObject, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciSingleObject),
   memoizerific: memoizerific(1)(fibonacciSingleObject),
-  'micro-memoize (next)': memoizeNext(fibonacciSingleObject),
   'micro-memoize': memoize(fibonacciSingleObject),
+  'micro-memoize (next)': memoizeNext(fibonacciSingleObject),
   ramda: ramda(fibonacciSingleObject),
   underscore: underscore(fibonacciSingleObject, resolveArguments),
 };
@@ -154,8 +154,8 @@ const multiplePrimitive = {
   mem: mem(fibonacciMultiplePrimitive, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciMultiplePrimitive),
   memoizerific: memoizerific(1)(fibonacciMultiplePrimitive),
-  'micro-memoize (next)': memoizeNext(fibonacciMultiplePrimitive),
   'micro-memoize': memoize(fibonacciMultiplePrimitive),
+  'micro-memoize (next)': memoizeNext(fibonacciMultiplePrimitive),
   ramda: ramda(fibonacciMultiplePrimitive),
   underscore: underscore(fibonacciMultiplePrimitive, resolveArguments),
 };
@@ -168,8 +168,8 @@ const multipleArray = {
   mem: mem(fibonacciMultipleArray, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciMultipleArray),
   memoizerific: memoizerific(1)(fibonacciMultipleArray),
-  'micro-memoize (next)': memoizeNext(fibonacciMultipleArray),
   'micro-memoize': memoize(fibonacciMultipleArray),
+  'micro-memoize (next)': memoizeNext(fibonacciMultipleArray),
   ramda: ramda(fibonacciMultipleArray),
   underscore: underscore(fibonacciMultipleArray, resolveArguments),
 };
@@ -182,8 +182,8 @@ const multipleObject = {
   mem: mem(fibonacciMultipleObject, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciMultipleObject),
   memoizerific: memoizerific(1)(fibonacciMultipleObject),
-  'micro-memoize (next)': memoizeNext(fibonacciMultipleObject),
   'micro-memoize': memoize(fibonacciMultipleObject),
+  'micro-memoize (next)': memoizeNext(fibonacciMultipleObject),
   ramda: ramda(fibonacciMultipleObject),
   underscore: underscore(fibonacciMultipleObject, resolveArguments),
 };

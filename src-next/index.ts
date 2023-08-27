@@ -4,30 +4,39 @@ export type Key = any[];
 
 type Arg = Key[number];
 
+interface CacheNode<Fn extends (...args: any[]) => any> {
+  n: CacheNode<Fn> | null;
+  p: CacheNode<Fn> | null;
+  k: Key;
+  v: ReturnType<Fn>;
+}
+
 interface CacheEntry<Fn extends (...args: any[]) => any> {
   key: Key;
   value: ReturnType<Fn>;
 }
 
 type OnChange<Fn extends (...args: any[]) => any> = (
-  type: 'add' | 'hit' | 'remove' | 'update',
+  type: 'add' | 'delete' | 'hit' | 'resolved' | 'update',
   entry: CacheEntry<Fn>,
   cache: Cache<Fn>,
 ) => void;
-type KeyTransformer = (args: Key) => Key;
+type KeyTransformer<Fn extends (...args: any[]) => any> = (
+  args: Parameters<Fn>,
+) => Key;
 
 interface Options<Fn extends (...args: any[]) => any> {
-  isPromise?: boolean;
+  async?: boolean;
   maxSize?: number;
   matchesArg?: (a: Arg, b: Arg) => boolean;
   matchesKey?: (a: Key, b: Key) => boolean;
-  onChange?: OnChange<Fn>;
-  transformKey?: KeyTransformer;
+  onCache?: OnChange<Fn>;
+  transformKey?: KeyTransformer<Fn>;
 }
 
 // interface NormalizedOptions<Fn extends (...args: any[]) => any>
-//   extends Required<Omit<Options<Fn>, 'onChange' | 'transformKey'>> {
-//   onChange: OnChange<Fn> | undefined;
+//   extends Required<Omit<Options<Fn>, 'onCache' | 'transformKey'>> {
+//   onCache: OnChange<Fn> | undefined;
 //   transformKey: KeyTransformer | undefined;
 // }
 
@@ -42,6 +51,7 @@ interface Memoized<Fn extends (...args: any[]) => any> {
   cache: Cache<Fn>;
   fn: Fn;
   isMemoized: true;
+  options: Options<Fn>;
 }
 
 type TypeOf =
@@ -54,8 +64,10 @@ type TypeOf =
   | 'symbol'
   | 'undefined';
 
-function cloneKey(args: RawKey): Key {
-  const key: Key = [];
+function cloneKey<Fn extends (...args: any[]) => any>(
+  args: Parameters<Fn>,
+): [...Parameters<Fn>] {
+  const key = [] as unknown as Parameters<Fn>;
 
   for (let index = 0, length = args.length; index < length; ++index) {
     key[index] = args[index];
@@ -82,111 +94,107 @@ function getDefault<Value, DefaultValue>(
   return typeof value === type ? value : defaultValue;
 }
 
-function updateAsyncEntry<Fn extends (...args: any[]) => any>(
-  cache: Cache<Fn>,
-  entry: CacheEntry<Fn>,
-): void {
-  entry.value = entry.value.then(
-    (value: any) => {
-      if (cache.onChange) {
-        const index = cache.entries.indexOf(entry);
+function getEntry<Fn extends (...args: any[]) => any>(
+  node: CacheNode<Fn>,
+): CacheEntry<Fn> {
+  return { key: node.k, value: node.v };
+}
 
-        if (index === 0) {
-          cache.onChange('hit', entry, cache);
-        } else if (index !== -1) {
-          cache.onChange('update', entry, cache);
-        }
-      }
-
-      return value;
-    },
-    (error: Error) => {
-      cache.remove(entry);
-      throw error;
-    },
-  );
+function sameValueZero(a: any, b: any) {
+  return a === b || (a !== a && b !== b);
 }
 
 class Cache<Fn extends (...args: any[]) => any> {
+  private a: (a: Arg, b: Arg) => boolean;
   private c: boolean;
-
-  entries: Array<CacheEntry<Fn>> = [];
-  matchesArg: (a: Arg, b: Arg) => boolean;
-  matchesKey: (a: Key, b: Key) => boolean;
-  maxSize: number;
-  isPromise: boolean;
-  onChange: OnChange<Fn> | undefined;
-  transformKey: ((args: RawKey | Key) => Key) | undefined;
+  private h: CacheNode<Fn> | null = null;
+  private k: ((args: Parameters<Fn>) => Key) | undefined;
+  private l: number;
+  private m: (a: Key, b: Key) => boolean;
+  private o: OnChange<Fn> | undefined;
+  private p: boolean;
+  private s = 0;
+  private t: CacheNode<Fn> | null = null;
 
   constructor(options: Options<Fn>) {
     const transformKey = getDefault('function', options.transformKey);
 
-    this.isPromise = getDefault('boolean', options.isPromise, false);
-    this.matchesArg = getDefault('function', options.matchesArg, sameValueZero);
-    this.matchesKey = getDefault('function', options.matchesKey, this.e);
-    this.maxSize = getDefault('number', options.maxSize, 1);
-    this.onChange = getDefault('function', options.onChange);
-    this.c = !!transformKey || options.matchesKey === this.matchesKey;
-    this.transformKey = this.c
+    this.a = getDefault('function', options.matchesArg, sameValueZero);
+    this.l = getDefault('number', options.maxSize, 1);
+    this.m = getDefault('function', options.matchesKey, this.e);
+    this.o = getDefault('function', options.onCache);
+    this.p = getDefault('boolean', options.async, false);
+
+    this.c = !!transformKey || options.matchesKey === this.m;
+    this.k = this.c
       ? transformKey
-        ? (args: RawKey) => transformKey(cloneKey(args))
+        ? (args: Parameters<Fn>) => transformKey(cloneKey<Fn>(args))
         : cloneKey
       : undefined;
   }
 
-  add(key: Key, value: ReturnType<Fn>): CacheEntry<Fn> {
-    const entry = { key, value };
-
-    this.r(entry, this.entries.length);
-    this.onChange && this.onChange('add', entry, this);
-
-    return entry;
-  }
-
   clear(): void {
-    this.entries.length = 0;
+    this.h = this.t = null;
   }
 
-  match(key: Key): CacheEntry<Fn> | undefined {
-    const length = this.entries.length;
+  delete(node: CacheNode<Fn>): void {
+    const next = node.n;
+    const prev = node.p;
 
-    if (!length) {
-      return;
+    if (next) {
+      next.p = prev;
+    } else {
+      this.t = prev;
     }
 
-    let entry = this.entries[0]!;
-
-    if (this.matchesKey(entry.key, key)) {
-      this.onChange && this.onChange('hit', entry, this);
-      return entry;
+    if (prev) {
+      prev.n = next;
+    } else {
+      this.h = next;
     }
 
-    if (length === 1) {
-      return;
-    }
+    --this.s;
 
-    for (let index = 1; index < length; ++index) {
-      entry = this.entries[index]!;
-
-      if (this.matchesKey(entry.key, key)) {
-        this.r(entry, index);
-        this.onChange && this.onChange('update', entry, this);
-        return entry;
-      }
-    }
+    this.o && this.o('delete', getEntry(node), this);
   }
 
-  remove(entry: CacheEntry<Fn>): void {
-    const index = this.entries.indexOf(entry);
+  has(key: Key): boolean {
+    return !!this.g(key);
+  }
 
-    if (index !== -1) {
-      this.entries.splice(index, 1);
-      this.onChange && this.onChange('remove', entry, this);
+  set(key: Key, value: ReturnType<Fn>): CacheNode<Fn> {
+    const existingNode = this.g(key);
+
+    if (!existingNode) {
+      const node = this.n(key, value);
+
+      this.o && this.o('add', getEntry(node), this);
+
+      return node;
     }
+
+    if (existingNode === this.h) {
+      existingNode.v = value;
+    } else {
+      this.u(existingNode);
+    }
+
+    this.o && this.o('update', getEntry(existingNode), this);
+
+    return existingNode;
   }
 
   snapshot(): CacheSnapshot<Fn> {
-    return this.entries.map(({ key, value }) => ({ key, value }));
+    const cached: CacheSnapshot<Fn> = [];
+
+    let node = this.h;
+
+    while (node != null) {
+      cached.push(getEntry(node));
+      node = node.n;
+    }
+
+    return cached;
   }
 
   private e(prevKey: Key, nextKey: Key): boolean {
@@ -197,11 +205,11 @@ class Cache<Fn extends (...args: any[]) => any> {
     }
 
     if (length === 1) {
-      return this.matchesArg(prevKey[0], nextKey[0]);
+      return this.a(prevKey[0], nextKey[0]);
     }
 
     for (let index = 0; index < length; ++index) {
-      if (!this.matchesArg(prevKey[index], nextKey[index])) {
+      if (!this.a(prevKey[index], nextKey[index])) {
         return false;
       }
     }
@@ -209,28 +217,86 @@ class Cache<Fn extends (...args: any[]) => any> {
     return true;
   }
 
-  private r(entry: CacheEntry<Fn>, startingIndex: number) {
-    const currentLength = this.entries.length;
-
-    let index = startingIndex;
-
-    while (index--) {
-      this.entries[index + 1] = this.entries[index]!;
+  private f(key: Key): CacheNode<Fn> | undefined {
+    if (!this.h) {
+      return;
     }
 
-    this.entries[0] = entry;
+    if (this.m(this.h.k, key)) {
+      this.o && this.o('hit', getEntry(this.h), this);
+      return this.h;
+    }
 
-    if (currentLength === this.maxSize && startingIndex === currentLength) {
-      this.entries.pop();
-    } else if (startingIndex >= this.maxSize) {
-      // eslint-disable-next-line no-multi-assign
-      this.entries.length = this.maxSize;
+    if (this.h === this.t) {
+      return;
+    }
+
+    let cached: CacheNode<Fn> | null = this.h.n;
+
+    while (cached) {
+      if (this.m(cached.k, key)) {
+        this.u(cached);
+        this.o && this.o('update', getEntry(cached), this);
+        return cached;
+      }
+
+      cached = cached.n;
     }
   }
-}
 
-function sameValueZero(a: any, b: any) {
-  return a === b || (a !== a && b !== b);
+  private g(key: Key): CacheNode<Fn> | undefined {
+    let cached = this.h;
+
+    while (cached) {
+      if (this.m(cached.k, key)) {
+        return cached;
+      }
+
+      cached = cached.n;
+    }
+  }
+
+  private n(key: Key, value: ReturnType<Fn>): CacheNode<Fn> {
+    const prevHead = this.h;
+    const prevTail = this.t;
+    const node = { k: key, n: prevHead, p: null, v: value };
+
+    this.h = node;
+
+    if (prevHead) {
+      prevHead.p = node;
+    } else {
+      this.t = node;
+    }
+
+    if (++this.s > this.l && prevTail) {
+      this.delete(prevTail);
+    }
+
+    return node;
+  }
+
+  private u(node: CacheNode<Fn>): void {
+    const next = node.n;
+    const prev = node.p;
+
+    if (next) {
+      next.p = prev;
+    }
+
+    if (prev) {
+      prev.n = next;
+    }
+
+    this.h!.p = node;
+    node.n = this.h;
+    node.p = null;
+    this.h = node;
+
+    if (node === this.t) {
+      this.t = prev;
+    }
+  }
 }
 
 export default function memoize<Fn extends (...args: any[]) => any>(
@@ -238,30 +304,47 @@ export default function memoize<Fn extends (...args: any[]) => any>(
   passedOptions: Options<Fn> = {},
 ): Memoized<Fn> {
   const cache = new Cache(passedOptions);
-  const transformed = !!cache.transformKey;
+  // @ts-expect-error - `k` is not surfaced on public API
+  const transformKey = cache.k;
+  // @ts-expect-error - `o` is not surfaced on public API
+  const onChange = cache.o;
 
   const memoized: Memoized<Fn> = function memoized(this: any) {
-    const key = transformed
-      ? cache.transformKey!(arguments)
-      : (arguments as unknown as Key);
-    let cached = cache.match(key);
+    const args = arguments as unknown as Parameters<Fn>;
+    const key = transformKey ? transformKey!(args) : args;
+    // @ts-expect-error - `f` is not surfaced on public API
+    let cached = cache.f(key);
 
     if (cached) {
-      return cached.value;
+      return cached.v;
     }
 
-    cached = cache.add(transformed ? key : cloneKey(key), fn.apply(this, key));
+    // @ts-expect-error - `n` is not surfaced on public API
+    cached = cache.n(transformKey ? key : cloneKey(key), fn.apply(this, key));
+    onChange && onChange('add', getEntry(cached!), this);
 
-    if (cache.isPromise) {
-      updateAsyncEntry(cache, cached);
+    // @ts-expect-error - `p` is not surfaced on public API
+    if (cache.p) {
+      cached.v = cached.v.then(
+        (value: any) => {
+          onChange && onChange('resolved', getEntry(cached!), this);
+
+          return value;
+        },
+        (error: Error) => {
+          cache.delete(cached!);
+          throw error;
+        },
+      );
     }
 
-    return cached.value;
+    return cached.v;
   };
 
   memoized.cache = cache;
   memoized.fn = fn;
   memoized.isMemoized = true;
+  memoized.options = passedOptions;
 
   return memoized;
 }
