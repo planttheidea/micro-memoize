@@ -44,6 +44,10 @@
             --this.s;
             this.o && this.o('delete', getEntry(node), this);
         };
+        Cache.prototype.get = function (key) {
+            var node = this.g(key);
+            return node && node.v;
+        };
         Cache.prototype.has = function (key) {
             return !!this.g(key);
         };
@@ -85,12 +89,11 @@
             }
             return true;
         };
-        Cache.prototype.f = function (key) {
+        Cache.prototype.g = function (key) {
             if (!this.h) {
                 return;
             }
             if (this.m(this.h.k, key)) {
-                this.o && this.o('hit', getEntry(this.h), this);
                 return this.h;
             }
             if (this.h === this.t) {
@@ -100,16 +103,6 @@
             while (cached) {
                 if (this.m(cached.k, key)) {
                     this.u(cached);
-                    this.o && this.o('update', getEntry(cached), this);
-                    return cached;
-                }
-                cached = cached.n;
-            }
-        };
-        Cache.prototype.g = function (key) {
-            var cached = this.h;
-            while (cached) {
-                if (this.m(cached.k, key)) {
                     return cached;
                 }
                 cached = cached.n;
@@ -119,7 +112,9 @@
             var _this = this;
             if (this.p) {
                 value = value.then(function (value) {
-                    _this.o && _this.o('resolved', getEntry(node), _this);
+                    _this.o &&
+                        _this.has(node.k) &&
+                        _this.o('resolved', getEntry(node), _this);
                     return value;
                 }, function (error) {
                     _this.delete(node);
@@ -190,15 +185,19 @@
         var memoized = function memoized() {
             // @ts-expect-error - `arguments` does not line up with `Parameters<Fn>`
             var key = transformKey ? transformKey(arguments) : arguments;
-            // @ts-expect-error - `f` is not surfaced on public API
-            var cached = cache.f(key);
-            if (cached) {
-                return cached.v;
+            // @ts-expect-error - `h` is not surfaced on public API
+            var prevHead = cache.h;
+            // @ts-expect-error - `g` is not surfaced on public API
+            var node = cache.g(key);
+            if (node) {
+                onChange &&
+                    onChange(node === prevHead ? 'hit' : 'update', getEntry(node), cache);
+                return node.v;
             }
             // @ts-expect-error - `n` is not surfaced on public API
-            cached = cache.n(transformKey ? key : cloneKey(key), fn.apply(this, key));
-            onChange && onChange('add', getEntry(cached), cache);
-            return cached.v;
+            node = cache.n(transformKey ? key : cloneKey(key), fn.apply(this, key));
+            onChange && onChange('add', getEntry(node), cache);
+            return node.v;
         };
         memoized.cache = cache;
         memoized.fn = fn;

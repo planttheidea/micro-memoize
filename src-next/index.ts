@@ -113,6 +113,12 @@ class Cache<Fn extends (...args: any[]) => any> {
     this.o && this.o('delete', getEntry(node), this);
   }
 
+  get(key: Key): ReturnType<Fn> | undefined {
+    const node = this.g(key);
+
+    return node && node.v;
+  }
+
   has(key: Key): boolean {
     return !!this.g(key);
   }
@@ -172,13 +178,12 @@ class Cache<Fn extends (...args: any[]) => any> {
     return true;
   }
 
-  private f(key: Key): CacheNode<Fn> | undefined {
+  private g(key: Key): CacheNode<Fn> | undefined {
     if (!this.h) {
       return;
     }
 
     if (this.m(this.h.k, key)) {
-      this.o && this.o('hit', getEntry(this.h), this);
       return this.h;
     }
 
@@ -191,19 +196,6 @@ class Cache<Fn extends (...args: any[]) => any> {
     while (cached) {
       if (this.m(cached.k, key)) {
         this.u(cached);
-        this.o && this.o('update', getEntry(cached), this);
-        return cached;
-      }
-
-      cached = cached.n;
-    }
-  }
-
-  private g(key: Key): CacheNode<Fn> | undefined {
-    let cached = this.h;
-
-    while (cached) {
-      if (this.m(cached.k, key)) {
         return cached;
       }
 
@@ -215,7 +207,9 @@ class Cache<Fn extends (...args: any[]) => any> {
     if (this.p) {
       value = value.then(
         (value: any) => {
-          this.o && this.o('resolved', getEntry(node), this);
+          this.o &&
+            this.has(node.k) &&
+            this.o('resolved', getEntry(node), this);
           return value;
         },
         (error: Error) => {
@@ -333,19 +327,23 @@ export default function memoize<Fn extends (...args: any[]) => any>(
 
   const memoized: Memoized<Fn> = function memoized(this: any) {
     // @ts-expect-error - `arguments` does not line up with `Parameters<Fn>`
-    const key = transformKey ? transformKey!(arguments) : arguments;
-    // @ts-expect-error - `f` is not surfaced on public API
-    let cached = cache.f(key);
+    const key: Key = transformKey ? transformKey!(arguments) : arguments;
+    // @ts-expect-error - `h` is not surfaced on public API
+    const prevHead = cache.h;
+    // @ts-expect-error - `g` is not surfaced on public API
+    let node = cache.g(key);
 
-    if (cached) {
-      return cached.v;
+    if (node) {
+      onChange &&
+        onChange(node === prevHead ? 'hit' : 'update', getEntry(node), cache);
+      return node.v;
     }
 
     // @ts-expect-error - `n` is not surfaced on public API
-    cached = cache.n(transformKey ? key : cloneKey(key), fn.apply(this, key));
-    onChange && onChange('add', getEntry(cached!), cache);
+    node = cache.n(transformKey ? key : cloneKey(key), fn.apply(this, key));
+    onChange && onChange('add', getEntry(node), cache);
 
-    return cached.v;
+    return node.v;
   };
 
   memoized.cache = cache;
