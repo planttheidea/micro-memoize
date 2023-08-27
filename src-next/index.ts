@@ -58,46 +58,6 @@ type TypeOf =
   | 'symbol'
   | 'undefined';
 
-function cloneKey<Fn extends (...args: any[]) => any>(
-  args: Parameters<Fn>,
-): [...Parameters<Fn>] {
-  const key = [] as unknown as Parameters<Fn>;
-
-  for (let index = 0, length = args.length; index < length; ++index) {
-    key[index] = args[index];
-  }
-
-  return key;
-}
-
-function getDefault<Value>(
-  type: TypeOf,
-  value: Value,
-  defaultValue?: undefined,
-): Value | undefined;
-function getDefault<Value, DefaultValue>(
-  type: TypeOf,
-  value: Value,
-  defaultValue: DefaultValue,
-): Value extends undefined ? DefaultValue : Value;
-function getDefault<Value, DefaultValue>(
-  type: TypeOf,
-  value: Value,
-  defaultValue?: DefaultValue,
-) {
-  return typeof value === type ? value : defaultValue;
-}
-
-function getEntry<Fn extends (...args: any[]) => any>(
-  node: CacheNode<Fn>,
-): CacheEntry<Fn> {
-  return { key: node.k, value: node.v };
-}
-
-function sameValueZero(a: any, b: any) {
-  return a === b || (a !== a && b !== b);
-}
-
 class Cache<Fn extends (...args: any[]) => any> {
   private a: (a: Arg, b: Arg) => boolean;
   private c: boolean;
@@ -129,6 +89,7 @@ class Cache<Fn extends (...args: any[]) => any> {
 
   clear(): void {
     this.h = this.t = null;
+    this.s = 0;
   }
 
   delete(node: CacheNode<Fn>): void {
@@ -167,9 +128,9 @@ class Cache<Fn extends (...args: any[]) => any> {
       return node;
     }
 
-    if (existingNode === this.h) {
-      existingNode.v = value;
-    } else {
+    existingNode.v = value;
+
+    if (existingNode !== this.h) {
       this.u(existingNode);
     }
 
@@ -251,6 +212,19 @@ class Cache<Fn extends (...args: any[]) => any> {
   }
 
   private n(key: Key, value: ReturnType<Fn>): CacheNode<Fn> {
+    if (this.p) {
+      value = value.then(
+        (value: any) => {
+          this.o && this.o('resolved', getEntry(node), this);
+          return value;
+        },
+        (error: Error) => {
+          this.delete(node);
+          throw error;
+        },
+      );
+    }
+
     const prevHead = this.h;
     const prevTail = this.t;
     const node = { k: key, n: prevHead, p: null, v: value };
@@ -293,17 +267,73 @@ class Cache<Fn extends (...args: any[]) => any> {
   }
 }
 
+function cloneKey<Fn extends (...args: any[]) => any>(
+  args: Parameters<Fn>,
+): [...Parameters<Fn>] {
+  const key = [] as unknown as Parameters<Fn>;
+
+  for (let index = 0, length = args.length; index < length; ++index) {
+    key[index] = args[index];
+  }
+
+  return key;
+}
+
+function getDefault<Value>(
+  type: TypeOf,
+  value: Value,
+  defaultValue?: undefined,
+): Value | undefined;
+function getDefault<Value, DefaultValue>(
+  type: TypeOf,
+  value: Value,
+  defaultValue: DefaultValue,
+): Value extends undefined ? DefaultValue : Value;
+function getDefault<Value, DefaultValue>(
+  type: TypeOf,
+  value: Value,
+  defaultValue?: DefaultValue,
+) {
+  return typeof value === type ? value : defaultValue;
+}
+
+function getEntry<Fn extends (...args: any[]) => any>(
+  node: CacheNode<Fn>,
+): CacheEntry<Fn> {
+  return { key: node.k, value: node.v };
+}
+
+function isMemoized(fn: any): fn is Memoized<any> {
+  return typeof fn === 'function' && fn.fn;
+}
+
+function sameValueZero(a: any, b: any) {
+  return a === b || (a !== a && b !== b);
+}
+
 export default function memoize<Fn extends (...args: any[]) => any>(
   fn: Fn,
+  passedOptions?: Options<Fn>,
+): Memoized<Fn>;
+export default function memoize<Fn extends (...args: any[]) => any>(
+  fn: Memoized<Fn>,
+  passedOptions?: Options<Fn>,
+): Memoized<Fn>;
+export default function memoize<Fn extends (...args: any[]) => any>(
+  fn: Fn | Memoized<Fn>,
   passedOptions: Options<Fn> = {},
 ): Memoized<Fn> {
+  if (isMemoized(fn)) {
+    return memoize(fn.fn, Object.assign({}, fn.options, passedOptions));
+  }
+
   const cache = new Cache(passedOptions);
   // @ts-expect-error - Capture internal properties not surfaced on public API
   const { k: transformKey, o: onChange } = cache;
 
   const memoized: Memoized<Fn> = function memoized(this: any) {
-    const args = arguments as unknown as Parameters<Fn>;
-    const key = transformKey ? transformKey!(args) : args;
+    // @ts-expect-error - `arguments` does not line up with `Parameters<Fn>`
+    const key = transformKey ? transformKey!(arguments) : arguments;
     // @ts-expect-error - `f` is not surfaced on public API
     let cached = cache.f(key);
 
@@ -314,20 +344,6 @@ export default function memoize<Fn extends (...args: any[]) => any>(
     // @ts-expect-error - `n` is not surfaced on public API
     cached = cache.n(transformKey ? key : cloneKey(key), fn.apply(this, key));
     onChange && onChange('add', getEntry(cached!), cache);
-
-    // @ts-expect-error - `p` is not surfaced on public API
-    if (cache.p) {
-      cached.v = cached.v.then(
-        (value: any) => {
-          onChange && onChange('resolved', getEntry(cached!), cache);
-          return value;
-        },
-        (error: Error) => {
-          cache.delete(cached!);
-          throw error;
-        },
-      );
-    }
 
     return cached.v;
   };

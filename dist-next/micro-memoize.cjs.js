@@ -1,21 +1,5 @@
 'use strict';
 
-function cloneKey(args) {
-    var key = [];
-    for (var index = 0, length_1 = args.length; index < length_1; ++index) {
-        key[index] = args[index];
-    }
-    return key;
-}
-function getDefault(type, value, defaultValue) {
-    return typeof value === type ? value : defaultValue;
-}
-function getEntry(node) {
-    return { key: node.k, value: node.v };
-}
-function sameValueZero(a, b) {
-    return a === b || (a !== a && b !== b);
-}
 var Cache = /** @class */ (function () {
     function Cache(options) {
         this.h = null;
@@ -36,6 +20,7 @@ var Cache = /** @class */ (function () {
     }
     Cache.prototype.clear = function () {
         this.h = this.t = null;
+        this.s = 0;
     };
     Cache.prototype.delete = function (node) {
         var next = node.n;
@@ -65,10 +50,8 @@ var Cache = /** @class */ (function () {
             this.o && this.o('add', getEntry(node), this);
             return node;
         }
-        if (existingNode === this.h) {
-            existingNode.v = value;
-        }
-        else {
+        existingNode.v = value;
+        if (existingNode !== this.h) {
             this.u(existingNode);
         }
         this.o && this.o('update', getEntry(existingNode), this);
@@ -129,6 +112,16 @@ var Cache = /** @class */ (function () {
         }
     };
     Cache.prototype.n = function (key, value) {
+        var _this = this;
+        if (this.p) {
+            value = value.then(function (value) {
+                _this.o && _this.o('resolved', getEntry(node), _this);
+                return value;
+            }, function (error) {
+                _this.delete(node);
+                throw error;
+            });
+        }
         var prevHead = this.h;
         var prevTail = this.t;
         var node = { k: key, n: prevHead, p: null, v: value };
@@ -163,14 +156,36 @@ var Cache = /** @class */ (function () {
     };
     return Cache;
 }());
+function cloneKey(args) {
+    var key = [];
+    for (var index = 0, length_1 = args.length; index < length_1; ++index) {
+        key[index] = args[index];
+    }
+    return key;
+}
+function getDefault(type, value, defaultValue) {
+    return typeof value === type ? value : defaultValue;
+}
+function getEntry(node) {
+    return { key: node.k, value: node.v };
+}
+function isMemoized(fn) {
+    return typeof fn === 'function' && fn.fn;
+}
+function sameValueZero(a, b) {
+    return a === b || (a !== a && b !== b);
+}
 function memoize(fn, passedOptions) {
     if (passedOptions === void 0) { passedOptions = {}; }
+    if (isMemoized(fn)) {
+        return memoize(fn.fn, Object.assign({}, fn.options, passedOptions));
+    }
     var cache = new Cache(passedOptions);
     // @ts-expect-error - Capture internal properties not surfaced on public API
     var transformKey = cache.k, onChange = cache.o;
     var memoized = function memoized() {
-        var args = arguments;
-        var key = transformKey ? transformKey(args) : args;
+        // @ts-expect-error - `arguments` does not line up with `Parameters<Fn>`
+        var key = transformKey ? transformKey(arguments) : arguments;
         // @ts-expect-error - `f` is not surfaced on public API
         var cached = cache.f(key);
         if (cached) {
@@ -179,16 +194,6 @@ function memoize(fn, passedOptions) {
         // @ts-expect-error - `n` is not surfaced on public API
         cached = cache.n(transformKey ? key : cloneKey(key), fn.apply(this, key));
         onChange && onChange('add', getEntry(cached), cache);
-        // @ts-expect-error - `p` is not surfaced on public API
-        if (cache.p) {
-            cached.v = cached.v.then(function (value) {
-                onChange && onChange('resolved', getEntry(cached), cache);
-                return value;
-            }, function (error) {
-                cache.delete(cached);
-                throw error;
-            });
-        }
         return cached.v;
     };
     memoized.cache = cache;
