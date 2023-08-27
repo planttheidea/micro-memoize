@@ -34,12 +34,6 @@ interface Options<Fn extends (...args: any[]) => any> {
   transformKey?: KeyTransformer<Fn>;
 }
 
-// interface NormalizedOptions<Fn extends (...args: any[]) => any>
-//   extends Required<Omit<Options<Fn>, 'onCache' | 'transformKey'>> {
-//   onCache: OnChange<Fn> | undefined;
-//   transformKey: KeyTransformer | undefined;
-// }
-
 type CacheSnapshot<Fn extends (...args: any[]) => any> = Array<{
   key: Key;
   value: ReturnType<Fn>;
@@ -304,10 +298,8 @@ export default function memoize<Fn extends (...args: any[]) => any>(
   passedOptions: Options<Fn> = {},
 ): Memoized<Fn> {
   const cache = new Cache(passedOptions);
-  // @ts-expect-error - `k` is not surfaced on public API
-  const transformKey = cache.k;
-  // @ts-expect-error - `o` is not surfaced on public API
-  const onChange = cache.o;
+  // @ts-expect-error - Capture internal properties not surfaced on public API
+  const { k: transformKey, o: onChange } = cache;
 
   const memoized: Memoized<Fn> = function memoized(this: any) {
     const args = arguments as unknown as Parameters<Fn>;
@@ -321,14 +313,13 @@ export default function memoize<Fn extends (...args: any[]) => any>(
 
     // @ts-expect-error - `n` is not surfaced on public API
     cached = cache.n(transformKey ? key : cloneKey(key), fn.apply(this, key));
-    onChange && onChange('add', getEntry(cached!), this);
+    onChange && onChange('add', getEntry(cached!), cache);
 
     // @ts-expect-error - `p` is not surfaced on public API
     if (cache.p) {
       cached.v = cached.v.then(
         (value: any) => {
-          onChange && onChange('resolved', getEntry(cached!), this);
-
+          onChange && onChange('resolved', getEntry(cached!), cache);
           return value;
         },
         (error: Error) => {

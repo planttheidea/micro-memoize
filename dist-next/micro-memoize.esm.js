@@ -164,12 +164,9 @@ var Cache = /** @class */ (function () {
 function memoize(fn, passedOptions) {
     if (passedOptions === void 0) { passedOptions = {}; }
     var cache = new Cache(passedOptions);
-    // @ts-expect-error - `k` is not surfaced on public API
-    var transformKey = cache.k;
-    // @ts-expect-error - `o` is not surfaced on public API
-    var onChange = cache.o;
+    // @ts-expect-error - Capture internal properties not surfaced on public API
+    var transformKey = cache.k, onChange = cache.o;
     var memoized = function memoized() {
-        var _this = this;
         var args = arguments;
         var key = transformKey ? transformKey(args) : args;
         // @ts-expect-error - `f` is not surfaced on public API
@@ -179,11 +176,11 @@ function memoize(fn, passedOptions) {
         }
         // @ts-expect-error - `n` is not surfaced on public API
         cached = cache.n(transformKey ? key : cloneKey(key), fn.apply(this, key));
-        onChange && onChange('add', getEntry(cached), this);
+        onChange && onChange('add', getEntry(cached), cache);
         // @ts-expect-error - `p` is not surfaced on public API
         if (cache.p) {
             cached.v = cached.v.then(function (value) {
-                onChange && onChange('resolved', getEntry(cached), _this);
+                onChange && onChange('resolved', getEntry(cached), cache);
                 return value;
             }, function (error) {
                 cache.delete(cached);
