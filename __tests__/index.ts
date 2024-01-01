@@ -1,6 +1,5 @@
 import { deepEqual } from 'fast-equals';
 import memoize from '../src';
-import { isSameValueZero } from '../src/utils';
 
 const has = (object: any, property: string) =>
   Object.prototype.hasOwnProperty.call(object, property);
@@ -20,26 +19,14 @@ describe('memoize', () => {
 
     const memoized = memoize(fn);
 
-    expect(memoized.cache.snapshot).toEqual({
-      keys: [],
+    expect(memoized.cache.snapshot()).toEqual({
+      entries: [],
       size: 0,
-      values: [],
-    });
-    expect(memoized.cache.snapshot).toEqual({
-      keys: [],
-      size: 0,
-      values: [],
     });
 
     expect(memoized.isMemoized).toEqual(true);
 
-    expect(memoized.options).toEqual({
-      isEqual: isSameValueZero,
-      isMatchingKey: undefined,
-      isPromise: false,
-      maxSize: 1,
-      transformKey: undefined,
-    });
+    expect(memoized.options).toEqual({});
 
     new Array(1000).fill('z').forEach(() => {
       const result = memoized('one', 'two');
@@ -52,15 +39,9 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(1);
 
-    expect(memoized.cache.snapshot).toEqual({
-      keys: [['one', 'two']],
+    expect(memoized.cache.snapshot()).toEqual({
+      entries: [{ key: ['one', 'two'], value: { one: 'one', two: 'two' } }],
       size: 1,
-      values: [
-        {
-          one: 'one',
-          two: 'two',
-        },
-      ],
     });
   });
 
@@ -79,16 +60,9 @@ describe('memoize', () => {
 
     const memoized = memoize(fn, { maxSize });
 
-    expect(memoized.cache.snapshot).toEqual({
-      keys: [],
+    expect(memoized.cache.snapshot()).toEqual({
+      entries: [],
       size: 0,
-      values: [],
-    });
-
-    expect(memoized.cache.snapshot).toEqual({
-      keys: [],
-      size: 0,
-      values: [],
     });
 
     expect(memoized.isMemoized).toEqual(true);
@@ -122,31 +96,17 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(4);
 
-    expect(memoized.cache.snapshot).toEqual({
-      keys: [
-        ['three', 'four'],
-        ['two', 'three'],
-        ['four', 'five'],
+    expect(memoized.cache.snapshot()).toEqual({
+      entries: [
+        { key: ['three', 'four'], value: { one: 'three', two: 'four' } },
+        { key: ['two', 'three'], value: { one: 'two', two: 'three' } },
+        { key: ['four', 'five'], value: { one: 'four', two: 'five' } },
       ],
       size: 3,
-      values: [
-        {
-          one: 'three',
-          two: 'four',
-        },
-        {
-          one: 'two',
-          two: 'three',
-        },
-        {
-          one: 'four',
-          two: 'five',
-        },
-      ],
     });
   });
 
-  it('will return the memoized function that will use the custom isEqual method', () => {
+  it('will return the memoized function that will use the custom matchesArg method', () => {
     let callCount = 0;
 
     const fn = (one: any, two: any) => {
@@ -158,9 +118,9 @@ describe('memoize', () => {
       };
     };
 
-    const memoized = memoize(fn, { isEqual: deepEqual });
+    const memoized = memoize(fn, { matchesArg: deepEqual });
 
-    expect(memoized.options.isEqual).toBe(deepEqual);
+    expect(memoized.options.matchesArg).toBe(deepEqual);
 
     expect(
       memoized(
@@ -184,17 +144,20 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(1);
 
-    expect(memoized.cache.snapshot).toEqual({
-      keys: [
-        [{ deep: { value: 'value' } }, { other: { deep: { value: 'value' } } }],
-      ],
-      size: 1,
-      values: [
+    expect(memoized.cache.snapshot()).toEqual({
+      entries: [
         {
-          one: { deep: { value: 'value' } },
-          two: { other: { deep: { value: 'value' } } },
+          key: [
+            { deep: { value: 'value' } },
+            { other: { deep: { value: 'value' } } },
+          ],
+          value: {
+            one: { deep: { value: 'value' } },
+            two: { other: { deep: { value: 'value' } } },
+          },
         },
       ],
+      size: 1,
     });
   });
 
@@ -236,19 +199,18 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(1);
 
-    expect(memoized.cache.snapshot).toEqual({
-      keys: [['[{"one":"one"},null]']],
-      size: 1,
-      values: [
+    expect(memoized.cache.snapshot()).toEqual({
+      entries: [
         {
-          one: { one: 'one' },
-          two: fnArg1,
+          key: ['[{"one":"one"},null]'],
+          value: { one: { one: 'one' }, two: fnArg1 },
         },
       ],
+      size: 1,
     });
   });
 
-  it('will return the memoized function that will use the transformKey method with a custom isEqual', () => {
+  it('will return the memoized function that will use the transformKey method with a custom matchesArg', () => {
     let callCount = 0;
 
     const fn = (one: any, two: any) => {
@@ -259,7 +221,7 @@ describe('memoize', () => {
         two,
       };
     };
-    const isEqual = function (key1: any, key2: any) {
+    const matchesArg = function (key1: any, key2: any) {
       return key1.args === key2.args;
     };
     const transformKey = function (args: any[]) {
@@ -271,11 +233,11 @@ describe('memoize', () => {
     };
 
     const memoized = memoize(fn, {
-      isEqual,
+      matchesArg,
       transformKey,
     });
 
-    expect(memoized.options.isEqual).toBe(isEqual);
+    expect(memoized.options.matchesArg).toBe(matchesArg);
     expect(memoized.options.transformKey).toBe(transformKey);
 
     const fnArg1 = () => {};
@@ -297,25 +259,18 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(1);
 
-    expect(memoized.cache.snapshot).toEqual({
-      keys: [
-        [
-          {
-            args: '[{"one":"one"},null]',
-          },
-        ],
-      ],
-      size: 1,
-      values: [
+    expect(memoized.cache.snapshot()).toEqual({
+      entries: [
         {
-          one: { one: 'one' },
-          two: fnArg1,
+          key: [{ args: '[{"one":"one"},null]' }],
+          value: { one: { one: 'one' }, two: fnArg1 },
         },
       ],
+      size: 1,
     });
   });
 
-  it('will return a memoized method that will auto-remove the key from cache if isPromise is true and the promise is rejected', async () => {
+  it('will return a memoized method that will auto-remove the key from cache if async is true and the async is rejected', async () => {
     const timeout = 200;
 
     const error = new Error('boom');
@@ -328,252 +283,112 @@ describe('memoize', () => {
 
       throw error;
     };
-    const isPromise = true;
+    const async = true;
 
-    const memoized = memoize(fn, { isPromise });
+    const memoized = memoize(fn, { async });
 
-    expect(memoized.options.isPromise).toEqual(isPromise);
+    expect(memoized.options.async).toEqual(async);
 
-    const spy = jest.fn();
+    try {
+      const pending = memoized('foo');
 
-    memoized('foo').catch(spy);
+      const snapshot = memoized.cache.snapshot();
 
-    expect(memoized.cache.snapshot.keys.length).toEqual(1);
-    expect(memoized.cache.snapshot.values.length).toEqual(1);
+      expect(snapshot.entries.length).toEqual(1);
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, timeout + 50);
-    });
+      await pending.catch();
+    } catch (callError) {
+      expect(memoized.cache.snapshot()).toEqual({
+        entries: [],
+        size: 0,
+      });
 
-    expect(memoized.cache.snapshot).toEqual({
-      keys: [],
-      size: 0,
-      values: [],
-    });
-
-    expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenCalledWith(error);
+      expect(callError).toBe(error);
+    }
   });
 
-  it('will fire the onCacheChange method passed with the cache when it is added to', () => {
+  it('will fire the onCache method passed with the cache when it is added to', () => {
     const fn = (one: string, two: string) => ({ one, two });
-    const onCacheChange = jest.fn();
+    const onCache = jest.fn();
 
-    const memoized = memoize(fn, { onCacheChange });
+    const memoized = memoize(fn, { onCache });
 
-    expect(memoized.options.onCacheChange).toBe(onCacheChange);
+    expect(memoized.options.onCache).toBe(onCache);
 
     memoized('foo', 'bar');
 
-    expect(onCacheChange).toHaveBeenCalledTimes(1);
-    expect(onCacheChange).toHaveBeenCalledWith(
+    expect(onCache).toHaveBeenCalledTimes(1);
+    expect(onCache).toHaveBeenCalledWith(
+      'add',
+      { key: ['foo', 'bar'], value: { one: 'foo', two: 'bar' } },
       memoized.cache,
-      {
-        onCacheChange,
-        isEqual: isSameValueZero,
-        isMatchingKey: undefined,
-        isPromise: false,
-        maxSize: 1,
-        transformKey: undefined,
-      },
-      memoized,
     );
   });
 
-  it('will fire the onCacheChange method passed with the cache when it is updated', () => {
+  it('will fire the onCache method passed with the cache when it is added, hit, and updated', () => {
     const fn = (one: string, two: string) => ({ one, two });
-    const onCacheChange = jest.fn();
+    const onCache = jest.fn();
     const maxSize = 2;
 
     const memoized = memoize(fn, {
       maxSize,
-      onCacheChange,
+      onCache,
     });
 
-    expect(memoized.options.onCacheChange).toBe(onCacheChange);
+    expect(memoized.options.onCache).toBe(onCache);
 
     memoized('foo', 'bar');
 
-    expect(onCacheChange).toHaveBeenCalledTimes(1);
-    expect(onCacheChange).toHaveBeenCalledWith(
+    expect(onCache).toHaveBeenCalledTimes(1);
+    expect(onCache).toHaveBeenCalledWith(
+      'add',
+      { key: ['foo', 'bar'], value: { one: 'foo', two: 'bar' } },
       memoized.cache,
-      memoized.options,
-      memoized,
     );
 
-    onCacheChange.mockReset();
+    onCache.mockReset();
 
     memoized('bar', 'foo');
 
-    expect(onCacheChange).toHaveBeenCalledTimes(1);
-    expect(onCacheChange).toHaveBeenCalledWith(
+    expect(onCache).toHaveBeenCalledTimes(1);
+    expect(onCache).toHaveBeenCalledWith(
+      'add',
+      { key: ['bar', 'foo'], value: { one: 'bar', two: 'foo' } },
       memoized.cache,
-      memoized.options,
-      memoized,
     );
 
-    onCacheChange.mockReset();
+    onCache.mockReset();
 
     memoized('bar', 'foo');
 
-    expect(onCacheChange).toHaveBeenCalledTimes(0);
-
-    onCacheChange.mockReset();
-
-    memoized('foo', 'bar');
-
-    expect(onCacheChange).toHaveBeenCalledTimes(1);
-    expect(onCacheChange).toHaveBeenCalledWith(
+    expect(onCache).toHaveBeenCalledTimes(1);
+    expect(onCache).toHaveBeenCalledWith(
+      'hit',
+      { key: ['bar', 'foo'], value: { one: 'bar', two: 'foo' } },
       memoized.cache,
-      memoized.options,
-      memoized,
     );
 
-    onCacheChange.mockReset();
+    onCache.mockReset();
 
     memoized('foo', 'bar');
 
-    expect(onCacheChange).toHaveBeenCalledTimes(0);
-  });
-
-  it('will not fire the onCacheHit method passed with the cache when it is added to', () => {
-    const fn = (one: string, two: string) => ({ one, two });
-    const onCacheHit = jest.fn();
-
-    const memoized = memoize(fn, { onCacheHit });
-
-    expect(memoized.options.onCacheHit).toBe(onCacheHit);
-
-    memoized('foo', 'bar');
-
-    expect(onCacheHit).toHaveBeenCalledTimes(0);
-  });
-
-  it('will fire the onCacheHit method passed with the cache when it is updated', () => {
-    const fn = (one: any, two: any) => ({
-      one,
-      two,
-    });
-    const onCacheHit = jest.fn();
-    const maxSize = 2;
-
-    const memoized = memoize(fn, {
-      maxSize,
-      onCacheHit,
-    });
-
-    expect(memoized.options.onCacheHit).toBe(onCacheHit);
-
-    memoized('foo', 'bar');
-
-    expect(onCacheHit).toHaveBeenCalledTimes(0);
-
-    memoized('bar', 'foo');
-
-    expect(onCacheHit).toHaveBeenCalledTimes(0);
-
-    memoized('bar', 'foo');
-
-    expect(onCacheHit).toHaveBeenCalledTimes(1);
-    expect(onCacheHit).toHaveBeenCalledWith(
+    expect(onCache).toHaveBeenCalledTimes(1);
+    expect(onCache).toHaveBeenCalledWith(
+      'update',
+      { key: ['foo', 'bar'], value: { one: 'foo', two: 'bar' } },
       memoized.cache,
-      memoized.options,
-      memoized,
     );
 
-    onCacheHit.mockReset();
+    onCache.mockReset();
 
     memoized('foo', 'bar');
 
-    expect(onCacheHit).toHaveBeenCalledTimes(1);
-    expect(onCacheHit).toHaveBeenCalledWith(
+    expect(onCache).toHaveBeenCalledTimes(1);
+    expect(onCache).toHaveBeenCalledWith(
+      'hit',
+      { key: ['foo', 'bar'], value: { one: 'foo', two: 'bar' } },
       memoized.cache,
-      memoized.options,
-      memoized,
     );
-
-    onCacheHit.mockReset();
-
-    memoized('foo', 'bar');
-
-    expect(onCacheHit).toHaveBeenCalledTimes(1);
-    expect(onCacheHit).toHaveBeenCalledWith(
-      memoized.cache,
-      memoized.options,
-      memoized,
-    );
-  });
-
-  it('will fire the onCacheAdd method passed with the cache when it is added but not when hit', () => {
-    const fn = (one: any, two: any) => ({
-      one,
-      two,
-    });
-    const onCacheAdd = jest.fn();
-
-    const memoized = memoize(fn, { onCacheAdd });
-
-    expect(memoized.options.onCacheAdd).toBe(onCacheAdd);
-
-    memoized('foo', 'bar');
-
-    expect(onCacheAdd).toHaveBeenCalledTimes(1);
-
-    memoized('foo', 'bar');
-
-    expect(onCacheAdd).toHaveBeenCalledTimes(1);
-  });
-
-  it('will fire the onCacheAdd method passed with the cache when it is added but never again', () => {
-    const fn = (one: any, two: any) => ({
-      one,
-      two,
-    });
-    const onCacheAdd = jest.fn();
-    const maxSize = 2;
-
-    const memoized = memoize(fn, {
-      maxSize,
-      onCacheAdd,
-    });
-
-    expect(memoized.options.onCacheAdd).toBe(onCacheAdd);
-
-    memoized('foo', 'bar');
-
-    expect(onCacheAdd).toHaveBeenCalledTimes(1);
-    expect(onCacheAdd).toHaveBeenCalledWith(
-      memoized.cache,
-      memoized.options,
-      memoized,
-    );
-
-    onCacheAdd.mockReset();
-
-    memoized('bar', 'foo');
-
-    expect(onCacheAdd).toHaveBeenCalledTimes(1);
-    expect(onCacheAdd).toHaveBeenCalledWith(
-      memoized.cache,
-      memoized.options,
-      memoized,
-    );
-
-    onCacheAdd.mockReset();
-
-    memoized('bar', 'foo');
-
-    expect(onCacheAdd).toHaveBeenCalledTimes(0);
-
-    onCacheAdd.mockReset();
-
-    memoized('foo', 'bar');
-
-    expect(onCacheAdd).toHaveBeenCalledTimes(0);
-
-    memoized('foo', 'bar');
-
-    expect(onCacheAdd).toHaveBeenCalledTimes(0);
   });
 
   type Dictionary<Type> = {
@@ -641,15 +456,14 @@ describe('memoize', () => {
     const fn = () => {};
 
     const maxSize = 5;
-    const isEqual = () => true;
+    const matchesArg = () => true;
 
     const memoized = memoize(fn, { maxSize });
-
-    const reMemoized = memoize(memoized, { isEqual });
+    const reMemoized = memoize(memoized, { matchesArg });
 
     expect(reMemoized).not.toBe(memoized);
     expect(reMemoized.options.maxSize).toBe(maxSize);
-    expect(reMemoized.options.isEqual).toBe(isEqual);
+    expect(reMemoized.options.matchesArg).toBe(matchesArg);
   });
 
   it('will throw an error if not a function', () => {
@@ -671,7 +485,7 @@ describe('memoize', () => {
       expect(result2).toBe(result1);
     });
 
-    it('matches for option `isEqual`', () => {
+    it('matches for option `matchesArg`', () => {
       type ContrivedObject = {
         deep: string;
       };
@@ -685,7 +499,7 @@ describe('memoize', () => {
         bar: object.bar,
       });
 
-      const memoizedDeepObject = memoize(deepObject, { isEqual: deepEqual });
+      const memoizedDeepObject = memoize(deepObject, { matchesArg: deepEqual });
 
       const result1 = memoizedDeepObject({
         foo: {
@@ -717,7 +531,7 @@ describe('memoize', () => {
       expect(result2).toBe(result1);
     });
 
-    it('matches for option `isMatchingKey`', () => {
+    it('matches for option `matchesKey`', () => {
       type ContrivedObject = { foo: string; bar: number; baz: string };
 
       const deepObject = (object: ContrivedObject) => ({
@@ -727,7 +541,7 @@ describe('memoize', () => {
 
       const memoizedShape = memoize(deepObject, {
         // receives the full key in cache and the full key of the most recent call
-        isMatchingKey(key1, key2) {
+        matchesKey(key1, key2) {
           const object1 = key1[0];
           const object2 = key2[0];
 
@@ -746,7 +560,7 @@ describe('memoize', () => {
       expect(result2).toBe(result1);
     });
 
-    it('matches for option `isPromise`', (done) => {
+    it('matches for option `async`', async () => {
       const fn = async (one: string, two: string) => {
         return new Promise((resolve, reject) => {
           setTimeout(() => {
@@ -755,21 +569,26 @@ describe('memoize', () => {
         });
       };
 
-      const memoized = memoize(fn, { isPromise: true });
+      const memoized = memoize(fn, { async: true });
 
-      const call = memoized('one', 'two');
+      try {
+        const pending = memoized('one', 'two');
 
-      expect(memoized.cache.snapshot.keys).toEqual([['one', 'two']]);
-      expect(memoized.cache.snapshot.values).toEqual([expect.any(Promise)]);
+        const snapshot = memoized.cache.snapshot();
 
-      call.catch((error) => {
-        expect(memoized.cache.snapshot.keys).toEqual([]);
-        expect(memoized.cache.snapshot.values).toEqual([]);
+        expect(snapshot.entries).toEqual([
+          { key: ['one', 'two'], value: expect.any(Promise) },
+        ]);
+
+        await pending.catch();
+      } catch (error) {
+        expect(memoized.cache.snapshot()).toEqual({
+          entries: [],
+          size: 0,
+        });
 
         expect(error).toEqual(new Error('{"one":"one","two":"two"}'));
-
-        done();
-      });
+      }
     });
 
     it('matches for option `maxSize`', () => {
@@ -786,15 +605,12 @@ describe('memoize', () => {
 
       expect(manyPossibleArgs).toHaveBeenCalledTimes(3);
 
-      expect(memoized.cache.snapshot.keys).toEqual([
-        ['three', 'four'],
-        ['two', 'three'],
-        ['one', 'two'],
-      ]);
-      expect(memoized.cache.snapshot.values).toEqual([
-        ['three', 'four'],
-        ['two', 'three'],
-        ['one', 'two'],
+      const snapshot = memoized.cache.snapshot();
+
+      expect(snapshot.entries).toEqual([
+        { key: ['three', 'four'], value: ['three', 'four'] },
+        { key: ['two', 'three'], value: ['two', 'three'] },
+        { key: ['one', 'two'], value: ['one', 'two'] },
       ]);
 
       manyPossibleArgs.mockClear();
@@ -810,11 +626,11 @@ describe('memoize', () => {
       expect(manyPossibleArgs).toHaveBeenCalled();
     });
 
-    it('matches for option `onCacheAdd`', () => {
+    it('matches for option `onCache`', () => {
       const fn = (one: string, two: string) => [one, two];
       const options = {
         maxSize: 2,
-        onCacheAdd: jest.fn(),
+        onCache: jest.fn(),
       };
 
       const memoized = memoize(fn, options);
@@ -823,75 +639,77 @@ describe('memoize', () => {
       memoized('foo', 'bar');
       memoized('foo', 'bar');
 
-      expect(options.onCacheAdd).toHaveBeenCalledTimes(1);
+      expect(options.onCache).toHaveBeenCalledTimes(3);
+      expect(options.onCache).toHaveBeenNthCalledWith(
+        1,
+        'add',
+        { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        memoized.cache,
+      );
+      expect(options.onCache).toHaveBeenNthCalledWith(
+        2,
+        'hit',
+        { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        memoized.cache,
+      );
+      expect(options.onCache).toHaveBeenNthCalledWith(
+        3,
+        'hit',
+        { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        memoized.cache,
+      );
 
-      memoized('bar', 'foo'); // cache has been added to
-      memoized('bar', 'foo');
-      memoized('bar', 'foo');
-
-      expect(options.onCacheAdd).toHaveBeenCalledTimes(2);
-
-      memoized('foo', 'bar');
-      memoized('foo', 'bar');
-      memoized('foo', 'bar');
-
-      expect(options.onCacheAdd).toHaveBeenCalledTimes(2);
-    });
-
-    it('matches for option `onCacheChange`', () => {
-      const fn = (one: string, two: string) => [one, two];
-      const options = {
-        maxSize: 2,
-        onCacheChange: jest.fn(),
-      };
-
-      const memoized = memoize(fn, options);
-
-      memoized('foo', 'bar');
-      memoized('foo', 'bar');
-      memoized('foo', 'bar');
-
-      expect(options.onCacheChange).toHaveBeenCalledTimes(1);
+      options.onCache.mockClear();
 
       memoized('bar', 'foo');
       memoized('bar', 'foo');
       memoized('bar', 'foo');
 
-      expect(options.onCacheChange).toHaveBeenCalledTimes(2);
+      expect(options.onCache).toHaveBeenCalledTimes(3);
+      expect(options.onCache).toHaveBeenNthCalledWith(
+        1,
+        'add',
+        { key: ['bar', 'foo'], value: ['bar', 'foo'] },
+        memoized.cache,
+      );
+      expect(options.onCache).toHaveBeenNthCalledWith(
+        2,
+        'hit',
+        { key: ['bar', 'foo'], value: ['bar', 'foo'] },
+        memoized.cache,
+      );
+      expect(options.onCache).toHaveBeenNthCalledWith(
+        3,
+        'hit',
+        { key: ['bar', 'foo'], value: ['bar', 'foo'] },
+        memoized.cache,
+      );
+
+      options.onCache.mockClear();
 
       memoized('foo', 'bar');
       memoized('foo', 'bar');
       memoized('foo', 'bar');
 
-      expect(options.onCacheChange).toHaveBeenCalledTimes(3);
-    });
-
-    it('matches for option `onCacheHit`', () => {
-      const fn = (one: string, two: string) => [one, two];
-      const options = {
-        maxSize: 2,
-        onCacheHit: jest.fn(),
-      };
-
-      const memoized = memoize(fn, options);
-
-      memoized('foo', 'bar');
-      memoized('foo', 'bar');
-      memoized('foo', 'bar');
-
-      expect(options.onCacheHit).toHaveBeenCalledTimes(2);
-
-      memoized('bar', 'foo');
-      memoized('bar', 'foo');
-      memoized('bar', 'foo');
-
-      expect(options.onCacheHit).toHaveBeenCalledTimes(4);
-
-      memoized('foo', 'bar');
-      memoized('foo', 'bar');
-      memoized('foo', 'bar');
-
-      expect(options.onCacheHit).toHaveBeenCalledTimes(7);
+      expect(options.onCache).toHaveBeenCalledTimes(3);
+      expect(options.onCache).toHaveBeenNthCalledWith(
+        1,
+        'update',
+        { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        memoized.cache,
+      );
+      expect(options.onCache).toHaveBeenNthCalledWith(
+        2,
+        'hit',
+        { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        memoized.cache,
+      );
+      expect(options.onCache).toHaveBeenNthCalledWith(
+        3,
+        'hit',
+        { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        memoized.cache,
+      );
     });
 
     it('matches for option `transformKey`', () => {
@@ -901,7 +719,7 @@ describe('memoize', () => {
       ]);
 
       const memoized = memoize(ignoreFunctionArg, {
-        isMatchingKey: (key1, key2) => key1[0] === key2[0],
+        matchesKey: (key1, key2) => key1[0] === key2[0],
         // Cache based on the serialized first parameter
         transformKey: (args) => [JSON.stringify(args[0])],
       });

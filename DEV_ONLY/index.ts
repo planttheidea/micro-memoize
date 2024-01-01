@@ -3,7 +3,7 @@
 import Bluebird from 'bluebird';
 import { deepEqual } from 'fast-equals';
 
-import memoize from '../src-next';
+import memoize from '../src';
 
 // import '../benchmarks';
 

@@ -1,264 +1,239 @@
 import type {
-  AnyFn,
-  CacheModifiedHandler,
+  Arg,
+  Cache as CacheType,
+  CacheEntry,
+  CacheNode,
   CacheSnapshot,
   Key,
-  KeyIndexGetter,
-  MatchingKeyComparator,
-  Memoized,
-  NormalizedOptions,
-  RawKey,
-  Value,
+  OnChange,
+  Options,
 } from '../index.d';
+import { cloneKey, getDefault, getEntry, isSameValueZero } from './utils';
 
-// utils
-import { cloneArray } from './utils';
+export class Cache<Fn extends (...args: any[]) => any>
+  implements CacheType<Fn>
+{
+  private l: number;
+  private s = 0;
 
-export class Cache<Fn extends AnyFn> {
-  readonly canTransformKey: boolean;
-  readonly getKeyIndex: KeyIndexGetter;
-  readonly options: NormalizedOptions<Fn>;
-  readonly shouldCloneArguments: boolean;
-  readonly shouldUpdateOnAdd: boolean;
-  readonly shouldUpdateOnChange: boolean;
-  readonly shouldUpdateOnHit: boolean;
+  a: (a: Arg, b: Arg) => boolean;
+  c: boolean;
+  h: CacheNode<Fn> | null = null;
+  k: ((args: Parameters<Fn>) => Key) | undefined;
+  m: (a: Key, b: Key) => boolean;
+  o: OnChange<Fn> | undefined;
+  p: boolean;
+  t: CacheNode<Fn> | null = null;
 
-  /**
-   * The prevents call arguments which have cached results.
-   */
-  keys: Key[];
-  /**
-   * The results of previous cached calls.
-   */
-  values: Value[];
+  constructor(options: Options<Fn>) {
+    const transformKey = getDefault('function', options.transformKey);
 
-  constructor(options: NormalizedOptions<Fn>) {
-    this.keys = [];
-    this.values = [];
-    this.options = options;
+    this.a = getDefault('function', options.matchesArg, isSameValueZero);
+    this.l = getDefault('number', options.maxSize, 1);
+    this.m = getDefault('function', options.matchesKey, this.e);
+    this.o = getDefault('function', options.onCache);
+    this.p = getDefault('boolean', options.async, false);
 
-    const isMatchingKeyFunction = typeof options.isMatchingKey === 'function';
+    this.c = !!transformKey || options.matchesKey === this.m;
+    this.k = this.c
+      ? transformKey
+        ? (args: Parameters<Fn>) => transformKey(cloneKey<Fn>(args))
+        : cloneKey
+      : undefined;
+  }
 
-    if (isMatchingKeyFunction) {
-      this.getKeyIndex = this._getKeyIndexFromMatchingKey;
-    } else if (options.maxSize > 1) {
-      this.getKeyIndex = this._getKeyIndexForMany;
+  get size() {
+    return this.s;
+  }
+
+  clear(): void {
+    this.h = this.t = null;
+    this.s = 0;
+  }
+
+  delete(node: CacheNode<Fn>): void {
+    const next = node.n;
+    const prev = node.p;
+
+    if (next) {
+      next.p = prev;
     } else {
-      this.getKeyIndex = this._getKeyIndexForSingle;
+      this.t = prev;
     }
 
-    this.canTransformKey = typeof options.transformKey === 'function';
-    this.shouldCloneArguments = this.canTransformKey || isMatchingKeyFunction;
-
-    this.shouldUpdateOnAdd = typeof options.onCacheAdd === 'function';
-    this.shouldUpdateOnChange = typeof options.onCacheChange === 'function';
-    this.shouldUpdateOnHit = typeof options.onCacheHit === 'function';
-  }
-
-  /**
-   * The number of cached [key,value] results.
-   */
-  get size(): number {
-    return this.keys.length;
-  }
-
-  /**
-   * A copy of the cache at a moment in time. This is useful
-   * to compare changes over time, since the cache mutates
-   * internally for performance reasons.
-   */
-  get snapshot(): CacheSnapshot {
-    return {
-      keys: cloneArray(this.keys),
-      size: this.size,
-      values: cloneArray(this.values),
-    };
-  }
-
-  /**
-   * Gets the matching key index when a custom key matcher is used.
-   */
-  _getKeyIndexFromMatchingKey(keyToMatch: RawKey) {
-    const { isMatchingKey, maxSize } = this.options as {
-      isMatchingKey: MatchingKeyComparator;
-      maxSize: number;
-    };
-
-    const { keys } = this;
-    const keysLength = keys.length;
-
-    if (!keysLength) {
-      return -1;
-    }
-
-    if (isMatchingKey(keys[0]!, keyToMatch)) {
-      return 0;
-    }
-
-    if (maxSize > 1) {
-      for (let index = 1; index < keysLength; index++) {
-        if (isMatchingKey(keys[index]!, keyToMatch)) {
-          return index;
-        }
-      }
-    }
-
-    return -1;
-  }
-
-  /**
-   * Gets the matching key index when multiple keys are used.
-   */
-  _getKeyIndexForMany(keyToMatch: RawKey) {
-    const { isEqual } = this.options;
-
-    const { keys } = this;
-    const keysLength = keys.length;
-
-    if (!keysLength) {
-      return -1;
-    }
-
-    if (keysLength === 1) {
-      return this._getKeyIndexForSingle(keyToMatch);
-    }
-
-    const keyLength = keyToMatch.length;
-
-    let existingKey;
-    let argIndex;
-
-    if (keyLength > 1) {
-      for (let index = 0; index < keysLength; index++) {
-        existingKey = keys[index]!;
-
-        if (existingKey.length === keyLength) {
-          argIndex = 0;
-
-          for (; argIndex < keyLength; argIndex++) {
-            if (!isEqual(existingKey[argIndex], keyToMatch[argIndex])) {
-              break;
-            }
-          }
-
-          if (argIndex === keyLength) {
-            return index;
-          }
-        }
-      }
+    if (prev) {
+      prev.n = next;
     } else {
-      for (let index = 0; index < keysLength; index++) {
-        existingKey = keys[index]!;
+      this.h = next;
+    }
 
-        if (
-          existingKey.length === keyLength &&
-          isEqual(existingKey[0], keyToMatch[0])
-        ) {
-          return index;
+    --this.s;
+
+    this.o && this.o('delete', getEntry(node), this);
+  }
+
+  get(key: Key): ReturnType<Fn> | undefined {
+    const node = this.g(key);
+
+    return node && node.v;
+  }
+
+  has(key: Key): boolean {
+    return !!this.g(key);
+  }
+
+  hydrate(entries: Array<CacheEntry<Fn>>): void {
+    for (let index = 0, length = entries.length; index < length; ++index) {
+      const entry = entries[index]!;
+
+      const existingNode = this.g(entry.key);
+
+      if (existingNode) {
+        existingNode.v = entry.value;
+
+        if (existingNode !== this.h) {
+          this.u(existingNode);
         }
+      } else {
+        this.n(entry.key, entry.value);
+      }
+    }
+  }
+
+  set(key: Key, value: ReturnType<Fn>): CacheNode<Fn> {
+    const existingNode = this.g(key);
+
+    if (!existingNode) {
+      const node = this.n(key, value);
+
+      this.o && this.o('add', getEntry(node), this);
+
+      return node;
+    }
+
+    existingNode.v = value;
+
+    if (existingNode !== this.h) {
+      this.u(existingNode);
+    }
+
+    this.o && this.o('update', getEntry(existingNode), this);
+
+    return existingNode;
+  }
+
+  snapshot(): CacheSnapshot<Fn> {
+    const entries: Array<CacheEntry<Fn>> = [];
+
+    let node = this.h;
+
+    while (node != null) {
+      entries.push(getEntry(node));
+      node = node.n;
+    }
+
+    return { entries, size: this.s };
+  }
+
+  private e(prevKey: Key, nextKey: Key): boolean {
+    const length = nextKey.length;
+
+    if (prevKey.length !== length) {
+      return false;
+    }
+
+    if (length === 1) {
+      return this.a(prevKey[0], nextKey[0]);
+    }
+
+    for (let index = 0; index < length; ++index) {
+      if (!this.a(prevKey[index], nextKey[index])) {
+        return false;
       }
     }
 
-    return -1;
+    return true;
   }
 
-  /**
-   * Gets the matching key index when a single key is used.
-   */
-  _getKeyIndexForSingle(keyToMatch: RawKey) {
-    const { keys } = this;
-
-    if (!keys.length) {
-      return -1;
+  private g(key: Key): CacheNode<Fn> | undefined {
+    if (!this.h) {
+      return;
     }
 
-    const existingKey = keys[0]!;
-    const { length } = existingKey;
-
-    if (keyToMatch.length !== length) {
-      return -1;
+    if (this.m(this.h.k, key)) {
+      return this.h;
     }
 
-    const { isEqual } = this.options;
+    if (this.h === this.t) {
+      return;
+    }
 
-    if (length > 1) {
-      for (let index = 0; index < length; index++) {
-        if (!isEqual(existingKey[index], keyToMatch[index])) {
-          return -1;
-        }
+    let cached: CacheNode<Fn> | null = this.h.n;
+
+    while (cached) {
+      if (this.m(cached.k, key)) {
+        this.u(cached);
+        return cached;
       }
 
-      return 0;
-    }
-
-    return isEqual(existingKey[0], keyToMatch[0]) ? 0 : -1;
-  }
-
-  /**
-   * Order the array based on a Least-Recently-Used basis.
-   */
-  orderByLru(key: Key, value: Value, startingIndex: number) {
-    const { keys } = this;
-    const { values } = this;
-
-    const currentLength = keys.length;
-
-    let index = startingIndex;
-
-    while (index--) {
-      keys[index + 1] = keys[index]!;
-      values[index + 1] = values[index];
-    }
-
-    keys[0] = key;
-    values[0] = value;
-
-    const { maxSize } = this.options;
-
-    if (currentLength === maxSize && startingIndex === currentLength) {
-      keys.pop();
-      values.pop();
-    } else if (startingIndex >= maxSize) {
-      // eslint-disable-next-line no-multi-assign
-      keys.length = values.length = maxSize;
+      cached = cached.n;
     }
   }
 
-  /**
-   * Update the promise method to auto-remove from cache if rejected, and
-   * if resolved then fire cache hit / changed.
-   */
-  updateAsyncCache(memoized: Memoized<Fn>) {
-    const { onCacheChange, onCacheHit } = this.options as {
-      onCacheChange: CacheModifiedHandler<Fn>;
-      onCacheHit: CacheModifiedHandler<Fn>;
-    };
+  private n(key: Key, value: ReturnType<Fn>): CacheNode<Fn> {
+    const prevHead = this.h;
+    const prevTail = this.t;
+    const node = { k: key, n: prevHead, p: null, v: value };
 
-    const [firstKey] = this.keys;
-    const [firstValue] = this.values;
+    if (this.p) {
+      node.v = value.then(
+        (value: any) => {
+          this.o &&
+            this.has(node.k) &&
+            this.o('resolved', getEntry(node), this);
+          return value;
+        },
+        (error: Error) => {
+          this.delete(node);
+          throw error;
+        },
+      );
+    }
 
-    this.values[0] = firstValue.then(
-      (value: any) => {
-        if (this.shouldUpdateOnHit) {
-          onCacheHit(this, this.options, memoized);
-        }
+    this.h = node;
 
-        if (this.shouldUpdateOnChange) {
-          onCacheChange(this, this.options, memoized);
-        }
+    if (prevHead) {
+      prevHead.p = node;
+    } else {
+      this.t = node;
+    }
 
-        return value;
-      },
-      (error: Error) => {
-        const keyIndex = this.getKeyIndex(firstKey!);
+    if (++this.s > this.l && prevTail) {
+      this.delete(prevTail);
+    }
 
-        if (keyIndex !== -1) {
-          this.keys.splice(keyIndex, 1);
-          this.values.splice(keyIndex, 1);
-        }
+    return node;
+  }
 
-        throw error;
-      },
-    );
+  private u(node: CacheNode<Fn>): void {
+    const next = node.n;
+    const prev = node.p;
+
+    if (next) {
+      next.p = prev;
+    }
+
+    if (prev) {
+      prev.n = next;
+    }
+
+    this.h!.p = node;
+    node.n = this.h;
+    node.p = null;
+    this.h = node;
+
+    if (node === this.t) {
+      this.t = prev;
+    }
   }
 }

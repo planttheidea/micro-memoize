@@ -2,6 +2,7 @@
 .nyc_output
 coverage
 dist
+dist-prev
 es
 node_modules
 lib

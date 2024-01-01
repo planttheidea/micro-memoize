@@ -30,7 +30,6 @@ const mem = require('mem');
 const memoizee = require('memoizee');
 const memoizerific = require('memoizerific');
 const memoize = require('../dist/micro-memoize.cjs.js');
-const memoizeNext = require('../dist-next/micro-memoize.cjs.js');
 const ramda = require('ramda').memoizeWith(resolveArguments);
 const underscore = require('underscore').memoize;
 
@@ -113,7 +112,6 @@ const singularPrimitive = {
   memoizee: memoizee(fibonacciSinglePrimitive),
   memoizerific: memoizerific(1)(fibonacciSinglePrimitive),
   'micro-memoize': memoize(fibonacciSinglePrimitive),
-  'micro-memoize (next)': memoizeNext(fibonacciSinglePrimitive),
   ramda: ramda(fibonacciSinglePrimitive),
   underscore: underscore(fibonacciSinglePrimitive),
 };
@@ -127,7 +125,6 @@ const singularPrimitiveMulti = {
   memoizee: memoizee(fibonacciSinglePrimitive),
   memoizerific: memoizerific(3)(fibonacciSinglePrimitive),
   'micro-memoize': memoize(fibonacciSinglePrimitive, { maxSize: 3 }),
-  'micro-memoize (next)': memoizeNext(fibonacciSinglePrimitive, { maxSize: 3 }),
   ramda: ramda(fibonacciSinglePrimitive),
   underscore: underscore(fibonacciSinglePrimitive),
 };
@@ -141,7 +138,6 @@ const singularArray = {
   memoizee: memoizee(fibonacciSingleArray),
   memoizerific: memoizerific(1)(fibonacciSingleArray),
   'micro-memoize': memoize(fibonacciSingleArray),
-  'micro-memoize (next)': memoizeNext(fibonacciSingleArray),
   ramda: ramda(fibonacciSingleArray),
   underscore: underscore(fibonacciSingleArray, resolveArguments),
 };
@@ -155,7 +151,6 @@ const singularArrayMulti = {
   memoizee: memoizee(fibonacciSingleArray),
   memoizerific: memoizerific(3)(fibonacciSingleArray),
   'micro-memoize': memoize(fibonacciSingleArray, { maxSize: 3 }),
-  'micro-memoize (next)': memoizeNext(fibonacciSingleArray, { maxSize: 3 }),
   ramda: ramda(fibonacciSingleArray),
   underscore: underscore(fibonacciSingleArray, resolveArguments),
 };
@@ -169,7 +164,6 @@ const singularObject = {
   memoizee: memoizee(fibonacciSingleObject),
   memoizerific: memoizerific(1)(fibonacciSingleObject),
   'micro-memoize': memoize(fibonacciSingleObject),
-  'micro-memoize (next)': memoizeNext(fibonacciSingleObject),
   ramda: ramda(fibonacciSingleObject),
   underscore: underscore(fibonacciSingleObject, resolveArguments),
 };
@@ -183,7 +177,6 @@ const singularObjectMulti = {
   memoizee: memoizee(fibonacciSingleObject),
   memoizerific: memoizerific(3)(fibonacciSingleObject),
   'micro-memoize': memoize(fibonacciSingleObject, { maxSize: 3 }),
-  'micro-memoize (next)': memoizeNext(fibonacciSingleObject, { maxSize: 3 }),
   ramda: ramda(fibonacciSingleObject),
   underscore: underscore(fibonacciSingleObject, resolveArguments),
 };
@@ -197,7 +190,6 @@ const multiplePrimitive = {
   memoizee: memoizee(fibonacciMultiplePrimitive),
   memoizerific: memoizerific(1)(fibonacciMultiplePrimitive),
   'micro-memoize': memoize(fibonacciMultiplePrimitive),
-  'micro-memoize (next)': memoizeNext(fibonacciMultiplePrimitive),
   ramda: ramda(fibonacciMultiplePrimitive),
   underscore: underscore(fibonacciMultiplePrimitive, resolveArguments),
 };
@@ -211,9 +203,6 @@ const multiplePrimitiveMulti = {
   memoizee: memoizee(fibonacciMultiplePrimitive),
   memoizerific: memoizerific(3)(fibonacciMultiplePrimitive),
   'micro-memoize': memoize(fibonacciMultiplePrimitive, { maxSize: 3 }),
-  'micro-memoize (next)': memoizeNext(fibonacciMultiplePrimitive, {
-    maxSize: 3,
-  }),
   ramda: ramda(fibonacciMultiplePrimitive),
   underscore: underscore(fibonacciMultiplePrimitive, resolveArguments),
 };
@@ -227,7 +216,6 @@ const multipleArray = {
   memoizee: memoizee(fibonacciMultipleArray),
   memoizerific: memoizerific(1)(fibonacciMultipleArray),
   'micro-memoize': memoize(fibonacciMultipleArray),
-  'micro-memoize (next)': memoizeNext(fibonacciMultipleArray),
   ramda: ramda(fibonacciMultipleArray),
   underscore: underscore(fibonacciMultipleArray, resolveArguments),
 };
@@ -241,7 +229,6 @@ const multipleArrayMulti = {
   memoizee: memoizee(fibonacciMultipleArray),
   memoizerific: memoizerific(3)(fibonacciMultipleArray),
   'micro-memoize': memoize(fibonacciMultipleArray, { maxSize: 3 }),
-  'micro-memoize (next)': memoizeNext(fibonacciMultipleArray, { maxSize: 3 }),
   ramda: ramda(fibonacciMultipleArray),
   underscore: underscore(fibonacciMultipleArray, resolveArguments),
 };
@@ -255,7 +242,6 @@ const multipleObject = {
   memoizee: memoizee(fibonacciMultipleObject),
   memoizerific: memoizerific(1)(fibonacciMultipleObject),
   'micro-memoize': memoize(fibonacciMultipleObject),
-  'micro-memoize (next)': memoizeNext(fibonacciMultipleObject),
   ramda: ramda(fibonacciMultipleObject),
   underscore: underscore(fibonacciMultipleObject, resolveArguments),
 };
@@ -269,7 +255,6 @@ const multipleObjectMulti = {
   memoizee: memoizee(fibonacciMultipleObject),
   memoizerific: memoizerific(3)(fibonacciMultipleObject),
   'micro-memoize': memoize(fibonacciMultipleObject, { maxSize: 3 }),
-  'micro-memoize (next)': memoizeNext(fibonacciMultipleObject, { maxSize: 3 }),
   ramda: ramda(fibonacciMultipleObject),
   underscore: underscore(fibonacciMultipleObject, resolveArguments),
 };

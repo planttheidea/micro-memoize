@@ -82,9 +82,9 @@
     "url": "git+https://github.com/planttheidea/micro-memoize.git"
   },
   "scripts": {
-    "benchmark": "npm run clean && npm run build && npm run build:next && NODE_ENV=production node ./benchmarks/index.cjs",
+    "benchmark": "npm run clean && npm run build && NODE_ENV=production node ./benchmarks/index.cjs",
     "build": "NODE_ENV=production rollup -c --bundleConfigAsCjs",
-    "build:next": "NODE_ENV=production rollup -c rollup-next.config.js --bundleConfigAsCjs",
+    "build:prev": "NODE_ENV=production rollup -c rollup-prev.config.js --bundleConfigAsCjs",
     "build:mjs": "node ./es-to-mjs.js",
     "clean": "rimraf dist && rimraf mjs",
     "dev": "NODE_ENV=development webpack-dev-server --config=webpack/webpack.config.js",
