@@ -59,12 +59,24 @@ export type TypeOf =
   | 'undefined';
 
 export class Cache<Fn extends (...args: any[]) => any> {
+  a: (a: Arg, b: Arg) => boolean;
+  c: boolean;
+  h: CacheNode<Fn> | null;
+  k: ((args: Parameters<Fn>) => Key) | undefined;
+  m: (a: Key, b: Key) => boolean;
+  o: OnChange<Fn> | undefined;
+  p: boolean;
+  t: CacheNode<Fn> | null;
+
   constructor(options: Options<Fn>);
+
+  get size(): number;
 
   clear(): void;
   delete(node: CacheNode<Fn>): void;
   get(key: Key): ReturnType<Fn> | undefined;
   has(key: Key): boolean;
+  hydrate(entries: Array<CacheEntry<Fn>>): void;
   set(key: Key, value: ReturnType<Fn>): CacheNode<Fn>;
   snapshot(): CacheSnapshot<Fn>;
 }
