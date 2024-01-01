@@ -14,10 +14,45 @@ export interface CacheEntry<Fn extends (...args: any[]) => any> {
   value: ReturnType<Fn>;
 }
 
+interface OnChangeOptionsBase<Fn extends (...args: any[]) => any> {
+  cache: Cache<Fn>;
+  entry: CacheEntry<Fn>;
+  reason?: 'evicted' | 'rejected' | 'resolved';
+  type: 'add' | 'delete' | 'hit' | 'update';
+}
+
+export interface OnAddOptions<Fn extends (...args: any[]) => any>
+  extends OnChangeOptionsBase<Fn> {
+  reason?: undefined;
+  type: 'add';
+}
+
+export interface OnDeleteOptions<Fn extends (...args: any[]) => any>
+  extends OnChangeOptionsBase<Fn> {
+  reason?: 'evicted' | 'rejected';
+  type: 'delete';
+}
+
+export interface OnHitOptions<Fn extends (...args: any[]) => any>
+  extends OnChangeOptionsBase<Fn> {
+  reason?: undefined;
+  type: 'hit';
+}
+
+export interface OnUpdateOptions<Fn extends (...args: any[]) => any>
+  extends OnChangeOptionsBase<Fn> {
+  reason?: 'resolved';
+  type: 'update';
+}
+
+export type OnChangeOptions<Fn extends (...args: any[]) => any> =
+  | OnAddOptions<Fn>
+  | OnDeleteOptions<Fn>
+  | OnHitOptions<Fn>
+  | OnUpdateOptions<Fn>;
+
 export type OnChange<Fn extends (...args: any[]) => any> = (
-  type: 'add' | 'delete' | 'hit' | 'resolved' | 'update',
-  entry: CacheEntry<Fn>,
-  cache: Cache<Fn>,
+  options: OnChangeOptions<Fn>,
 ) => void;
 export type KeyTransformer<Fn extends (...args: any[]) => any> = (
   args: Parameters<Fn>,
@@ -73,7 +108,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
   get size(): number;
 
   clear(): void;
-  delete(node: CacheNode<Fn>): void;
+  delete(key: Key): boolean;
   get(key: Key): ReturnType<Fn> | undefined;
   has(key: Key): boolean;
   hydrate(entries: Array<CacheEntry<Fn>>): void;

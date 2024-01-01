@@ -36,7 +36,12 @@ export default function memoize<Fn extends (...args: any[]) => any>(
 
     if (node) {
       onChange &&
-        onChange(node === prevHead ? 'hit' : 'update', getEntry(node), cache);
+        onChange({
+          cache,
+          entry: getEntry(node),
+          type: node === prevHead ? 'hit' : 'update',
+        });
+
       return node.v;
     }
 
@@ -46,7 +51,8 @@ export default function memoize<Fn extends (...args: any[]) => any>(
       // @ts-expect-error - allow usage of arguments as pass-through to fn
       fn.apply(this, arguments),
     );
-    onChange && onChange('add', getEntry(node), cache);
+
+    onChange && onChange({ cache, entry: getEntry(node), type: 'add' });
 
     return node.v;
   };

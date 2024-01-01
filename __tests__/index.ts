@@ -318,11 +318,11 @@ describe('memoize', () => {
     memoized('foo', 'bar');
 
     expect(onCache).toHaveBeenCalledTimes(1);
-    expect(onCache).toHaveBeenCalledWith(
-      'add',
-      { key: ['foo', 'bar'], value: { one: 'foo', two: 'bar' } },
-      memoized.cache,
-    );
+    expect(onCache).toHaveBeenCalledWith({
+      cache: memoized.cache,
+      entry: { key: ['foo', 'bar'], value: { one: 'foo', two: 'bar' } },
+      type: 'add',
+    });
   });
 
   it('will fire the onCache method passed with the cache when it is added, hit, and updated', () => {
@@ -340,55 +340,55 @@ describe('memoize', () => {
     memoized('foo', 'bar');
 
     expect(onCache).toHaveBeenCalledTimes(1);
-    expect(onCache).toHaveBeenCalledWith(
-      'add',
-      { key: ['foo', 'bar'], value: { one: 'foo', two: 'bar' } },
-      memoized.cache,
-    );
+    expect(onCache).toHaveBeenCalledWith({
+      cache: memoized.cache,
+      entry: { key: ['foo', 'bar'], value: { one: 'foo', two: 'bar' } },
+      type: 'add',
+    });
 
     onCache.mockReset();
 
     memoized('bar', 'foo');
 
     expect(onCache).toHaveBeenCalledTimes(1);
-    expect(onCache).toHaveBeenCalledWith(
-      'add',
-      { key: ['bar', 'foo'], value: { one: 'bar', two: 'foo' } },
-      memoized.cache,
-    );
+    expect(onCache).toHaveBeenCalledWith({
+      cache: memoized.cache,
+      entry: { key: ['bar', 'foo'], value: { one: 'bar', two: 'foo' } },
+      type: 'add',
+    });
 
     onCache.mockReset();
 
     memoized('bar', 'foo');
 
     expect(onCache).toHaveBeenCalledTimes(1);
-    expect(onCache).toHaveBeenCalledWith(
-      'hit',
-      { key: ['bar', 'foo'], value: { one: 'bar', two: 'foo' } },
-      memoized.cache,
-    );
+    expect(onCache).toHaveBeenCalledWith({
+      cache: memoized.cache,
+      entry: { key: ['bar', 'foo'], value: { one: 'bar', two: 'foo' } },
+      type: 'hit',
+    });
 
     onCache.mockReset();
 
     memoized('foo', 'bar');
 
     expect(onCache).toHaveBeenCalledTimes(1);
-    expect(onCache).toHaveBeenCalledWith(
-      'update',
-      { key: ['foo', 'bar'], value: { one: 'foo', two: 'bar' } },
-      memoized.cache,
-    );
+    expect(onCache).toHaveBeenCalledWith({
+      cache: memoized.cache,
+      entry: { key: ['foo', 'bar'], value: { one: 'foo', two: 'bar' } },
+      type: 'update',
+    });
 
     onCache.mockReset();
 
     memoized('foo', 'bar');
 
     expect(onCache).toHaveBeenCalledTimes(1);
-    expect(onCache).toHaveBeenCalledWith(
-      'hit',
-      { key: ['foo', 'bar'], value: { one: 'foo', two: 'bar' } },
-      memoized.cache,
-    );
+    expect(onCache).toHaveBeenCalledWith({
+      cache: memoized.cache,
+      entry: { key: ['foo', 'bar'], value: { one: 'foo', two: 'bar' } },
+      type: 'hit',
+    });
   });
 
   type Dictionary<Type> = {
@@ -640,24 +640,21 @@ describe('memoize', () => {
       memoized('foo', 'bar');
 
       expect(options.onCache).toHaveBeenCalledTimes(3);
-      expect(options.onCache).toHaveBeenNthCalledWith(
-        1,
-        'add',
-        { key: ['foo', 'bar'], value: ['foo', 'bar'] },
-        memoized.cache,
-      );
-      expect(options.onCache).toHaveBeenNthCalledWith(
-        2,
-        'hit',
-        { key: ['foo', 'bar'], value: ['foo', 'bar'] },
-        memoized.cache,
-      );
-      expect(options.onCache).toHaveBeenNthCalledWith(
-        3,
-        'hit',
-        { key: ['foo', 'bar'], value: ['foo', 'bar'] },
-        memoized.cache,
-      );
+      expect(options.onCache).toHaveBeenNthCalledWith(1, {
+        cache: memoized.cache,
+        entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        type: 'add',
+      });
+      expect(options.onCache).toHaveBeenNthCalledWith(2, {
+        cache: memoized.cache,
+        entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        type: 'hit',
+      });
+      expect(options.onCache).toHaveBeenNthCalledWith(3, {
+        cache: memoized.cache,
+        entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        type: 'hit',
+      });
 
       options.onCache.mockClear();
 
@@ -666,24 +663,21 @@ describe('memoize', () => {
       memoized('bar', 'foo');
 
       expect(options.onCache).toHaveBeenCalledTimes(3);
-      expect(options.onCache).toHaveBeenNthCalledWith(
-        1,
-        'add',
-        { key: ['bar', 'foo'], value: ['bar', 'foo'] },
-        memoized.cache,
-      );
-      expect(options.onCache).toHaveBeenNthCalledWith(
-        2,
-        'hit',
-        { key: ['bar', 'foo'], value: ['bar', 'foo'] },
-        memoized.cache,
-      );
-      expect(options.onCache).toHaveBeenNthCalledWith(
-        3,
-        'hit',
-        { key: ['bar', 'foo'], value: ['bar', 'foo'] },
-        memoized.cache,
-      );
+      expect(options.onCache).toHaveBeenNthCalledWith(1, {
+        cache: memoized.cache,
+        entry: { key: ['bar', 'foo'], value: ['bar', 'foo'] },
+        type: 'add',
+      });
+      expect(options.onCache).toHaveBeenNthCalledWith(2, {
+        cache: memoized.cache,
+        entry: { key: ['bar', 'foo'], value: ['bar', 'foo'] },
+        type: 'hit',
+      });
+      expect(options.onCache).toHaveBeenNthCalledWith(3, {
+        cache: memoized.cache,
+        entry: { key: ['bar', 'foo'], value: ['bar', 'foo'] },
+        type: 'hit',
+      });
 
       options.onCache.mockClear();
 
@@ -692,24 +686,21 @@ describe('memoize', () => {
       memoized('foo', 'bar');
 
       expect(options.onCache).toHaveBeenCalledTimes(3);
-      expect(options.onCache).toHaveBeenNthCalledWith(
-        1,
-        'update',
-        { key: ['foo', 'bar'], value: ['foo', 'bar'] },
-        memoized.cache,
-      );
-      expect(options.onCache).toHaveBeenNthCalledWith(
-        2,
-        'hit',
-        { key: ['foo', 'bar'], value: ['foo', 'bar'] },
-        memoized.cache,
-      );
-      expect(options.onCache).toHaveBeenNthCalledWith(
-        3,
-        'hit',
-        { key: ['foo', 'bar'], value: ['foo', 'bar'] },
-        memoized.cache,
-      );
+      expect(options.onCache).toHaveBeenNthCalledWith(1, {
+        cache: memoized.cache,
+        entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        type: 'update',
+      });
+      expect(options.onCache).toHaveBeenNthCalledWith(2, {
+        cache: memoized.cache,
+        entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        type: 'hit',
+      });
+      expect(options.onCache).toHaveBeenNthCalledWith(3, {
+        cache: memoized.cache,
+        entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        type: 'hit',
+      });
     });
 
     it('matches for option `transformKey`', () => {

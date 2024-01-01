@@ -51,25 +51,17 @@ export class Cache<Fn extends (...args: any[]) => any>
     this.s = 0;
   }
 
-  delete(node: CacheNode<Fn>): void {
-    const next = node.n;
-    const prev = node.p;
+  delete(key: Key): boolean {
+    const node = this.g(key);
 
-    if (next) {
-      next.p = prev;
-    } else {
-      this.t = prev;
+    if (!node) {
+      return false;
     }
 
-    if (prev) {
-      prev.n = next;
-    } else {
-      this.h = next;
-    }
+    this.d(node);
+    this.o && this.o({ cache: this, entry: getEntry(node), type: 'delete' });
 
-    --this.s;
-
-    this.o && this.o('delete', getEntry(node), this);
+    return true;
   }
 
   get(key: Key): ReturnType<Fn> | undefined {
@@ -106,7 +98,7 @@ export class Cache<Fn extends (...args: any[]) => any>
     if (!existingNode) {
       const node = this.n(key, value);
 
-      this.o && this.o('add', getEntry(node), this);
+      this.o && this.o({ cache: this, entry: getEntry(node), type: 'add' });
 
       return node;
     }
@@ -117,7 +109,8 @@ export class Cache<Fn extends (...args: any[]) => any>
       this.u(existingNode);
     }
 
-    this.o && this.o('update', getEntry(existingNode), this);
+    this.o &&
+      this.o({ cache: this, entry: getEntry(existingNode), type: 'update' });
 
     return existingNode;
   }
@@ -133,6 +126,25 @@ export class Cache<Fn extends (...args: any[]) => any>
     }
 
     return { entries, size: this.s };
+  }
+
+  private d(node: CacheNode<Fn>): void {
+    const next = node.n;
+    const prev = node.p;
+
+    if (next) {
+      next.p = prev;
+    } else {
+      this.t = prev;
+    }
+
+    if (prev) {
+      prev.n = next;
+    } else {
+      this.h = next;
+    }
+
+    --this.s;
   }
 
   private e(prevKey: Key, nextKey: Key): boolean {
@@ -189,12 +201,27 @@ export class Cache<Fn extends (...args: any[]) => any>
       node.v = value.then(
         (value: any) => {
           this.o &&
-            this.has(node.k) &&
-            this.o('resolved', getEntry(node), this);
+            this.has(key) &&
+            this.o({
+              cache: this,
+              entry: getEntry(node),
+              reason: 'resolved',
+              type: 'update',
+            });
           return value;
         },
         (error: Error) => {
-          this.delete(node);
+          if (this.has(key)) {
+            this.d(node);
+            this.o &&
+              this.o({
+                cache: this,
+                entry: getEntry(node),
+                reason: 'rejected',
+                type: 'delete',
+              });
+          }
+
           throw error;
         },
       );
@@ -209,7 +236,14 @@ export class Cache<Fn extends (...args: any[]) => any>
     }
 
     if (++this.s > this.l && prevTail) {
-      this.delete(prevTail);
+      this.d(prevTail);
+      this.o &&
+        this.o({
+          cache: this,
+          entry: getEntry(prevTail),
+          reason: 'evicted',
+          type: 'delete',
+        });
     }
 
     return node;
