@@ -40,17 +40,15 @@ export default function memoize<Fn extends (...args: any[]) => any>(
           entry: getEntry(node),
           type: node === prevHead ? 'hit' : 'update',
         });
+    } else {
+      node = cache.n(
+        transformKey ? key : cloneKey(key),
+        // @ts-expect-error - allow usage of arguments as pass-through to fn
+        fn.apply(this, arguments),
+      );
 
-      return node.v;
+      onChange && onChange({ cache, entry: getEntry(node), type: 'add' });
     }
-
-    node = cache.n(
-      transformKey ? key : cloneKey(key),
-      // @ts-expect-error - allow usage of arguments as pass-through to fn
-      fn.apply(this, arguments),
-    );
-
-    onChange && onChange({ cache, entry: getEntry(node), type: 'add' });
 
     return node.v;
   };
