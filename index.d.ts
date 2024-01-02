@@ -174,4 +174,6 @@ interface Memoize {
   Cache: Cache<(...args: any[]) => any>;
 }
 
-export default Memoize;
+declare const memoize: Memoize;
+
+export default memoize;
