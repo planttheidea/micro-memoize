@@ -59,3 +59,5 @@ export default function memoize<Fn extends (...args: any[]) => any>(
 
   return memoized;
 }
+
+memoize.Cache = Cache;

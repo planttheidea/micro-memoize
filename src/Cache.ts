@@ -30,6 +30,8 @@ export class Cache<Fn extends (...args: any[]) => any>
   s = 0;
   t: CacheNode<Fn> | null = null;
 
+  static EventEmitter = EventEmitter;
+
   constructor(options: Options<Fn>) {
     const transformKey = getDefault('function', options.transformKey);
 
@@ -45,6 +47,11 @@ export class Cache<Fn extends (...args: any[]) => any>
         ? (args: IArguments) => transformKey(cloneKey<Fn>(args))
         : cloneKey;
     }
+  }
+
+  clear(): void {
+    this.h = this.t = null;
+    this.s = 0;
   }
 
   off<Type extends CacheEventType>(

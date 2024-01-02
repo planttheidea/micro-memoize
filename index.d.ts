@@ -134,8 +134,11 @@ export class Cache<Fn extends (...args: any[]) => any> {
   s: number;
   t: CacheNode<Fn> | null;
 
+  static EventEmitter: EventEmitter<CacheEventType, (...args: any[]) => any>;
+
   constructor(options: Options<Fn>);
 
+  clear(): void;
   off<
     Type extends CacheEventType,
     Listener extends CacheEventListener<Type, Fn>,
@@ -157,3 +160,18 @@ export class Cache<Fn extends (...args: any[]) => any> {
   ): void;
   u(node: CacheNode<Fn>): void;
 }
+
+interface Memoize {
+  <Fn extends (...args: any[]) => any>(
+    fn: Fn,
+    passedOptions?: Options<Fn>,
+  ): Memoized<Fn>;
+  <Fn extends (...args: any[]) => any>(
+    fn: Memoized<Fn>,
+    passedOptions?: Options<Fn>,
+  ): Memoized<Fn>;
+
+  Cache: Cache<(...args: any[]) => any>;
+}
+
+export default Memoize;

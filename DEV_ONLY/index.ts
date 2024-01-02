@@ -51,11 +51,19 @@ console.groupEnd();
 
 console.group('standard with larger cache size');
 
-const memoizedLargerCache = memoize(method, {
-  onCache(type, entry) {
-    console.log(type, entry);
-  },
-  maxSize: 3,
+const memoizedLargerCache = memoize(method, { maxSize: 3 });
+
+memoizedLargerCache.cache.on('add', (event) => {
+  console.log(event);
+});
+memoizedLargerCache.cache.on('delete', (event) => {
+  console.log(event);
+});
+memoizedLargerCache.cache.on('hit', (event) => {
+  console.log(event);
+});
+memoizedLargerCache.cache.on('update', (event) => {
+  console.log(event);
 });
 
 memoizedLargerCache(foo, bar);
@@ -171,7 +179,7 @@ memoizedPromise(2, 2).then((value: unknown) => {
   console.log(`cached value: ${value}`);
 });
 
-console.log(memoizedPromise.cache.snapshot().map(({ key }) => key));
+console.log(memoizedPromise.cache.snapshot().entries.map(({ key }) => key));
 
 console.groupEnd();
 

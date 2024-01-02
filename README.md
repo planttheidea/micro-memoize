@@ -18,6 +18,7 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
     - [maxSize](#maxsize)
     - [transformKey](#transformkey)
   - [Cache](#cache)
+    - [Clearance](#clearance)
     - [Cache events](#cache-events)
       - [New entry added](#new-entry-added)
     - [Existing entry deleted](#existing-entry-deleted)
@@ -39,7 +40,7 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
 
 ## Summary
 
-As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1.29kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
+As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1.32kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
 
 ## Importing
 
@@ -296,6 +297,17 @@ console.log(memoized('one', () => {})); // pulled from cache, ['one', () => {}]
 ## Cache
 
 Access to the cache memoized function's internal cache is available at `memoized.cache`. It is not recommended to mutate the internals, however there are some exposed methods that can be used for additional capabilities.
+
+### Clearance
+
+If you want to clear out the existing cache:
+
+```ts
+const fn = (one: string, two: string) => [one, two];
+const memoized = memoize(fn);
+
+memoized.cache.clear();
+```
 
 ### Cache events
 
