@@ -25,13 +25,12 @@ export default function memoize<Fn extends (...args: any[]) => any>(
   }
 
   const cache = new Cache(passedOptions);
-  const { k: transformKey, o: onChange } = cache;
 
   const memoized: Memoized<Fn> = function memoized(this: any) {
-    // @ts-expect-error - `arguments` does not line up with `Parameters<Fn>`
-    const key: Key = transformKey ? transformKey!(arguments) : arguments;
-    const prevHead = cache.h;
-    // @ts-expect-error - `g` is not surfaced on public API
+    const { h: prevHead, k: transformKey, o: onChange } = cache;
+    const key: Key = transformKey
+      ? transformKey(arguments)
+      : (arguments as unknown as Key);
     let node = cache.g(key);
 
     if (node) {
@@ -45,7 +44,6 @@ export default function memoize<Fn extends (...args: any[]) => any>(
       return node.v;
     }
 
-    // @ts-expect-error - `n` is not surfaced on public API
     node = cache.n(
       transformKey ? key : cloneKey(key),
       // @ts-expect-error - allow usage of arguments as pass-through to fn

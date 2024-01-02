@@ -95,12 +95,10 @@ export type TypeOf =
 
 export class Cache<Fn extends (...args: any[]) => any> {
   a: (a: Arg, b: Arg) => boolean;
-  c: boolean;
   h: CacheNode<Fn> | null;
-  k: ((args: Parameters<Fn>) => Key) | undefined;
+  k: ((args: IArguments) => Key) | undefined;
   m: (a: Key, b: Key) => boolean;
   o: OnChange<Fn> | undefined;
-  p: boolean;
   t: CacheNode<Fn> | null;
 
   constructor(options: Options<Fn>);

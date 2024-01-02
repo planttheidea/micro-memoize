@@ -13,16 +13,16 @@ import { cloneKey, getDefault, getEntry, isSameValueZero } from './utils';
 export class Cache<Fn extends (...args: any[]) => any>
   implements CacheType<Fn>
 {
+  private c: boolean;
   private l: number;
+  private p: boolean;
   private s = 0;
 
   a: (a: Arg, b: Arg) => boolean;
-  c: boolean;
   h: CacheNode<Fn> | null = null;
-  k: ((args: Parameters<Fn>) => Key) | undefined;
+  k: ((args: IArguments) => Key) | undefined;
   m: (a: Key, b: Key) => boolean;
   o: OnChange<Fn> | undefined;
-  p: boolean;
   t: CacheNode<Fn> | null = null;
 
   constructor(options: Options<Fn>) {
@@ -35,11 +35,12 @@ export class Cache<Fn extends (...args: any[]) => any>
     this.p = getDefault('boolean', options.async, false);
 
     this.c = !!transformKey || options.matchesKey === this.m;
-    this.k = this.c
-      ? transformKey
-        ? (args: Parameters<Fn>) => transformKey(cloneKey<Fn>(args))
-        : cloneKey
-      : undefined;
+
+    if (this.c) {
+      this.k = transformKey
+        ? (args: IArguments) => transformKey(cloneKey<Fn>(args))
+        : cloneKey;
+    }
   }
 
   get size() {
@@ -128,7 +129,7 @@ export class Cache<Fn extends (...args: any[]) => any>
     return { entries, size: this.s };
   }
 
-  private d(node: CacheNode<Fn>): void {
+  d(node: CacheNode<Fn>): void {
     const next = node.n;
     const prev = node.p;
 
@@ -147,7 +148,7 @@ export class Cache<Fn extends (...args: any[]) => any>
     --this.s;
   }
 
-  private e(prevKey: Key, nextKey: Key): boolean {
+  e(prevKey: Key, nextKey: Key): boolean {
     const length = nextKey.length;
 
     if (prevKey.length !== length) {
@@ -167,7 +168,7 @@ export class Cache<Fn extends (...args: any[]) => any>
     return true;
   }
 
-  private g(key: Key): CacheNode<Fn> | undefined {
+  g(key: Key): CacheNode<Fn> | undefined {
     if (!this.h) {
       return;
     }
@@ -192,7 +193,7 @@ export class Cache<Fn extends (...args: any[]) => any>
     }
   }
 
-  private n(key: Key, value: ReturnType<Fn>): CacheNode<Fn> {
+  n(key: Key, value: ReturnType<Fn>): CacheNode<Fn> {
     const prevHead = this.h;
     const prevTail = this.t;
     const node = { k: key, n: prevHead, p: null, v: value };
@@ -249,7 +250,7 @@ export class Cache<Fn extends (...args: any[]) => any>
     return node;
   }
 
-  private u(node: CacheNode<Fn>): void {
+  u(node: CacheNode<Fn>): void {
     const next = node.n;
     const prev = node.p;
 
