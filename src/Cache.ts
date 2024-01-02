@@ -5,9 +5,11 @@ import type {
   CacheNode,
   CacheSnapshot,
   Key,
-  OnChange,
   Options,
+  CacheEventType,
+  CacheEventListener,
 } from '../index.d';
+import { EventEmitter } from './EventEmitter';
 import { cloneKey, getDefault, getEntry, isSameValueZero } from './utils';
 
 export class Cache<Fn extends (...args: any[]) => any>
@@ -16,13 +18,16 @@ export class Cache<Fn extends (...args: any[]) => any>
   private c: boolean;
   private l: number;
   private p: boolean;
-  private s = 0;
 
   a: (a: Arg, b: Arg) => boolean;
   h: CacheNode<Fn> | null = null;
   k: ((args: IArguments) => Key) | undefined;
   m: (a: Key, b: Key) => boolean;
-  o: OnChange<Fn> | undefined;
+  oa: EventEmitter<'add', Fn> | null = null;
+  od: EventEmitter<'delete', Fn> | null = null;
+  oh: EventEmitter<'hit', Fn> | null = null;
+  ou: EventEmitter<'update', Fn> | null = null;
+  s = 0;
   t: CacheNode<Fn> | null = null;
 
   constructor(options: Options<Fn>) {
@@ -31,7 +36,6 @@ export class Cache<Fn extends (...args: any[]) => any>
     this.a = getDefault('function', options.matchesArg, isSameValueZero);
     this.l = getDefault('number', options.maxSize, 1);
     this.m = getDefault('function', options.matchesKey, this.e);
-    this.o = getDefault('function', options.onCache);
     this.p = getDefault('boolean', options.async, false);
 
     this.c = !!transformKey || options.matchesKey === this.m;
@@ -43,77 +47,34 @@ export class Cache<Fn extends (...args: any[]) => any>
     }
   }
 
-  get size() {
-    return this.s;
-  }
+  off<Type extends CacheEventType>(
+    type: Type,
+    listener: CacheEventListener<Type, Fn>,
+  ): void {
+    const emitter = this.og(type);
 
-  clear(): void {
-    this.h = this.t = null;
-    this.s = 0;
-  }
-
-  delete(key: Key): boolean {
-    const node = this.g(key);
-
-    if (!node) {
-      return false;
-    }
-
-    this.d(node);
-    this.o && this.o({ cache: this, entry: getEntry(node), type: 'delete' });
-
-    return true;
-  }
-
-  get(key: Key): ReturnType<Fn> | undefined {
-    const node = this.g(key);
-
-    return node && node.v;
-  }
-
-  has(key: Key): boolean {
-    return !!this.g(key);
-  }
-
-  hydrate(entries: Array<CacheEntry<Fn>>): void {
-    for (let index = 0, length = entries.length; index < length; ++index) {
-      const entry = entries[index]!;
-
-      const existingNode = this.g(entry.key);
-
-      if (existingNode) {
-        existingNode.v = entry.value;
-
-        if (existingNode !== this.h) {
-          this.u(existingNode);
-        }
-      } else {
-        this.n(entry.key, entry.value);
-      }
+    if (emitter) {
+      emitter.r(listener);
+      !emitter.s && this.os(type, null);
     }
   }
 
-  set(key: Key, value: ReturnType<Fn>): CacheNode<Fn> {
-    const existingNode = this.g(key);
+  on<
+    Type extends CacheEventType,
+    Listener extends CacheEventListener<Type, Fn>,
+  >(type: Type, listener: Listener): Listener {
+    const emitter = this.og(type);
 
-    if (!existingNode) {
-      const node = this.n(key, value);
+    if (!emitter) {
+      // @ts-expect-error - Narrow typing of map sees listeners differently
+      emitter = new EventEmitter<Type, Fn>(type);
 
-      this.o && this.o({ cache: this, entry: getEntry(node), type: 'add' });
-
-      return node;
+      this.os(type, emitter);
     }
 
-    existingNode.v = value;
+    emitter.a(listener);
 
-    if (existingNode !== this.h) {
-      this.u(existingNode);
-    }
-
-    this.o &&
-      this.o({ cache: this, entry: getEntry(existingNode), type: 'update' });
-
-    return existingNode;
+    return listener;
   }
 
   snapshot(): CacheSnapshot<Fn> {
@@ -201,21 +162,23 @@ export class Cache<Fn extends (...args: any[]) => any>
     if (this.p) {
       node.v = value.then(
         (value: any) => {
-          this.o &&
-            this.has(key) &&
-            this.o({
+          this.ou &&
+            this.g(node.k) &&
+            this.ou.n({
               cache: this,
               entry: getEntry(node),
               reason: 'resolved',
               type: 'update',
             });
+
           return value;
         },
         (error: Error) => {
-          if (this.has(key)) {
+          if (this.g(key)) {
             this.d(node);
-            this.o &&
-              this.o({
+
+            this.od &&
+              this.od.n({
                 cache: this,
                 entry: getEntry(node),
                 reason: 'rejected',
@@ -238,8 +201,9 @@ export class Cache<Fn extends (...args: any[]) => any>
 
     if (++this.s > this.l && prevTail) {
       this.d(prevTail);
-      this.o &&
-        this.o({
+
+      this.od &&
+        this.od.n({
           cache: this,
           entry: getEntry(prevTail),
           reason: 'evicted',
@@ -248,6 +212,41 @@ export class Cache<Fn extends (...args: any[]) => any>
     }
 
     return node;
+  }
+
+  og(type: CacheEventType): EventEmitter<CacheEventType, Fn> | null {
+    if (type === 'add') {
+      return this.oa;
+    }
+
+    if (type === 'delete') {
+      return this.od;
+    }
+
+    if (type === 'hit') {
+      return this.oh;
+    }
+
+    if (type === 'update') {
+      return this.ou;
+    }
+
+    return null;
+  }
+
+  os(
+    type: CacheEventType,
+    emitter: EventEmitter<CacheEventType, Fn> | null,
+  ): void {
+    if (type === 'add') {
+      this.oa = emitter;
+    } else if (type === 'delete') {
+      this.od = emitter;
+    } else if (type === 'hit') {
+      this.oh = emitter;
+    } else if (type === 'update') {
+      this.ou = emitter;
+    }
   }
 
   u(node: CacheNode<Fn>): void {

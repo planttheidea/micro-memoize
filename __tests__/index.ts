@@ -307,87 +307,114 @@ describe('memoize', () => {
     }
   });
 
-  it('will fire the onCache method passed with the cache when it is added to', () => {
+  it('will fire the cache event method passed with the cache when it is added, hit, and updated', () => {
     const fn = (one: string, two: string) => ({ one, two });
-    const onCache = jest.fn();
 
-    const memoized = memoize(fn, { onCache });
-
-    expect(memoized.options.onCache).toBe(onCache);
-
-    memoized('foo', 'bar');
-
-    expect(onCache).toHaveBeenCalledTimes(1);
-    expect(onCache).toHaveBeenCalledWith({
-      cache: memoized.cache,
-      entry: { key: ['foo', 'bar'], value: { one: 'foo', two: 'bar' } },
-      type: 'add',
-    });
-  });
-
-  it('will fire the onCache method passed with the cache when it is added, hit, and updated', () => {
-    const fn = (one: string, two: string) => ({ one, two });
-    const onCache = jest.fn();
+    const onAdd = jest.fn();
+    const onDelete = jest.fn();
+    const onHit = jest.fn();
+    const onUpdate = jest.fn();
     const maxSize = 2;
 
-    const memoized = memoize(fn, {
-      maxSize,
-      onCache,
-    });
+    const memoized = memoize(fn, { maxSize });
 
-    expect(memoized.options.onCache).toBe(onCache);
+    memoized.cache.on('add', onAdd);
+    memoized.cache.on('delete', onDelete);
+    memoized.cache.on('hit', onHit);
+    memoized.cache.on('update', onUpdate);
 
     memoized('foo', 'bar');
 
-    expect(onCache).toHaveBeenCalledTimes(1);
-    expect(onCache).toHaveBeenCalledWith({
+    expect(onAdd).toHaveBeenCalledTimes(1);
+    expect(onDelete).not.toHaveBeenCalled();
+    expect(onHit).not.toHaveBeenCalled();
+    expect(onUpdate).not.toHaveBeenCalled();
+
+    expect(onAdd).toHaveBeenCalledWith({
       cache: memoized.cache,
       entry: { key: ['foo', 'bar'], value: { one: 'foo', two: 'bar' } },
       type: 'add',
     });
 
-    onCache.mockReset();
+    onAdd.mockReset();
 
     memoized('bar', 'foo');
 
-    expect(onCache).toHaveBeenCalledTimes(1);
-    expect(onCache).toHaveBeenCalledWith({
+    expect(onAdd).toHaveBeenCalledTimes(1);
+    expect(onDelete).not.toHaveBeenCalled();
+    expect(onHit).not.toHaveBeenCalled();
+    expect(onUpdate).not.toHaveBeenCalled();
+
+    expect(onAdd).toHaveBeenCalledWith({
       cache: memoized.cache,
       entry: { key: ['bar', 'foo'], value: { one: 'bar', two: 'foo' } },
       type: 'add',
     });
 
-    onCache.mockReset();
+    onAdd.mockReset();
 
     memoized('bar', 'foo');
 
-    expect(onCache).toHaveBeenCalledTimes(1);
-    expect(onCache).toHaveBeenCalledWith({
+    expect(onAdd).not.toHaveBeenCalled();
+    expect(onDelete).not.toHaveBeenCalled();
+    expect(onHit).toHaveBeenCalledTimes(1);
+    expect(onUpdate).not.toHaveBeenCalled();
+
+    expect(onHit).toHaveBeenCalledWith({
       cache: memoized.cache,
       entry: { key: ['bar', 'foo'], value: { one: 'bar', two: 'foo' } },
       type: 'hit',
     });
 
-    onCache.mockReset();
+    onHit.mockReset();
 
     memoized('foo', 'bar');
 
-    expect(onCache).toHaveBeenCalledTimes(1);
-    expect(onCache).toHaveBeenCalledWith({
+    expect(onAdd).not.toHaveBeenCalled();
+    expect(onDelete).not.toHaveBeenCalled();
+    expect(onHit).not.toHaveBeenCalled();
+    expect(onUpdate).toHaveBeenCalledTimes(1);
+
+    expect(onUpdate).toHaveBeenCalledWith({
       cache: memoized.cache,
       entry: { key: ['foo', 'bar'], value: { one: 'foo', two: 'bar' } },
       type: 'update',
     });
 
-    onCache.mockReset();
+    onUpdate.mockReset();
 
     memoized('foo', 'bar');
 
-    expect(onCache).toHaveBeenCalledTimes(1);
-    expect(onCache).toHaveBeenCalledWith({
+    expect(onAdd).not.toHaveBeenCalled();
+    expect(onDelete).not.toHaveBeenCalled();
+    expect(onHit).toHaveBeenCalledTimes(1);
+    expect(onUpdate).not.toHaveBeenCalled();
+
+    expect(onHit).toHaveBeenCalledWith({
       cache: memoized.cache,
       entry: { key: ['foo', 'bar'], value: { one: 'foo', two: 'bar' } },
       type: 'hit',
+    });
+
+    onHit.mockReset();
+
+    memoized('bar', 'baz');
+
+    expect(onAdd).toHaveBeenCalledTimes(1);
+    expect(onDelete).toHaveBeenCalledTimes(1);
+    expect(onHit).not.toHaveBeenCalled();
+    expect(onUpdate).not.toHaveBeenCalled();
+
+    expect(onAdd).toHaveBeenCalledWith({
+      cache: memoized.cache,
+      entry: { key: ['bar', 'baz'], value: { one: 'bar', two: 'baz' } },
+      type: 'add',
+    });
+    expect(onDelete).toHaveBeenCalledWith({
+      cache: memoized.cache,
+      entry: { key: ['bar', 'foo'], value: { one: 'bar', two: 'foo' } },
+      reason: 'evicted',
+      type: 'delete',
     });
   });
 
@@ -628,78 +655,97 @@ describe('memoize', () => {
 
     it('matches for option `onCache`', () => {
       const fn = (one: string, two: string) => [one, two];
-      const options = {
-        maxSize: 2,
-        onCache: jest.fn(),
-      };
+      const options = { maxSize: 2 };
+
+      const onAdd = jest.fn();
+      const onHit = jest.fn();
+      const onUpdate = jest.fn();
 
       const memoized = memoize(fn, options);
+
+      memoized.cache.on('add', onAdd);
+      memoized.cache.on('hit', onHit);
+      memoized.cache.on('update', onUpdate);
 
       memoized('foo', 'bar'); // cache has been added to
       memoized('foo', 'bar');
       memoized('foo', 'bar');
 
-      expect(options.onCache).toHaveBeenCalledTimes(3);
-      expect(options.onCache).toHaveBeenNthCalledWith(1, {
+      expect(onAdd).toHaveBeenCalledTimes(1);
+      expect(onAdd).toHaveBeenCalledWith({
         cache: memoized.cache,
         entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
         type: 'add',
       });
-      expect(options.onCache).toHaveBeenNthCalledWith(2, {
+
+      expect(onHit).toHaveBeenCalledTimes(2);
+      expect(onHit).toHaveBeenNthCalledWith(1, {
         cache: memoized.cache,
         entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
         type: 'hit',
       });
-      expect(options.onCache).toHaveBeenNthCalledWith(3, {
+      expect(onHit).toHaveBeenNthCalledWith(2, {
         cache: memoized.cache,
         entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
         type: 'hit',
       });
 
-      options.onCache.mockClear();
+      expect(onUpdate).not.toHaveBeenCalled();
+
+      onAdd.mockClear();
+      onHit.mockClear();
 
       memoized('bar', 'foo');
       memoized('bar', 'foo');
       memoized('bar', 'foo');
 
-      expect(options.onCache).toHaveBeenCalledTimes(3);
-      expect(options.onCache).toHaveBeenNthCalledWith(1, {
+      expect(onAdd).toHaveBeenCalledTimes(1);
+      expect(onAdd).toHaveBeenCalledWith({
         cache: memoized.cache,
         entry: { key: ['bar', 'foo'], value: ['bar', 'foo'] },
         type: 'add',
       });
-      expect(options.onCache).toHaveBeenNthCalledWith(2, {
+
+      expect(onHit).toHaveBeenCalledTimes(2);
+      expect(onHit).toHaveBeenNthCalledWith(1, {
         cache: memoized.cache,
         entry: { key: ['bar', 'foo'], value: ['bar', 'foo'] },
         type: 'hit',
       });
-      expect(options.onCache).toHaveBeenNthCalledWith(3, {
+      expect(onHit).toHaveBeenNthCalledWith(2, {
         cache: memoized.cache,
         entry: { key: ['bar', 'foo'], value: ['bar', 'foo'] },
         type: 'hit',
       });
 
-      options.onCache.mockClear();
+      expect(onUpdate).not.toHaveBeenCalled();
+
+      onAdd.mockClear();
+      onHit.mockClear();
 
       memoized('foo', 'bar');
       memoized('foo', 'bar');
       memoized('foo', 'bar');
 
-      expect(options.onCache).toHaveBeenCalledTimes(3);
-      expect(options.onCache).toHaveBeenNthCalledWith(1, {
+      expect(onAdd).not.toHaveBeenCalled();
+
+      expect(onHit).toHaveBeenCalledTimes(2);
+      expect(onHit).toHaveBeenNthCalledWith(1, {
+        cache: memoized.cache,
+        entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        type: 'hit',
+      });
+      expect(onHit).toHaveBeenNthCalledWith(2, {
+        cache: memoized.cache,
+        entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        type: 'hit',
+      });
+
+      expect(onUpdate).toHaveBeenCalledTimes(1);
+      expect(onUpdate).toHaveBeenCalledWith({
         cache: memoized.cache,
         entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
         type: 'update',
-      });
-      expect(options.onCache).toHaveBeenNthCalledWith(2, {
-        cache: memoized.cache,
-        entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
-        type: 'hit',
-      });
-      expect(options.onCache).toHaveBeenNthCalledWith(3, {
-        cache: memoized.cache,
-        entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
-        type: 'hit',
       });
     });
 
