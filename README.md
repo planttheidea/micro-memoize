@@ -18,12 +18,17 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
     - [maxSize](#maxsize)
     - [transformKey](#transformkey)
   - [Cache](#cache)
-    - [Clearance](#clearance)
     - [Cache events](#cache-events)
       - [New entry added](#new-entry-added)
-    - [Existing entry deleted](#existing-entry-deleted)
-    - [Most recently used entry found](#most-recently-used-entry-found)
-    - [Existing entry found (not most recent)](#existing-entry-found-not-most-recent)
+      - [Existing entry deleted](#existing-entry-deleted)
+      - [Most recently used entry found](#most-recently-used-entry-found)
+      - [Existing entry found (not most recent)](#existing-entry-found-not-most-recent)
+    - [Cache manipulation](#cache-manipulation)
+      - [`clear`](#clear)
+      - [`delete`](#delete)
+      - [`get`](#get)
+      - [`has`](#has)
+      - [`set`](#set)
     - [Cache snapshots](#cache-snapshots)
   - [Additional propeties](#additional-propeties)
     - [memoized.fn](#memoizedfn)
@@ -40,7 +45,7 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
 
 ## Summary
 
-As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1.32kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
+As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1.41kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
 
 ## Importing
 
@@ -298,17 +303,6 @@ console.log(memoized('one', () => {})); // pulled from cache, ['one', () => {}]
 
 Access to the cache memoized function's internal cache is available at `memoized.cache`. It is not recommended to mutate the internals, however there are some exposed methods that can be used for additional capabilities.
 
-### Clearance
-
-If you want to clear out the existing cache:
-
-```ts
-const fn = (one: string, two: string) => [one, two];
-const memoized = memoize(fn);
-
-memoized.cache.clear();
-```
-
 ### Cache events
 
 Listeners to cache change events can be dynamically added to and removed from the cache for the memoized function.
@@ -365,9 +359,9 @@ memoized('foo', 'bar');
 memoized('foo', 'bar');
 ```
 
-### Existing entry deleted
+#### Existing entry deleted
 
-### Most recently used entry found
+#### Most recently used entry found
 
 ```ts
 const fn = (one: string, two: string) => [one, two];
@@ -390,7 +384,7 @@ memoized('foo', 'bar'); // cache was hit
 memoized('foo', 'bar'); // cache was hit
 ```
 
-### Existing entry found (not most recent)
+#### Existing entry found (not most recent)
 
 ```ts
 const fn = (one: string, two: string) => [one, two];
@@ -415,6 +409,78 @@ memoized('foo', 'bar');
 memoized('bar', 'foo'); // cache entry updated
 memoized('bar', 'foo');
 memoized('bar', 'foo');
+```
+
+### Cache manipulation
+
+#### `clear`
+
+If you want to clear out the existing cache:
+
+```ts
+const fn = (one: string, two: string) => [one, two];
+const memoized = memoize(fn);
+
+memoized.cache.clear();
+```
+
+#### `delete`
+
+If you want to delete an existing entry in the cache:
+
+```ts
+const fn = (one: string, two: string) => one + two;
+const memoized = memoize(fn);
+
+memoized('foo', 'bar');
+
+console.log(memoized.cache.get(['foo', 'bar'])); // 'foobar'
+
+memoized.cache.delete(['foo', 'bar']);
+
+console.log(memoized.cache.get(['foo', 'bar'])); // undefined
+```
+
+#### `get`
+
+If you want to get a value at an existing key in the cache:
+
+```ts
+const fn = (one: string, two: string) => one + two;
+const memoized = memoize(fn);
+
+memoized('foo', 'bar');
+
+console.log(memoized.cache.get(['foo', 'bar'])); // 'foobar'
+```
+
+Returns `undefined` if the key is not found.
+
+#### `has`
+
+If you want to determine if a key exists in the cache:
+
+```ts
+const fn = (one: string, two: string) => one + two;
+const memoized = memoize(fn);
+
+memoized('foo', 'bar');
+
+console.log(memoized.cache.get(['foo', 'bar'])); // true
+console.log(memoized.cache.get(['bar', 'baz'])); // false
+```
+
+#### `set`
+
+If you want to set a value at a key in the cache:
+
+```ts
+const fn = (one: string, two: string) => one + two;
+const memoized = memoize(fn);
+
+memoized.cache.set(['foo', 'bar'], 'foobar');
+
+console.log(memoized.cache.get(['foo', 'bar'])); // 'foobar'
 ```
 
 ### Cache snapshots

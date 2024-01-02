@@ -139,6 +139,9 @@ export class Cache<Fn extends (...args: any[]) => any> {
   constructor(options: Options<Fn>);
 
   clear(): void;
+  delete(key: Key): boolean;
+  get(key: Key): ReturnType<Fn> | undefined;
+  has(key: Key): boolean;
   off<
     Type extends CacheEventType,
     Listener extends CacheEventListener<Type, Fn>,
@@ -147,6 +150,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
     Type extends CacheEventType,
     Listener extends CacheEventListener<Type, Fn>,
   >(type: Type, listener: Listener): Listener;
+  set(key: Key, value: ReturnType<Fn>): void;
   snapshot(): CacheSnapshot<Fn>;
 
   d(node: CacheNode<Fn>): void;

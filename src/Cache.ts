@@ -54,6 +54,30 @@ export class Cache<Fn extends (...args: any[]) => any>
     this.s = 0;
   }
 
+  delete(key: Key): boolean {
+    const node = this.g(key);
+
+    if (!node) {
+      return false;
+    }
+
+    this.d(node);
+    this.od &&
+      this.od.n({ cache: this, entry: getEntry(node), type: 'delete' });
+
+    return true;
+  }
+
+  get(key: Key): ReturnType<Fn> | undefined {
+    const node = this.g(key);
+
+    return node && node.v;
+  }
+
+  has(key: Key): boolean {
+    return !!this.g(key);
+  }
+
   off<Type extends CacheEventType>(
     type: Type,
     listener: CacheEventListener<Type, Fn>,
@@ -82,6 +106,29 @@ export class Cache<Fn extends (...args: any[]) => any>
     emitter.a(listener);
 
     return listener;
+  }
+
+  set(key: Key, value: ReturnType<Fn>): CacheNode<Fn> {
+    const existingNode = this.g(key);
+
+    if (!existingNode) {
+      const node = this.n(key, value);
+
+      this.oa && this.oa.n({ cache: this, entry: getEntry(node), type: 'add' });
+
+      return node;
+    }
+
+    existingNode.v = value;
+
+    if (existingNode !== this.h) {
+      this.u(existingNode);
+    }
+
+    this.ou &&
+      this.ou.n({ cache: this, entry: getEntry(existingNode), type: 'update' });
+
+    return existingNode;
   }
 
   snapshot(): CacheSnapshot<Fn> {
