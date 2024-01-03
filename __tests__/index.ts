@@ -973,4 +973,162 @@ describe('memoize', () => {
       expect(ignoreFunctionArg).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('cache mutation methods', () => {
+    it('should allow getting values in cache', () => {
+      const fn = jest.fn((one: string, two: string) => one + two);
+      const memoized = memoize(fn);
+
+      memoized('foo', 'bar');
+
+      expect(memoized.cache.get(['foo', 'bar'])).toBe('foobar');
+      expect(memoized.cache.get(['bar', 'baz'])).toBe(undefined);
+    });
+
+    it('should correctly identify entries in cache', () => {
+      const fn = jest.fn((one: string, two: string) => one + two);
+      const memoized = memoize(fn);
+
+      memoized('foo', 'bar');
+
+      expect(memoized.cache.has(['foo', 'bar'])).toBe(true);
+      expect(memoized.cache.has(['bar', 'baz'])).toBe(false);
+    });
+
+    it('should allow adding values to cache', () => {
+      const fn = jest.fn((one: string, two: string) => one + two);
+      const memoized = memoize(fn);
+
+      expect(memoized.cache.snapshot()).toEqual({ entries: [], size: 0 });
+
+      memoized.cache.set(['foo', 'bar'], 'foobar');
+
+      expect(memoized.cache.snapshot()).toEqual({
+        entries: [{ key: ['foo', 'bar'], value: 'foobar' }],
+        size: 1,
+      });
+
+      expect(memoized.cache.get(['foo', 'bar'])).toBe('foobar');
+
+      memoized('foo', 'bar');
+
+      expect(fn).not.toHaveBeenCalled();
+    });
+
+    it('should allow updating values in cache', () => {
+      const fn = jest.fn((one: string, two: string) => one + two);
+      const memoized = memoize(fn);
+
+      memoized('foo', 'bar');
+
+      fn.mockClear();
+
+      expect(memoized.cache.snapshot()).toEqual({
+        entries: [{ key: ['foo', 'bar'], value: 'foobar' }],
+        size: 1,
+      });
+
+      memoized.cache.set(['foo', 'bar'], 'OVERRIDE');
+
+      expect(memoized.cache.snapshot()).toEqual({
+        entries: [{ key: ['foo', 'bar'], value: 'OVERRIDE' }],
+        size: 1,
+      });
+
+      expect(memoized.cache.get(['foo', 'bar'])).toBe('OVERRIDE');
+
+      memoized('foo', 'bar');
+
+      expect(fn).not.toHaveBeenCalled();
+    });
+
+    it('should allow updating older values in cache', () => {
+      const fn = jest.fn((one: string, two: string) => one + two);
+      const memoized = memoize(fn, { maxSize: 2 });
+
+      memoized('foo', 'bar');
+      memoized('bar', 'baz');
+
+      fn.mockClear();
+
+      expect(memoized.cache.snapshot()).toEqual({
+        entries: [
+          { key: ['bar', 'baz'], value: 'barbaz' },
+          { key: ['foo', 'bar'], value: 'foobar' },
+        ],
+        size: 2,
+      });
+
+      memoized.cache.set(['foo', 'bar'], 'OVERRIDE');
+
+      expect(memoized.cache.snapshot()).toEqual({
+        entries: [
+          { key: ['foo', 'bar'], value: 'OVERRIDE' },
+          { key: ['bar', 'baz'], value: 'barbaz' },
+        ],
+        size: 2,
+      });
+
+      expect(memoized.cache.get(['foo', 'bar'])).toBe('OVERRIDE');
+
+      memoized('foo', 'bar');
+
+      expect(fn).not.toHaveBeenCalled();
+    });
+
+    it('allows deleting values in cache', () => {
+      const fn = jest.fn((one: string, two: string) => one + two);
+      const memoized = memoize(fn);
+
+      memoized.cache.set(['foo', 'bar'], 'foobar');
+
+      expect(memoized.cache.snapshot()).toEqual({
+        entries: [{ key: ['foo', 'bar'], value: 'foobar' }],
+        size: 1,
+      });
+
+      const result = memoized.cache.delete(['foo', 'bar']);
+
+      expect(result).toBe(true);
+
+      expect(memoized.cache.snapshot()).toEqual({ entries: [], size: 0 });
+    });
+
+    it('returns false when deleting an item that does not exist', () => {
+      const fn = jest.fn((one: string, two: string) => one + two);
+      const memoized = memoize(fn);
+
+      memoized.cache.set(['foo', 'bar'], 'foobar');
+
+      expect(memoized.cache.delete(['bar', 'baz'])).toBe(false);
+
+      const result = memoized.cache.delete(['foo', 'bar']);
+
+      expect(result).toBe(true);
+
+      expect(memoized.cache.delete(['foo', 'bar'])).toBe(false);
+    });
+
+    it('allows clearing cache', () => {
+      const fn = jest.fn((one: string, two: string) => one + two);
+      const memoized = memoize(fn, { maxSize: 3 });
+
+      memoized('foo', 'bar');
+      memoized('bar', 'baz');
+      memoized('baz', 'quz');
+
+      expect(memoized.cache.snapshot()).toEqual({
+        entries: [
+          { key: ['baz', 'quz'], value: 'bazquz' },
+          { key: ['bar', 'baz'], value: 'barbaz' },
+          { key: ['foo', 'bar'], value: 'foobar' },
+        ],
+        size: 3,
+      });
+
+      memoized.cache.clear();
+
+      expect(memoized.cache.snapshot()).toEqual({ entries: [], size: 0 });
+    });
+  });
 });
