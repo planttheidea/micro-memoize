@@ -111,20 +111,24 @@ export class Cache<Fn extends (...args: any[]) => any>
   set(key: Key, value: ReturnType<Fn>): CacheNode<Fn> {
     const existingNode = this.g(key);
 
-    if (!existingNode) {
-      const node = this.n(key, value);
+    if (existingNode) {
+      existingNode.v = value;
 
-      this.oa && this.oa.n({ cache: this, entry: getEntry(node), type: 'add' });
+      this.ou &&
+        this.ou.n({
+          cache: this,
+          entry: getEntry(existingNode),
+          type: 'update',
+        });
 
-      return node;
+      return existingNode;
     }
 
-    existingNode.v = value;
+    const node = this.n(key, value);
 
-    this.ou &&
-      this.ou.n({ cache: this, entry: getEntry(existingNode), type: 'update' });
+    this.oa && this.oa.n({ cache: this, entry: getEntry(node), type: 'add' });
 
-    return existingNode;
+    return node;
   }
 
   snapshot(): CacheSnapshot<Fn> {
