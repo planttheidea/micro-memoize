@@ -121,10 +121,6 @@ export class Cache<Fn extends (...args: any[]) => any>
 
     existingNode.v = value;
 
-    if (existingNode !== this.h) {
-      this.u(existingNode);
-    }
-
     this.ou &&
       this.ou.n({ cache: this, entry: getEntry(existingNode), type: 'update' });
 
