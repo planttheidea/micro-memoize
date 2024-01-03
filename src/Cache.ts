@@ -71,7 +71,13 @@ export class Cache<Fn extends (...args: any[]) => any>
   get(key: Key): ReturnType<Fn> | undefined {
     const node = this.g(key);
 
-    return node && node.v;
+    if (!node) {
+      return;
+    }
+
+    node !== this.h && this.u(node);
+
+    return node.v;
   }
 
   has(key: Key): boolean {
@@ -99,7 +105,6 @@ export class Cache<Fn extends (...args: any[]) => any>
     if (!emitter) {
       // @ts-expect-error - Narrow typing of map sees listeners differently
       emitter = new EventEmitter<Type, Fn>(type);
-
       this.os(type, emitter);
     }
 
@@ -109,22 +114,24 @@ export class Cache<Fn extends (...args: any[]) => any>
   }
 
   set(key: Key, value: ReturnType<Fn>): CacheNode<Fn> {
-    const existingNode = this.g(key);
+    let node = this.g(key);
 
-    if (existingNode) {
-      existingNode.v = value;
+    if (node) {
+      node.v = value;
+
+      node !== this.h && this.u(node);
 
       this.ou &&
         this.ou.n({
           cache: this,
-          entry: getEntry(existingNode),
+          entry: getEntry(node),
           type: 'update',
         });
 
-      return existingNode;
+      return node;
     }
 
-    const node = this.n(key, value);
+    node = this.n(key, value);
 
     this.oa && this.oa.n({ cache: this, entry: getEntry(node), type: 'add' });
 
@@ -200,7 +207,6 @@ export class Cache<Fn extends (...args: any[]) => any>
 
     while (cached) {
       if (this.m(cached.k, key)) {
-        this.u(cached);
         return cached;
       }
 

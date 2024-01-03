@@ -27,17 +27,19 @@ export default function memoize<Fn extends (...args: any[]) => any>(
   const cache = new Cache(passedOptions);
 
   const memoized: Memoized<Fn> = function memoized(this: any) {
-    const { h: prevHead, k: transformKey } = cache;
+    const { h: head, k: transformKey } = cache;
     const key: Key = transformKey
       ? transformKey(arguments)
       : (arguments as unknown as Key);
     let node = cache.g(key);
 
     if (node) {
-      if (cache.oh && node === prevHead) {
+      if (node !== head) {
+        cache.u(node);
+        cache.ou &&
+          cache.ou.n({ cache, entry: getEntry(node), type: 'update' });
+      } else if (cache.oh) {
         cache.oh.n({ cache, entry: getEntry(node), type: 'hit' });
-      } else if (cache.ou && node !== prevHead) {
-        cache.ou.n({ cache, entry: getEntry(node), type: 'update' });
       }
     } else {
       node = cache.n(
