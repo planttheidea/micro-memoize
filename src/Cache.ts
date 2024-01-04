@@ -60,7 +60,7 @@ export class Cache<Fn extends (...args: any[]) => any>
   }
 
   delete(key: Key): boolean {
-    const node = this.g(this.k ? this.k(key) : key);
+    const node = this.gt(key);
 
     if (!node) {
       return false;
@@ -73,7 +73,7 @@ export class Cache<Fn extends (...args: any[]) => any>
   }
 
   get(key: Key): ReturnType<Fn> | undefined {
-    const node = this.g(this.k ? this.k(key) : key);
+    const node = this.gt(key);
 
     if (!node) {
       return;
@@ -117,7 +117,7 @@ export class Cache<Fn extends (...args: any[]) => any>
   }
 
   set(key: Key, value: ReturnType<Fn>): CacheNode<Fn> {
-    let node = this.g(this.k ? this.k(key) : key);
+    let node = this.gt(key);
 
     if (node) {
       node.v = value;
@@ -212,6 +212,10 @@ export class Cache<Fn extends (...args: any[]) => any>
 
       node = node.n;
     }
+  }
+
+  gt(key: Key): CacheNode<Fn> | undefined {
+    return this.g(this.k ? this.k(key) : key);
   }
 
   n(key: Key, value: ReturnType<Fn>): CacheNode<Fn> {
