@@ -15,11 +15,12 @@ export interface CacheEntry<Fn extends (...args: any[]) => any> {
 }
 
 export type CacheEventType = 'add' | 'delete' | 'hit' | 'update';
+export type CacheEventReason = 'evicted' | 'rejected' | 'resolved';
 
 interface CacheEventBase<Fn extends (...args: any[]) => any> {
   cache: Cache<Fn>;
   entry: CacheEntry<Fn>;
-  reason?: 'evicted' | 'rejected' | 'resolved';
+  reason?: CacheEventReason;
   type: CacheEventType;
 }
 
@@ -118,7 +119,7 @@ export class EventEmitter<
   constructor(type: Type);
 
   a(listener: CacheEventListener<Type, Fn>): void;
-  n(event: CacheEvent<Type, Fn>): void;
+  n(node: CacheNode<Fn>, reason?: CacheEventReason): void;
   r(listener: CacheEventListener<Type, Fn>): void;
 }
 
@@ -134,10 +135,10 @@ export class Cache<Fn extends (...args: any[]) => any> {
   s: number;
   t: CacheNode<Fn> | null;
 
-  static createEventEmitter: () => EventEmitter<
-    CacheEventType,
-    (...args: any[]) => any
-  >;
+  static createEventEmitter: (
+    cache: Cache<any>,
+    node: CacheNode<any>,
+  ) => EventEmitter<CacheEventType, any>;
 
   constructor(options: Options<Fn>);
 

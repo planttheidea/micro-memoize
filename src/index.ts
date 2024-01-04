@@ -1,6 +1,6 @@
 import type { Key, Memoized, Options } from '../index.d';
 import { Cache } from './Cache';
-import { cloneKey, getEntry, isMemoized } from './utils';
+import { cloneKey, isMemoized } from './utils';
 
 export default function memoize<Fn extends (...args: any[]) => any>(
   fn: Fn,
@@ -34,10 +34,10 @@ export default function memoize<Fn extends (...args: any[]) => any>(
     let node = cache.g(key);
 
     if (node === head) {
-      cache.oh && cache.oh.n({ cache, entry: getEntry(node), type: 'hit' });
+      cache.oh && cache.oh.n(node);
     } else if (node) {
       cache.u(node);
-      cache.ou && cache.ou.n({ cache, entry: getEntry(node), type: 'update' });
+      cache.ou && cache.ou.n(node);
     } else {
       node = cache.n(
         transformKey ? key : cloneKey(key),
@@ -45,7 +45,7 @@ export default function memoize<Fn extends (...args: any[]) => any>(
         fn.apply(this, arguments),
       );
 
-      cache.oa && cache.oa.n({ cache, entry: getEntry(node), type: 'add' });
+      cache.oa && cache.oa.n(node);
     }
 
     return node.v;

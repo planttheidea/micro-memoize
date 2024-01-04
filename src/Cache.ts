@@ -67,8 +67,7 @@ export class Cache<Fn extends (...args: any[]) => any>
     }
 
     this.d(node);
-    this.od &&
-      this.od.n({ cache: this, entry: getEntry(node), type: 'delete' });
+    this.od && this.od.n(node);
 
     return true;
   }
@@ -105,11 +104,10 @@ export class Cache<Fn extends (...args: any[]) => any>
     Type extends CacheEventType,
     Listener extends CacheEventListener<Type, Fn>,
   >(type: Type, listener: Listener): Listener {
-    const emitter = this.og(type);
+    let emitter = this.og(type);
 
     if (!emitter) {
-      // @ts-expect-error - Narrow typing of map sees listeners differently
-      emitter = createEventEmitter<Type, Fn>(type);
+      emitter = createEventEmitter<Type, Fn>(this, type);
       this.os(type, emitter);
     }
 
@@ -126,19 +124,14 @@ export class Cache<Fn extends (...args: any[]) => any>
 
       node !== this.h && this.u(node);
 
-      this.ou &&
-        this.ou.n({
-          cache: this,
-          entry: getEntry(node),
-          type: 'update',
-        });
+      this.ou && this.ou.n(node);
 
       return node;
     }
 
     node = this.n(key, value);
 
-    this.oa && this.oa.n({ cache: this, entry: getEntry(node), type: 'add' });
+    this.oa && this.oa.n(node);
 
     return node;
   }
@@ -229,14 +222,7 @@ export class Cache<Fn extends (...args: any[]) => any>
     if (this.p) {
       node.v = value.then(
         (value: any) => {
-          this.ou &&
-            this.g(node.k) &&
-            this.ou.n({
-              cache: this,
-              entry: getEntry(node),
-              reason: 'resolved',
-              type: 'update',
-            });
+          this.ou && this.g(node.k) && this.ou.n(node, 'resolved');
 
           return value;
         },
@@ -244,13 +230,7 @@ export class Cache<Fn extends (...args: any[]) => any>
           if (this.g(key)) {
             this.d(node);
 
-            this.od &&
-              this.od.n({
-                cache: this,
-                entry: getEntry(node),
-                reason: 'rejected',
-                type: 'delete',
-              });
+            this.od && this.od.n(node, 'rejected');
           }
 
           throw error;
@@ -268,14 +248,7 @@ export class Cache<Fn extends (...args: any[]) => any>
 
     if (++this.s > this.l && prevTail) {
       this.d(prevTail);
-
-      this.od &&
-        this.od.n({
-          cache: this,
-          entry: getEntry(prevTail),
-          reason: 'evicted',
-          type: 'delete',
-        });
+      this.od && this.od.n(prevTail, 'evicted');
     }
 
     return node;

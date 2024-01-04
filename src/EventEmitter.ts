@@ -1,14 +1,18 @@
+import { getEntry } from './utils';
 import type {
+  Cache as CacheType,
   CacheEvent,
   CacheEventListener,
+  CacheEventReason,
   CacheEventType,
+  CacheNode,
   EventEmitter,
 } from '../index.d';
 
 export function createEventEmitter<
   Type extends CacheEventType,
   Fn extends (...args: any[]) => any,
->(): EventEmitter<Type, Fn> {
+>(cache: CacheType<Fn>, type: Type): EventEmitter<Type, Fn> {
   const listeners: Array<CacheEventListener<Type, Fn>> = [];
 
   return {
@@ -21,9 +25,14 @@ export function createEventEmitter<
       }
     },
 
-    n(event: CacheEvent<Type, Fn>): void {
+    n(node: CacheNode<Fn>, reason?: CacheEventReason): void {
       for (let index = 0, length = this.s; index < length; ++index) {
-        listeners[index]!(event);
+        listeners[index]!({
+          cache,
+          entry: getEntry(node),
+          reason,
+          type,
+        } as CacheEvent<Type, Fn>);
       }
     },
 
