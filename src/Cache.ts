@@ -2,12 +2,12 @@ import type {
   Arg,
   Cache as CacheType,
   CacheEntry,
+  CacheEventType,
+  CacheEventListener,
   CacheNode,
   CacheSnapshot,
   Key,
   Options,
-  CacheEventType,
-  CacheEventListener,
 } from '../index.d';
 import { EventEmitter } from './EventEmitter';
 import { cloneKey, getDefault, getEntry, isSameValueZero } from './utils';
@@ -21,7 +21,7 @@ export class Cache<Fn extends (...args: any[]) => any>
 
   a: (a: Arg, b: Arg) => boolean;
   h: CacheNode<Fn> | null = null;
-  k: ((args: IArguments) => Key) | undefined;
+  k: ((args: IArguments | Key) => Key) | undefined;
   m: (a: Key, b: Key) => boolean;
   oa: EventEmitter<'add', Fn> | null = null;
   od: EventEmitter<'delete', Fn> | null = null;
@@ -44,7 +44,7 @@ export class Cache<Fn extends (...args: any[]) => any>
 
     if (this.c) {
       this.k = transformKey
-        ? (args: IArguments) => transformKey(cloneKey<Fn>(args))
+        ? (args: IArguments | Key) => transformKey(cloneKey<Fn>(args))
         : cloneKey;
     }
   }
@@ -55,7 +55,7 @@ export class Cache<Fn extends (...args: any[]) => any>
   }
 
   delete(key: Key): boolean {
-    const node = this.g(key);
+    const node = this.g(this.k ? this.k(key) : key);
 
     if (!node) {
       return false;
@@ -69,7 +69,7 @@ export class Cache<Fn extends (...args: any[]) => any>
   }
 
   get(key: Key): ReturnType<Fn> | undefined {
-    const node = this.g(key);
+    const node = this.g(this.k ? this.k(key) : key);
 
     if (!node) {
       return;
@@ -114,7 +114,7 @@ export class Cache<Fn extends (...args: any[]) => any>
   }
 
   set(key: Key, value: ReturnType<Fn>): CacheNode<Fn> {
-    let node = this.g(key);
+    let node = this.g(this.k ? this.k(key) : key);
 
     if (node) {
       node.v = value;
@@ -191,26 +191,28 @@ export class Cache<Fn extends (...args: any[]) => any>
   }
 
   g(key: Key): CacheNode<Fn> | undefined {
-    if (!this.h) {
+    let node = this.h;
+
+    if (!node) {
       return;
     }
 
-    if (this.m(this.h.k, key)) {
-      return this.h;
+    if (this.m(node.k, key)) {
+      return node;
     }
 
     if (this.h === this.t) {
       return;
     }
 
-    let cached: CacheNode<Fn> | null = this.h.n;
+    node = node.n;
 
-    while (cached) {
-      if (this.m(cached.k, key)) {
-        return cached;
+    while (node) {
+      if (this.m(node.k, key)) {
+        return node;
       }
 
-      cached = cached.n;
+      node = node.n;
     }
   }
 

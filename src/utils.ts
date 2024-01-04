@@ -1,7 +1,7 @@
-import type { CacheEntry, CacheNode, Memoized, TypeOf } from '../index.d';
+import type { CacheEntry, CacheNode, Key, Memoized, TypeOf } from '../index.d';
 
 export function cloneKey<Fn extends (...args: any[]) => any>(
-  args: IArguments | Parameters<Fn>,
+  args: IArguments | Parameters<Fn> | Key,
 ): [...Parameters<Fn>] {
   const key = [] as unknown as Parameters<Fn>;
 

@@ -125,7 +125,7 @@ export class EventEmitter<
 export class Cache<Fn extends (...args: any[]) => any> {
   a: (a: Arg, b: Arg) => boolean;
   h: CacheNode<Fn> | null;
-  k: ((args: IArguments) => Key) | undefined;
+  k: ((args: IArguments | Key) => Key) | undefined;
   m: (a: Key, b: Key) => boolean;
   oa: EventEmitter<'add', Fn> | null;
   od: EventEmitter<'delete', Fn> | null;
