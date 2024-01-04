@@ -6,10 +6,11 @@ import type {
   CacheEventListener,
   CacheNode,
   CacheSnapshot,
+  EventEmitter,
   Key,
   Options,
 } from '../index.d';
-import { EventEmitter } from './EventEmitter';
+import { createEventEmitter } from './EventEmitter';
 import { cloneKey, getDefault, getEntry, isSameValueZero } from './utils';
 
 export class Cache<Fn extends (...args: any[]) => any>
@@ -30,7 +31,7 @@ export class Cache<Fn extends (...args: any[]) => any>
   s = 0;
   t: CacheNode<Fn> | null = null;
 
-  static EventEmitter = EventEmitter;
+  static createEventEmitter = createEventEmitter;
 
   constructor(options: Options<Fn>) {
     const transformKey = getDefault('function', options.transformKey);
@@ -47,6 +48,10 @@ export class Cache<Fn extends (...args: any[]) => any>
         ? (args: IArguments | Key) => transformKey(cloneKey<Fn>(args))
         : cloneKey;
     }
+  }
+
+  get size() {
+    return this.s;
   }
 
   clear(): void {
@@ -104,7 +109,7 @@ export class Cache<Fn extends (...args: any[]) => any>
 
     if (!emitter) {
       // @ts-expect-error - Narrow typing of map sees listeners differently
-      emitter = new EventEmitter<Type, Fn>(type);
+      emitter = createEventEmitter<Type, Fn>(type);
       this.os(type, emitter);
     }
 

@@ -33,14 +33,11 @@ export default function memoize<Fn extends (...args: any[]) => any>(
       : (arguments as unknown as Key);
     let node = cache.g(key);
 
-    if (node) {
-      if (node !== head) {
-        cache.u(node);
-        cache.ou &&
-          cache.ou.n({ cache, entry: getEntry(node), type: 'update' });
-      } else if (cache.oh) {
-        cache.oh.n({ cache, entry: getEntry(node), type: 'hit' });
-      }
+    if (node === head) {
+      cache.oh && cache.oh.n({ cache, entry: getEntry(node), type: 'hit' });
+    } else if (node) {
+      cache.u(node);
+      cache.ou && cache.ou.n({ cache, entry: getEntry(node), type: 'update' });
     } else {
       node = cache.n(
         transformKey ? key : cloneKey(key),

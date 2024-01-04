@@ -2,37 +2,38 @@ import type {
   CacheEvent,
   CacheEventListener,
   CacheEventType,
-  EventEmitter as EventEmitterType,
+  EventEmitter,
 } from '../index.d';
 
-export class EventEmitter<
+export function createEventEmitter<
   Type extends CacheEventType,
   Fn extends (...args: any[]) => any,
-> implements EventEmitterType<Type, Fn>
-{
-  private l: Array<CacheEventListener<Type, Fn>> = [];
+>(): EventEmitter<Type, Fn> {
+  const listeners: Array<CacheEventListener<Type, Fn>> = [];
 
-  s = 0;
+  return {
+    s: 0,
 
-  a(listener: CacheEventListener<Type, Fn>): void {
-    if (this.l.indexOf(listener) === -1) {
-      this.l.push(listener);
-      ++this.s;
-    }
-  }
+    a(listener: CacheEventListener<Type, Fn>): void {
+      if (listeners.indexOf(listener) === -1) {
+        listeners.push(listener);
+        ++this.s;
+      }
+    },
 
-  n(event: CacheEvent<Type, Fn>): void {
-    for (let index = 0, length = this.l.length; index < length; ++index) {
-      this.l[index]!(event);
-    }
-  }
+    n(event: CacheEvent<Type, Fn>): void {
+      for (let index = 0, length = this.s; index < length; ++index) {
+        listeners[index]!(event);
+      }
+    },
 
-  r(listener: CacheEventListener<Type, Fn>): void {
-    const index = this.l.indexOf(listener);
+    r(listener: CacheEventListener<Type, Fn>): void {
+      const index = listeners.indexOf(listener);
 
-    if (index !== -1) {
-      this.l.splice(index, 1);
-      --this.s;
-    }
-  }
+      if (index !== -1) {
+        listeners.splice(index, 1);
+        --this.s;
+      }
+    },
+  };
 }

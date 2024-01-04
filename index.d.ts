@@ -134,7 +134,10 @@ export class Cache<Fn extends (...args: any[]) => any> {
   s: number;
   t: CacheNode<Fn> | null;
 
-  static EventEmitter: EventEmitter<CacheEventType, (...args: any[]) => any>;
+  static createEventEmitter: () => EventEmitter<
+    CacheEventType,
+    (...args: any[]) => any
+  >;
 
   constructor(options: Options<Fn>);
 
