@@ -28,7 +28,7 @@ export default function memoize<Fn extends (...args: any[]) => any>(
 
   const memoized: Memoized<Fn> = function memoized(this: any) {
     const { h: head, k: transformKey } = cache;
-    const key: Key = transformKey
+    const key = transformKey
       ? transformKey(arguments)
       : (arguments as unknown as Key);
     let node = cache.g(key);

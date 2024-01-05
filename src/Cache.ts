@@ -2,6 +2,7 @@ import type {
   Arg,
   Cache as CacheType,
   CacheEntry,
+  CacheEvent,
   CacheEventType,
   CacheEventListener,
   CacheNode,
@@ -10,7 +11,6 @@ import type {
   Key,
   Options,
 } from '../index.d';
-import { createEventEmitter } from './EventEmitter';
 import { cloneKey, getDefault, getEntry, isSameValueZero } from './utils';
 
 export class Cache<Fn extends (...args: any[]) => any>
@@ -32,8 +32,6 @@ export class Cache<Fn extends (...args: any[]) => any>
   ou: EventEmitter<'update', Fn> | null = null;
   t: CacheNode<Fn> | null = null;
 
-  static createEventEmitter = createEventEmitter;
-
   constructor(options: Options<Fn>) {
     const transformKey = getDefault('function', options.transformKey);
 
@@ -42,7 +40,7 @@ export class Cache<Fn extends (...args: any[]) => any>
     this.m = getDefault('function', options.matchesKey, this.e);
     this.p = getDefault('boolean', options.async, false);
 
-    this.c = !!transformKey || options.matchesKey === this.m;
+    this.c = !!(transformKey || options.matchesKey);
 
     if (this.c) {
       this.k = transformKey
@@ -56,33 +54,31 @@ export class Cache<Fn extends (...args: any[]) => any>
     this.size = 0;
   }
 
-  delete(key: Key): boolean {
+  delete(key: Parameters<Fn>): boolean {
     const node = this.gt(key);
 
-    if (!node) {
-      return false;
+    if (node) {
+      this.d(node);
+      this.od && this.od.n(node);
+
+      return true;
     }
 
-    this.d(node);
-    this.od && this.od.n(node);
-
-    return true;
+    return false;
   }
 
-  get(key: Key): ReturnType<Fn> | undefined {
+  get(key: Parameters<Fn>): ReturnType<Fn> | undefined {
     const node = this.gt(key);
 
-    if (!node) {
-      return;
+    if (node) {
+      node !== this.h && this.u(node);
+
+      return node.v;
     }
-
-    node !== this.h && this.u(node);
-
-    return node.v;
   }
 
-  has(key: Key): boolean {
-    return !!this.g(key);
+  has(key: Parameters<Fn>): boolean {
+    return !!this.gt(key);
   }
 
   off<Type extends CacheEventType>(
@@ -104,7 +100,7 @@ export class Cache<Fn extends (...args: any[]) => any>
     let emitter = this.og(type);
 
     if (!emitter) {
-      emitter = createEventEmitter<Type, Fn>(this, type);
+      emitter = this.co(type);
       this.os(type, emitter);
     }
 
@@ -113,22 +109,21 @@ export class Cache<Fn extends (...args: any[]) => any>
     return listener;
   }
 
-  set(key: Key, value: ReturnType<Fn>): CacheNode<Fn> {
-    let node = this.gt(key);
+  set(key: Parameters<Fn>, value: ReturnType<Fn>): CacheNode<Fn> {
+    const normalizedKey = this.k ? this.k(key) : key;
+
+    let node = this.g(normalizedKey);
 
     if (node) {
       node.v = value;
 
       node !== this.h && this.u(node);
-
       this.ou && this.ou.n(node);
+    } else {
+      node = this.n(normalizedKey, value);
 
-      return node;
+      this.oa && this.oa.n(node);
     }
-
-    node = this.n(key, value);
-
-    this.oa && this.oa.n(node);
 
     return node;
   }
@@ -144,6 +139,52 @@ export class Cache<Fn extends (...args: any[]) => any>
     }
 
     return { entries, size: this.size };
+  }
+
+  co<Type extends CacheEventType>(type: Type): EventEmitter<Type, Fn> {
+    const listeners: Array<CacheEventListener<Type, Fn>> = [];
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const cache = this;
+
+    let size = 0;
+
+    function a(listener: CacheEventListener<Type, Fn>): void {
+      if (listeners.indexOf(listener) === -1) {
+        listeners.push(listener);
+        ++size;
+      }
+    }
+
+    function n(node: CacheNode<Fn>, reason?: any): void {
+      const entry = getEntry(node);
+
+      for (let index = 0; index < size; ++index) {
+        listeners[index]!({
+          cache,
+          entry,
+          reason,
+          type,
+        } as unknown as CacheEvent<Type, Fn>);
+      }
+    }
+
+    function r(listener: CacheEventListener<Type, Fn>): void {
+      const index = listeners.indexOf(listener);
+
+      if (index !== -1) {
+        listeners.splice(index, 1);
+        --size;
+      }
+    }
+
+    return {
+      get s() {
+        return size;
+      },
+      a,
+      n,
+      r,
+    };
   }
 
   d(node: CacheNode<Fn>): void {
@@ -211,7 +252,7 @@ export class Cache<Fn extends (...args: any[]) => any>
     }
   }
 
-  gt(key: Key): CacheNode<Fn> | undefined {
+  gt(key: Parameters<Fn>): CacheNode<Fn> | undefined {
     return this.g(this.k ? this.k(key) : key);
   }
 
@@ -223,7 +264,7 @@ export class Cache<Fn extends (...args: any[]) => any>
     if (this.p) {
       node.v = value.then(
         (value: any) => {
-          this.ou && this.g(node.k) && this.ou.n(node, 'resolved');
+          this.ou && this.g(key) && this.ou.n(node, 'resolved');
 
           return value;
         },

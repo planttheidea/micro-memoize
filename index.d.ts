@@ -110,13 +110,11 @@ export type TypeOf =
   | 'symbol'
   | 'undefined';
 
-export class EventEmitter<
+export interface EventEmitter<
   Type extends CacheEventType,
   Fn extends (...args: any[]) => any,
 > {
   s: number;
-
-  constructor(type: Type);
 
   a(listener: CacheEventListener<Type, Fn>): void;
   n(node: CacheNode<Fn>, reason?: CacheEventReason): void;
@@ -144,9 +142,9 @@ export class Cache<Fn extends (...args: any[]) => any> {
   constructor(options: Options<Fn>);
 
   clear(): void;
-  delete(key: Key): boolean;
-  get(key: Key): ReturnType<Fn> | undefined;
-  has(key: Key): boolean;
+  delete(key: Parameters<Fn>): boolean;
+  get(key: Parameters<Fn>): ReturnType<Fn> | undefined;
+  has(key: Parameters<Fn>): boolean;
   off<
     Type extends CacheEventType,
     Listener extends CacheEventListener<Type, Fn>,
@@ -155,9 +153,16 @@ export class Cache<Fn extends (...args: any[]) => any> {
     Type extends CacheEventType,
     Listener extends CacheEventListener<Type, Fn>,
   >(type: Type, listener: Listener): Listener;
-  set(key: Key, value: ReturnType<Fn>): void;
+  set(key: Parameters<Fn>, value: ReturnType<Fn>): void;
   snapshot(): CacheSnapshot<Fn>;
 
+  co<Type extends CacheEventType>(
+    type: Type,
+  ): {
+    a(listener: CacheEventListener<Type, Fn>): void;
+    n(node: CacheNode<Fn>, reason?: CacheEventReason): void;
+    r(listener: CacheEventListener<Type, Fn>): void;
+  };
   d(node: CacheNode<Fn>): void;
   e(prevKey: Key, nextKey: Key): boolean;
   g(key: Key): CacheNode<Fn> | undefined;
