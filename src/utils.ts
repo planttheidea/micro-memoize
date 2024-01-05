@@ -38,7 +38,7 @@ export function getEntry<Fn extends (...args: any[]) => any>(
 }
 
 export function isMemoized(fn: any): fn is Memoized<any> {
-  return typeof fn === 'function' && fn.fn;
+  return typeof fn === 'function' && fn.isMemoized;
 }
 
 export function isSameValueZero(a: any, b: any) {
