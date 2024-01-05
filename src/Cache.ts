@@ -20,6 +20,8 @@ export class Cache<Fn extends (...args: any[]) => any>
   private l: number;
   private p: boolean;
 
+  size = 0;
+
   a: (a: Arg, b: Arg) => boolean;
   h: CacheNode<Fn> | null = null;
   k: ((args: IArguments | Key) => Key) | undefined;
@@ -28,7 +30,6 @@ export class Cache<Fn extends (...args: any[]) => any>
   od: EventEmitter<'delete', Fn> | null = null;
   oh: EventEmitter<'hit', Fn> | null = null;
   ou: EventEmitter<'update', Fn> | null = null;
-  s = 0;
   t: CacheNode<Fn> | null = null;
 
   static createEventEmitter = createEventEmitter;
@@ -50,13 +51,9 @@ export class Cache<Fn extends (...args: any[]) => any>
     }
   }
 
-  get size() {
-    return this.s;
-  }
-
   clear(): void {
     this.h = this.t = null;
-    this.s = 0;
+    this.size = 0;
   }
 
   delete(key: Key): boolean {
@@ -146,7 +143,7 @@ export class Cache<Fn extends (...args: any[]) => any>
       node = node.n;
     }
 
-    return { entries, size: this.s };
+    return { entries, size: this.size };
   }
 
   d(node: CacheNode<Fn>): void {
@@ -165,7 +162,7 @@ export class Cache<Fn extends (...args: any[]) => any>
       this.h = next;
     }
 
-    --this.s;
+    --this.size;
   }
 
   e(prevKey: Key, nextKey: Key): boolean {
@@ -250,7 +247,7 @@ export class Cache<Fn extends (...args: any[]) => any>
       this.t = node;
     }
 
-    if (++this.s > this.l && prevTail) {
+    if (++this.size > this.l && prevTail) {
       this.d(prevTail);
       this.od && this.od.n(prevTail, 'evicted');
     }

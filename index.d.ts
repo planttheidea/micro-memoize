@@ -124,6 +124,8 @@ export class EventEmitter<
 }
 
 export class Cache<Fn extends (...args: any[]) => any> {
+  size: number;
+
   a: (a: Arg, b: Arg) => boolean;
   h: CacheNode<Fn> | null;
   k: ((args: IArguments | Key) => Key) | undefined;
@@ -132,7 +134,6 @@ export class Cache<Fn extends (...args: any[]) => any> {
   od: EventEmitter<'delete', Fn> | null;
   oh: EventEmitter<'hit', Fn> | null;
   ou: EventEmitter<'update', Fn> | null;
-  s: number;
   t: CacheNode<Fn> | null;
 
   static createEventEmitter: (
