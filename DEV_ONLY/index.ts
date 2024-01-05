@@ -39,19 +39,19 @@ memoized(bar, foo);
 memoized(foo, bar);
 memoized(foo, bar);
 
-console.log(memoized.cache.snapshot());
+console.log(memoized.cache.entries());
 console.log(memoized.cache);
 
 memoized.cache.clear();
 
-console.log(memoized.cache.snapshot());
+console.log(memoized.cache.entries());
 console.log(memoized.cache);
 
 console.groupEnd();
 
 console.group('standard with larger cache size');
 
-const memoizedLargerCache = memoize(method, { maxSize: 3 });
+const memoizedLargerCache = memoize(memoized, { maxSize: 3 });
 
 memoizedLargerCache.cache.on('add', (event) => {
   console.log(event);
@@ -74,7 +74,7 @@ memoizedLargerCache(foo, bar);
 memoizedLargerCache(baz, quz);
 memoizedLargerCache(foo, quz);
 
-console.log(memoizedLargerCache.cache.snapshot());
+console.log(memoizedLargerCache.cache.entries());
 
 console.groupEnd();
 
@@ -113,7 +113,7 @@ deepEqualMemoized({ one: 2, two: 1 });
 deepEqualMemoized({ one: 1, two: 2 });
 deepEqualMemoized({ one: 1, two: 2 });
 
-console.log(deepEqualMemoized.cache.snapshot());
+console.log(deepEqualMemoized.cache.entries());
 
 console.groupEnd();
 
@@ -147,7 +147,7 @@ memoizedPromiseRejected(3)
     console.log(value);
   })
   .catch((error: Error) => {
-    console.log(memoizedPromiseRejected.cache.snapshot());
+    console.log(memoizedPromiseRejected.cache.entries());
     console.error(error);
   });
 
@@ -156,7 +156,7 @@ memoizedPromiseRejected(3)
     console.log(value);
   })
   .catch((error: Error) => {
-    console.log(memoizedPromiseRejected.cache.snapshot());
+    console.log(memoizedPromiseRejected.cache.entries());
     console.error(error);
   });
 
@@ -165,7 +165,7 @@ memoizedPromiseRejected(3)
     console.log(value);
   })
   .catch((error: Error) => {
-    console.log(memoizedPromiseRejected.cache.snapshot());
+    console.log(memoizedPromiseRejected.cache.entries());
     console.error(error);
   });
 
@@ -179,7 +179,7 @@ memoizedPromise(2, 2).then((value: unknown) => {
   console.log(`cached value: ${value}`);
 });
 
-console.log(memoizedPromise.cache.snapshot().entries.map(({ key }) => key));
+console.log(memoizedPromise.cache.entries().map(([key]) => key));
 
 console.groupEnd();
 
@@ -303,9 +303,9 @@ const metadata = {
 const result1 = calc(data, metadata);
 
 console.log(result1);
-console.log(calc.cache.snapshot());
+console.log(calc.cache.entries());
 
 const result2 = calc(data, metadata);
 
 console.log(result2);
-console.log(calc.cache.snapshot());
+console.log(calc.cache.entries());

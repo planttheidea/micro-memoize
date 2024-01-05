@@ -29,7 +29,7 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
       - [`get`](#get)
       - [`has`](#has)
       - [`set`](#set)
-    - [Cache snapshots](#cache-snapshots)
+    - [Cache entries](#cache-entries)
   - [Additional propeties](#additional-propeties)
     - [memoized.fn](#memoizedfn)
     - [memoized.isMemoized](#memoizedismemoized)
@@ -45,7 +45,7 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
 
 ## Summary
 
-As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1.39kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
+As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1.37kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
 
 ## Importing
 
@@ -122,12 +122,10 @@ const memoized = memoize(fn, { async: true });
 
 memoized('one', 'two');
 
-console.log(memoized.cache.snapshot.keys); // [['one', 'two']]
-console.log(memoized.cache.snapshot.values); // [Promise]
+console.log(memoized.cache.entries()); // [['one', 'two'], Promise]
 
 setTimeout(() => {
-  console.log(memoized.cache.snapshot.keys); // []
-  console.log(memoized.cache.snapshot.values); // []
+  console.log(memoized.cache.entries()); // []
 }, 1000);
 ```
 
@@ -483,31 +481,31 @@ memoized.cache.set(['foo', 'bar'], 'foobar');
 console.log(memoized.cache.get(['foo', 'bar'])); // 'foobar'
 ```
 
-### Cache snapshots
+### Cache entries
 
-A snapshot of the cache can be taken at any time, which provides a point-in-time reflection of the values in the cache. Since the values are mutated internally, this can be useful for debugging unexpected behavior based on call dynamics.
+A snapshot of the entries in cache can be taken at any time, which provides a point-in-time reflection of the values in the cache. Since the values are mutated internally, this can be useful for debugging unexpected behavior based on call dynamics.
 
 ```ts
 const fn = (one: string, two: string) => one + two;
 const memoized = memoize(fn, { maxSize: 2 });
 
-console.log(memoized.cache.snapshot());
-// { entries: [], size: 0 };
+console.log(memoized.cache.entries());
+// [];
 
 memoized('foo', 'bar');
 
-console.log(memoized.cache.snapshot());
-// { entries: [{ key: ['foo', 'bar'], value: 'foobar' }], size: 1 };
+console.log(memoized.cache.entries());
+// [['foo', 'bar'], 'foobar']
 
 memoized('bar', 'baz');
 
-console.log(memoized.cache.snapshot());
-// { entries: [{ key: ['bar', 'baz'], value: 'barbaz' }, { key: ['foo', 'bar'], value: 'foobar'}], size: 2 };
+console.log(memoized.cache.entries());
+// [['bar', 'baz'], 'barbaz'], [['foo', 'bar'], 'foobar']]
 
 memoized('foo', 'bar');
 
-console.log(memoized.cache.snapshot());
-// { entries: [{ key: ['foo', 'bar'], value: 'foobar'}, { key: ['bar', 'baz'], value: 'barbaz' }], size: 2 };
+console.log(memoized.cache.entries());
+// [[['foo', 'bar'], 'foobar'], ['bar', 'baz'], 'barbaz']]
 ```
 
 ## Additional propeties

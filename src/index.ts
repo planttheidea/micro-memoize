@@ -1,19 +1,14 @@
-import type { Key, Memoized, Options } from '../index.d';
+import type { Key, Memoize, Memoized, Options } from '../index.d';
 import { Cache } from './Cache';
 import { cloneKey, isMemoized } from './utils';
 
-export default function memoize<Fn extends (...args: any[]) => any>(
-  fn: Fn,
-  passedOptions?: Options<Fn>,
-): Memoized<Fn>;
-export default function memoize<Fn extends (...args: any[]) => any>(
-  fn: Memoized<Fn>,
-  passedOptions?: Options<Fn>,
-): Memoized<Fn>;
-export default function memoize<Fn extends (...args: any[]) => any>(
-  fn: Fn | Memoized<Fn>,
-  passedOptions: Options<Fn> = {},
-): Memoized<Fn> {
+const memoize: Memoize = function memoize<
+  Fn extends (...args: any[]) => any,
+  Opts extends Options<Fn>,
+>(
+  fn: Fn | Memoized<Fn, Opts>,
+  passedOptions: Opts = {} as Opts,
+): Memoized<Fn, Opts> {
   if (typeof fn !== 'function') {
     throw new TypeError(
       `Expected first parameter to be function; received ${typeof fn}`,
@@ -26,7 +21,7 @@ export default function memoize<Fn extends (...args: any[]) => any>(
 
   const cache = new Cache(passedOptions);
 
-  const memoized: Memoized<Fn> = function memoized(this: any) {
+  const memoized: Memoized<Fn, Opts> = function memoized(this: any) {
     const { h: head, k: transformKey } = cache;
     const key = transformKey
       ? transformKey(arguments)
@@ -57,6 +52,8 @@ export default function memoize<Fn extends (...args: any[]) => any>(
   memoized.options = passedOptions;
 
   return memoized;
-}
+};
 
 memoize.Cache = Cache;
+
+export default memoize;

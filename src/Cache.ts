@@ -1,12 +1,12 @@
 import type {
   Arg,
   Cache as CacheType,
+  CacheEntries,
   CacheEntry,
   CacheEvent,
   CacheEventType,
   CacheEventListener,
   CacheNode,
-  CacheSnapshot,
   EventEmitter,
   Key,
   Options,
@@ -16,20 +16,19 @@ import { cloneKey, getDefault, getEntry, isSameValueZero } from './utils';
 export class Cache<Fn extends (...args: any[]) => any>
   implements CacheType<Fn>
 {
-  private c: boolean;
-  private l: number;
-  private p: boolean;
-
   size = 0;
 
   a: (a: Arg, b: Arg) => boolean;
+  c: boolean;
   h: CacheNode<Fn> | null = null;
   k: ((args: IArguments | Key) => Key) | undefined;
+  l: number;
   m: (a: Key, b: Key) => boolean;
   oa: EventEmitter<'add', Fn> | null = null;
   od: EventEmitter<'delete', Fn> | null = null;
   oh: EventEmitter<'hit', Fn> | null = null;
   ou: EventEmitter<'update', Fn> | null = null;
+  p: boolean;
   t: CacheNode<Fn> | null = null;
 
   constructor(options: Options<Fn>) {
@@ -65,6 +64,19 @@ export class Cache<Fn extends (...args: any[]) => any>
     }
 
     return false;
+  }
+
+  entries(): CacheEntries<Fn> {
+    const entries: Array<CacheEntry<Fn>> = [];
+
+    let node = this.h;
+
+    while (node != null) {
+      entries.push(getEntry(node));
+      node = node.n;
+    }
+
+    return entries;
   }
 
   get(key: Parameters<Fn>): ReturnType<Fn> | undefined {
@@ -126,19 +138,6 @@ export class Cache<Fn extends (...args: any[]) => any>
     }
 
     return node;
-  }
-
-  snapshot(): CacheSnapshot<Fn> {
-    const entries: Array<CacheEntry<Fn>> = [];
-
-    let node = this.h;
-
-    while (node != null) {
-      entries.push(getEntry(node));
-      node = node.n;
-    }
-
-    return { entries, size: this.size };
   }
 
   co<Type extends CacheEventType>(type: Type): EventEmitter<Type, Fn> {

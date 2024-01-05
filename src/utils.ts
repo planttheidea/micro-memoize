@@ -1,4 +1,14 @@
-import type { CacheEntry, CacheNode, Key, Memoized, TypeOf } from '../index.d';
+import type { CacheEntry, CacheNode, Key, Memoized } from '../index.d';
+
+type TypeOf =
+  | 'bigint'
+  | 'boolean'
+  | 'function'
+  | 'number'
+  | 'object'
+  | 'string'
+  | 'symbol'
+  | 'undefined';
 
 export function cloneKey<Fn extends (...args: any[]) => any>(
   args: IArguments | Parameters<Fn> | Key,
@@ -34,10 +44,10 @@ export function getDefault<Value, DefaultValue>(
 export function getEntry<Fn extends (...args: any[]) => any>(
   node: CacheNode<Fn>,
 ): CacheEntry<Fn> {
-  return { key: node.k, value: node.v };
+  return [node.k, node.v];
 }
 
-export function isMemoized(fn: any): fn is Memoized<any> {
+export function isMemoized(fn: any): fn is Memoized<any, any> {
   return typeof fn === 'function' && fn.isMemoized;
 }
 

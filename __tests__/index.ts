@@ -19,10 +19,7 @@ describe('memoize', () => {
 
     const memoized = memoize(fn);
 
-    expect(memoized.cache.snapshot()).toEqual({
-      entries: [],
-      size: 0,
-    });
+    expect(memoized.cache.entries()).toEqual([]);
 
     expect(memoized.isMemoized).toEqual(true);
 
@@ -39,10 +36,9 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(1);
 
-    expect(memoized.cache.snapshot()).toEqual({
-      entries: [{ key: ['one', 'two'], value: { one: 'one', two: 'two' } }],
-      size: 1,
-    });
+    expect(memoized.cache.entries()).toEqual([
+      [['one', 'two'], { one: 'one', two: 'two' }],
+    ]);
   });
 
   it('will return the memoized function that handles variable keys', () => {
@@ -59,10 +55,7 @@ describe('memoize', () => {
 
     const memoized = memoize(fn);
 
-    expect(memoized.cache.snapshot()).toEqual({
-      entries: [],
-      size: 0,
-    });
+    expect(memoized.cache.entries()).toEqual([]);
 
     expect(memoized.isMemoized).toEqual(true);
 
@@ -91,10 +84,9 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(3);
 
-    expect(memoized.cache.snapshot()).toEqual({
-      entries: [{ key: ['one', 'two'], value: { one: 'one', two: 'two' } }],
-      size: 1,
-    });
+    expect(memoized.cache.entries()).toEqual([
+      [['one', 'two'], { one: 'one', two: 'two' }],
+    ]);
   });
 
   it('will return the memoized function that can have multiple cached key => value pairs', () => {
@@ -112,10 +104,7 @@ describe('memoize', () => {
 
     const memoized = memoize(fn, { maxSize });
 
-    expect(memoized.cache.snapshot()).toEqual({
-      entries: [],
-      size: 0,
-    });
+    expect(memoized.cache.entries()).toEqual([]);
 
     expect(memoized.isMemoized).toEqual(true);
 
@@ -148,15 +137,12 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(4);
 
-    expect(memoized.cache.snapshot()).toEqual({
-      entries: [
-        { key: ['three', 'four'], value: { one: 'three', two: 'four' } },
-        { key: ['two', 'three'], value: { one: 'two', two: 'three' } },
-        { key: ['four', 'five'], value: { one: 'four', two: 'five' } },
-        { key: ['one', 'two'], value: { one: 'one', two: 'two' } },
-      ],
-      size: 4,
-    });
+    expect(memoized.cache.entries()).toEqual([
+      [['three', 'four'], { one: 'three', two: 'four' }],
+      [['two', 'three'], { one: 'two', two: 'three' }],
+      [['four', 'five'], { one: 'four', two: 'five' }],
+      [['one', 'two'], { one: 'one', two: 'two' }],
+    ]);
   });
 
   it('will return the memoized function that can have multiple cached key => value pairs with cache eviction', () => {
@@ -174,10 +160,7 @@ describe('memoize', () => {
 
     const memoized = memoize(fn, { maxSize });
 
-    expect(memoized.cache.snapshot()).toEqual({
-      entries: [],
-      size: 0,
-    });
+    expect(memoized.cache.entries()).toEqual([]);
 
     expect(memoized.isMemoized).toEqual(true);
 
@@ -210,14 +193,11 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(4);
 
-    expect(memoized.cache.snapshot()).toEqual({
-      entries: [
-        { key: ['three', 'four'], value: { one: 'three', two: 'four' } },
-        { key: ['two', 'three'], value: { one: 'two', two: 'three' } },
-        { key: ['four', 'five'], value: { one: 'four', two: 'five' } },
-      ],
-      size: 3,
-    });
+    expect(memoized.cache.entries()).toEqual([
+      [['three', 'four'], { one: 'three', two: 'four' }],
+      [['two', 'three'], { one: 'two', two: 'three' }],
+      [['four', 'five'], { one: 'four', two: 'five' }],
+    ]);
   });
 
   it('will return the memoized function that will use the custom matchesArg method', () => {
@@ -258,21 +238,15 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(1);
 
-    expect(memoized.cache.snapshot()).toEqual({
-      entries: [
+    expect(memoized.cache.entries()).toEqual([
+      [
+        [{ deep: { value: 'value' } }, { other: { deep: { value: 'value' } } }],
         {
-          key: [
-            { deep: { value: 'value' } },
-            { other: { deep: { value: 'value' } } },
-          ],
-          value: {
-            one: { deep: { value: 'value' } },
-            two: { other: { deep: { value: 'value' } } },
-          },
+          one: { deep: { value: 'value' } },
+          two: { other: { deep: { value: 'value' } } },
         },
       ],
-      size: 1,
-    });
+    ]);
   });
 
   it('will return the memoized function that will use the transformKey method', () => {
@@ -313,15 +287,9 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(1);
 
-    expect(memoized.cache.snapshot()).toEqual({
-      entries: [
-        {
-          key: ['[{"one":"one"},null]'],
-          value: { one: { one: 'one' }, two: fnArg1 },
-        },
-      ],
-      size: 1,
-    });
+    expect(memoized.cache.entries()).toEqual([
+      [['[{"one":"one"},null]'], { one: { one: 'one' }, two: fnArg1 }],
+    ]);
   });
 
   it('will return the memoized function that will use the transformKey method with a custom matchesArg', () => {
@@ -373,15 +341,12 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(1);
 
-    expect(memoized.cache.snapshot()).toEqual({
-      entries: [
-        {
-          key: [{ args: '[{"one":"one"},null]' }],
-          value: { one: { one: 'one' }, two: fnArg1 },
-        },
+    expect(memoized.cache.entries()).toEqual([
+      [
+        [{ args: '[{"one":"one"},null]' }],
+        { one: { one: 'one' }, two: fnArg1 },
       ],
-      size: 1,
-    });
+    ]);
   });
 
   it('will notify of resolved when async is true and resolves', async () => {
@@ -409,7 +374,7 @@ describe('memoize', () => {
     expect(onUpdate).toHaveBeenCalledTimes(1);
     expect(onUpdate).toHaveBeenCalledWith({
       cache: memoized.cache,
-      entry: { key: ['foo'], value: expect.any(Promise) },
+      entry: [['foo'], expect.any(Promise)],
       reason: 'resolved',
       type: 'update',
     });
@@ -440,9 +405,7 @@ describe('memoize', () => {
 
     const pending = memoized('foo');
 
-    const snapshot = memoized.cache.snapshot();
-
-    expect(snapshot.entries.length).toEqual(1);
+    expect(memoized.cache.entries().length).toEqual(1);
 
     const catchSpy = jest.fn();
 
@@ -451,7 +414,7 @@ describe('memoize', () => {
     expect(onDelete).toHaveBeenCalledTimes(1);
     expect(onDelete).toHaveBeenCalledWith({
       cache: memoized.cache,
-      entry: { key: ['foo'], value: expect.any(Promise) },
+      entry: [['foo'], expect.any(Promise)],
       reason: 'rejected',
       type: 'delete',
     });
@@ -477,18 +440,13 @@ describe('memoize', () => {
 
     const pending = memoized('foo');
 
-    const snapshot = memoized.cache.snapshot();
-
-    expect(snapshot.entries.length).toEqual(1);
+    expect(memoized.cache.entries().length).toEqual(1);
 
     const catchSpy = jest.fn();
 
     await pending.catch(catchSpy);
 
-    expect(memoized.cache.snapshot()).toEqual({
-      entries: [],
-      size: 0,
-    });
+    expect(memoized.cache.entries()).toEqual([]);
 
     expect(catchSpy).toHaveBeenCalledWith(error);
   });
@@ -518,7 +476,7 @@ describe('memoize', () => {
 
     expect(onAdd).toHaveBeenCalledWith({
       cache: memoized.cache,
-      entry: { key: ['foo', 'bar'], value: { one: 'foo', two: 'bar' } },
+      entry: [['foo', 'bar'], { one: 'foo', two: 'bar' }],
       type: 'add',
     });
 
@@ -533,7 +491,7 @@ describe('memoize', () => {
 
     expect(onAdd).toHaveBeenCalledWith({
       cache: memoized.cache,
-      entry: { key: ['bar', 'foo'], value: { one: 'bar', two: 'foo' } },
+      entry: [['bar', 'foo'], { one: 'bar', two: 'foo' }],
       type: 'add',
     });
 
@@ -548,7 +506,7 @@ describe('memoize', () => {
 
     expect(onHit).toHaveBeenCalledWith({
       cache: memoized.cache,
-      entry: { key: ['bar', 'foo'], value: { one: 'bar', two: 'foo' } },
+      entry: [['bar', 'foo'], { one: 'bar', two: 'foo' }],
       type: 'hit',
     });
 
@@ -563,7 +521,7 @@ describe('memoize', () => {
 
     expect(onUpdate).toHaveBeenCalledWith({
       cache: memoized.cache,
-      entry: { key: ['foo', 'bar'], value: { one: 'foo', two: 'bar' } },
+      entry: [['foo', 'bar'], { one: 'foo', two: 'bar' }],
       type: 'update',
     });
 
@@ -578,7 +536,7 @@ describe('memoize', () => {
 
     expect(onHit).toHaveBeenCalledWith({
       cache: memoized.cache,
-      entry: { key: ['foo', 'bar'], value: { one: 'foo', two: 'bar' } },
+      entry: [['foo', 'bar'], { one: 'foo', two: 'bar' }],
       type: 'hit',
     });
 
@@ -593,12 +551,12 @@ describe('memoize', () => {
 
     expect(onAdd).toHaveBeenCalledWith({
       cache: memoized.cache,
-      entry: { key: ['bar', 'baz'], value: { one: 'bar', two: 'baz' } },
+      entry: [['bar', 'baz'], { one: 'bar', two: 'baz' }],
       type: 'add',
     });
     expect(onDelete).toHaveBeenCalledWith({
       cache: memoized.cache,
-      entry: { key: ['bar', 'foo'], value: { one: 'bar', two: 'foo' } },
+      entry: [['bar', 'foo'], { one: 'bar', two: 'foo' }],
       reason: 'evicted',
       type: 'delete',
     });
@@ -786,20 +744,15 @@ describe('memoize', () => {
 
       const pending = memoized('one', 'two');
 
-      const snapshot = memoized.cache.snapshot();
-
-      expect(snapshot.entries).toEqual([
-        { key: ['one', 'two'], value: expect.any(Promise) },
+      expect(memoized.cache.entries()).toEqual([
+        [['one', 'two'], expect.any(Promise)],
       ]);
 
       const catchSpy = jest.fn();
 
       await pending.catch(catchSpy);
 
-      expect(memoized.cache.snapshot()).toEqual({
-        entries: [],
-        size: 0,
-      });
+      expect(memoized.cache.entries()).toEqual([]);
 
       expect(catchSpy).toHaveBeenCalledWith(
         new Error('{"one":"one","two":"two"}'),
@@ -820,12 +773,19 @@ describe('memoize', () => {
 
       expect(manyPossibleArgs).toHaveBeenCalledTimes(3);
 
-      const snapshot = memoized.cache.snapshot();
-
-      expect(snapshot.entries).toEqual([
-        { key: ['three', 'four'], value: ['three', 'four'] },
-        { key: ['two', 'three'], value: ['two', 'three'] },
-        { key: ['one', 'two'], value: ['one', 'two'] },
+      expect(memoized.cache.entries()).toEqual([
+        [
+          ['three', 'four'],
+          ['three', 'four'],
+        ],
+        [
+          ['two', 'three'],
+          ['two', 'three'],
+        ],
+        [
+          ['one', 'two'],
+          ['one', 'two'],
+        ],
       ]);
 
       manyPossibleArgs.mockClear();
@@ -862,19 +822,28 @@ describe('memoize', () => {
       expect(onAdd).toHaveBeenCalledTimes(1);
       expect(onAdd).toHaveBeenCalledWith({
         cache: memoized.cache,
-        entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        entry: [
+          ['foo', 'bar'],
+          ['foo', 'bar'],
+        ],
         type: 'add',
       });
 
       expect(onHit).toHaveBeenCalledTimes(2);
       expect(onHit).toHaveBeenNthCalledWith(1, {
         cache: memoized.cache,
-        entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        entry: [
+          ['foo', 'bar'],
+          ['foo', 'bar'],
+        ],
         type: 'hit',
       });
       expect(onHit).toHaveBeenNthCalledWith(2, {
         cache: memoized.cache,
-        entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        entry: [
+          ['foo', 'bar'],
+          ['foo', 'bar'],
+        ],
         type: 'hit',
       });
 
@@ -890,19 +859,28 @@ describe('memoize', () => {
       expect(onAdd).toHaveBeenCalledTimes(1);
       expect(onAdd).toHaveBeenCalledWith({
         cache: memoized.cache,
-        entry: { key: ['bar', 'foo'], value: ['bar', 'foo'] },
+        entry: [
+          ['bar', 'foo'],
+          ['bar', 'foo'],
+        ],
         type: 'add',
       });
 
       expect(onHit).toHaveBeenCalledTimes(2);
       expect(onHit).toHaveBeenNthCalledWith(1, {
         cache: memoized.cache,
-        entry: { key: ['bar', 'foo'], value: ['bar', 'foo'] },
+        entry: [
+          ['bar', 'foo'],
+          ['bar', 'foo'],
+        ],
         type: 'hit',
       });
       expect(onHit).toHaveBeenNthCalledWith(2, {
         cache: memoized.cache,
-        entry: { key: ['bar', 'foo'], value: ['bar', 'foo'] },
+        entry: [
+          ['bar', 'foo'],
+          ['bar', 'foo'],
+        ],
         type: 'hit',
       });
 
@@ -920,19 +898,28 @@ describe('memoize', () => {
       expect(onHit).toHaveBeenCalledTimes(2);
       expect(onHit).toHaveBeenNthCalledWith(1, {
         cache: memoized.cache,
-        entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        entry: [
+          ['foo', 'bar'],
+          ['foo', 'bar'],
+        ],
         type: 'hit',
       });
       expect(onHit).toHaveBeenNthCalledWith(2, {
         cache: memoized.cache,
-        entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        entry: [
+          ['foo', 'bar'],
+          ['foo', 'bar'],
+        ],
         type: 'hit',
       });
 
       expect(onUpdate).toHaveBeenCalledTimes(1);
       expect(onUpdate).toHaveBeenCalledWith({
         cache: memoized.cache,
-        entry: { key: ['foo', 'bar'], value: ['foo', 'bar'] },
+        entry: [
+          ['foo', 'bar'],
+          ['foo', 'bar'],
+        ],
         type: 'update',
       });
 
@@ -975,15 +962,12 @@ describe('memoize', () => {
       memoized('one', () => {});
 
       expect(ignoreFunctionArg).toHaveBeenCalledTimes(1);
-      expect(memoized.cache.snapshot()).toEqual({
-        entries: [
-          {
-            key: ['["one","function () { }"]'],
-            value: { one: 'one', two: expect.any(Function) },
-          },
+      expect(memoized.cache.entries()).toEqual([
+        [
+          ['["one","function () { }"]'],
+          { one: 'one', two: expect.any(Function) },
         ],
-        size: 1,
-      });
+      ]);
       expect(memoized.cache.get(['one', () => {}])).toEqual({
         one: 'one',
         two: expect.any(Function),
@@ -1016,14 +1000,11 @@ describe('memoize', () => {
       const fn = jest.fn((one: string, two: string) => one + two);
       const memoized = memoize(fn);
 
-      expect(memoized.cache.snapshot()).toEqual({ entries: [], size: 0 });
+      expect(memoized.cache.entries()).toEqual([]);
 
       memoized.cache.set(['foo', 'bar'], 'foobar');
 
-      expect(memoized.cache.snapshot()).toEqual({
-        entries: [{ key: ['foo', 'bar'], value: 'foobar' }],
-        size: 1,
-      });
+      expect(memoized.cache.entries()).toEqual([[['foo', 'bar'], 'foobar']]);
 
       expect(memoized.cache.get(['foo', 'bar'])).toBe('foobar');
 
@@ -1040,17 +1021,11 @@ describe('memoize', () => {
 
       fn.mockClear();
 
-      expect(memoized.cache.snapshot()).toEqual({
-        entries: [{ key: ['foo', 'bar'], value: 'foobar' }],
-        size: 1,
-      });
+      expect(memoized.cache.entries()).toEqual([[['foo', 'bar'], 'foobar']]);
 
       memoized.cache.set(['foo', 'bar'], 'OVERRIDE');
 
-      expect(memoized.cache.snapshot()).toEqual({
-        entries: [{ key: ['foo', 'bar'], value: 'OVERRIDE' }],
-        size: 1,
-      });
+      expect(memoized.cache.entries()).toEqual([[['foo', 'bar'], 'OVERRIDE']]);
 
       expect(memoized.cache.get(['foo', 'bar'])).toBe('OVERRIDE');
 
@@ -1068,23 +1043,17 @@ describe('memoize', () => {
 
       fn.mockClear();
 
-      expect(memoized.cache.snapshot()).toEqual({
-        entries: [
-          { key: ['bar', 'baz'], value: 'barbaz' },
-          { key: ['foo', 'bar'], value: 'foobar' },
-        ],
-        size: 2,
-      });
+      expect(memoized.cache.entries()).toEqual([
+        [['bar', 'baz'], 'barbaz'],
+        [['foo', 'bar'], 'foobar'],
+      ]);
 
       memoized.cache.set(['foo', 'bar'], 'OVERRIDE');
 
-      expect(memoized.cache.snapshot()).toEqual({
-        entries: [
-          { key: ['foo', 'bar'], value: 'OVERRIDE' },
-          { key: ['bar', 'baz'], value: 'barbaz' },
-        ],
-        size: 2,
-      });
+      expect(memoized.cache.entries()).toEqual([
+        [['foo', 'bar'], 'OVERRIDE'],
+        [['bar', 'baz'], 'barbaz'],
+      ]);
 
       expect(memoized.cache.get(['foo', 'bar'])).toBe('OVERRIDE');
 
@@ -1099,16 +1068,13 @@ describe('memoize', () => {
 
       memoized.cache.set(['foo', 'bar'], 'foobar');
 
-      expect(memoized.cache.snapshot()).toEqual({
-        entries: [{ key: ['foo', 'bar'], value: 'foobar' }],
-        size: 1,
-      });
+      expect(memoized.cache.entries()).toEqual([[['foo', 'bar'], 'foobar']]);
 
       const result = memoized.cache.delete(['foo', 'bar']);
 
       expect(result).toBe(true);
 
-      expect(memoized.cache.snapshot()).toEqual({ entries: [], size: 0 });
+      expect(memoized.cache.entries()).toEqual([]);
     });
 
     it('returns false when deleting an item that does not exist', () => {
@@ -1134,18 +1100,15 @@ describe('memoize', () => {
       memoized('bar', 'baz');
       memoized('baz', 'quz');
 
-      expect(memoized.cache.snapshot()).toEqual({
-        entries: [
-          { key: ['baz', 'quz'], value: 'bazquz' },
-          { key: ['bar', 'baz'], value: 'barbaz' },
-          { key: ['foo', 'bar'], value: 'foobar' },
-        ],
-        size: 3,
-      });
+      expect(memoized.cache.entries()).toEqual([
+        [['baz', 'quz'], 'bazquz'],
+        [['bar', 'baz'], 'barbaz'],
+        [['foo', 'bar'], 'foobar'],
+      ]);
 
       memoized.cache.clear();
 
-      expect(memoized.cache.snapshot()).toEqual({ entries: [], size: 0 });
+      expect(memoized.cache.entries()).toEqual([]);
     });
   });
 });
