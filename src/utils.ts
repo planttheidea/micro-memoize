@@ -3,9 +3,10 @@ import type { CacheEntry, CacheNode, Key, Memoized, TypeOf } from '../index.d';
 export function cloneKey<Fn extends (...args: any[]) => any>(
   args: IArguments | Parameters<Fn> | Key,
 ): [...Parameters<Fn>] {
-  const key = [] as unknown as Parameters<Fn>;
+  const length = args.length;
+  const key = Array(length) as Parameters<Fn>;
 
-  for (let index = 0, length = args.length; index < length; ++index) {
+  for (let index = 0; index < length; ++index) {
     key[index] = args[index];
   }
 

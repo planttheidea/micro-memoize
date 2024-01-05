@@ -956,21 +956,38 @@ describe('memoize', () => {
     });
 
     it('matches for option `transformKey`', () => {
-      const ignoreFunctionArg = jest.fn((one: string, two: () => void) => [
+      const ignoreFunctionArg = jest.fn((one: string, two: () => void) => ({
         one,
         two,
-      ]);
+      }));
 
       const memoized = memoize(ignoreFunctionArg, {
         matchesKey: (key1, key2) => key1[0] === key2[0],
         // Cache based on the serialized first parameter
-        transformKey: (args) => [JSON.stringify(args[0])],
+        transformKey: (args) => [
+          JSON.stringify(args, (_key: string, value: any) =>
+            typeof value === 'function' ? value.toString() : value,
+          ),
+        ],
       });
 
       memoized('one', () => {});
       memoized('one', () => {});
 
       expect(ignoreFunctionArg).toHaveBeenCalledTimes(1);
+      expect(memoized.cache.snapshot()).toEqual({
+        entries: [
+          {
+            key: ['["one","function () { }"]'],
+            value: { one: 'one', two: expect.any(Function) },
+          },
+        ],
+        size: 1,
+      });
+      expect(memoized.cache.get(['one', () => {}])).toEqual({
+        one: 'one',
+        two: expect.any(Function),
+      });
     });
   });
 
