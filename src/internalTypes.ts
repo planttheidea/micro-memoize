@@ -247,11 +247,3 @@ export interface Memoize {
    */
   Cache: typeof Cache;
 }
-
-/**
- * Memoize the given function, with options available to customize the
- * way the memoization is handled.
- */
-declare const memoize: Memoize;
-
-export default memoize;
