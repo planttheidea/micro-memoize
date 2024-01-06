@@ -64,7 +64,7 @@ import memoize from 'micro-memoize/mjs';
 CommonJS:
 
 ```ts
-const memoize = require('micro-memoize');
+const memoize = require('micro-memoize').default;
 ```
 
 ## Usage

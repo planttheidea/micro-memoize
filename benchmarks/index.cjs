@@ -29,7 +29,7 @@ const lruMemoize = require('lru-memoize').default;
 const mem = require('mem');
 const memoizee = require('memoizee');
 const memoizerific = require('memoizerific');
-const memoize = require('../dist/micro-memoize.cjs.js');
+const memoize = require('../dist/micro-memoize.cjs.js').default;
 const ramda = require('ramda').memoizeWith(resolveArguments);
 const underscore = require('underscore').memoize;
 

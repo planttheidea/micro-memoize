@@ -7,7 +7,7 @@ import pkg from './package.json';
 const UMD_CONFIG = {
   input: 'src/index.ts',
   output: {
-    exports: 'default',
+    exports: 'named',
     file: pkg.browser,
     format: 'umd',
     name: pkg.name,
