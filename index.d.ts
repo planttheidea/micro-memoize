@@ -225,10 +225,6 @@ export class Cache<Fn extends (...args: any[]) => any> {
    */
   a: (a: Arg, b: Arg) => boolean;
   /**
-   * Whether the key should be cloned before being processed.
-   */
-  c: boolean;
-  /**
    * Head of the linked list.
    */
   h: CacheNode<Fn> | null;
@@ -316,7 +312,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
    * Create an event listener for a cache change event.
    * @private
    */
-  co<Type extends CacheEventType>(
+  c<Type extends CacheEventType>(
     type: Type,
   ): {
     /**

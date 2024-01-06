@@ -19,7 +19,6 @@ export class Cache<Fn extends (...args: any[]) => any>
   size = 0;
 
   a: (a: Arg, b: Arg) => boolean;
-  c: boolean;
   h: CacheNode<Fn> | null = null;
   k: ((args: IArguments | Key) => Key) | undefined;
   l: number;
@@ -39,9 +38,7 @@ export class Cache<Fn extends (...args: any[]) => any>
     this.m = getDefault('function', options.matchesKey, this.e);
     this.p = getDefault('boolean', options.async, false);
 
-    this.c = !!(transformKey || options.matchesKey);
-
-    if (this.c) {
+    if (transformKey || options.matchesKey === this.m) {
       this.k = transformKey
         ? (args: IArguments | Key) => transformKey(cloneKey<Fn>(args))
         : cloneKey;
@@ -112,7 +109,7 @@ export class Cache<Fn extends (...args: any[]) => any>
     let emitter = this.og(type);
 
     if (!emitter) {
-      emitter = this.co(type);
+      emitter = this.c(type);
       this.os(type, emitter);
     }
 
@@ -140,7 +137,7 @@ export class Cache<Fn extends (...args: any[]) => any>
     return node;
   }
 
-  co<Type extends CacheEventType>(type: Type): EventEmitter<Type, Fn> {
+  c<Type extends CacheEventType>(type: Type): EventEmitter<Type, Fn> {
     const listeners: Array<CacheEventListener<Type, Fn>> = [];
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const cache = this;
