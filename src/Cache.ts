@@ -1,6 +1,5 @@
 import type {
   Arg,
-  Cache as CacheType,
   CacheEntries,
   CacheEntry,
   CacheEvent,
@@ -10,12 +9,10 @@ import type {
   EventEmitter,
   Key,
   Options,
-} from '../index.d';
+} from './internalTypes';
 import { cloneKey, getDefault, getEntry, isSameValueZero } from './utils';
 
-export class Cache<Fn extends (...args: any[]) => any>
-  implements CacheType<Fn>
-{
+export class Cache<Fn extends (...args: any[]) => any> {
   size = 0;
 
   a: (a: Arg, b: Arg) => boolean;

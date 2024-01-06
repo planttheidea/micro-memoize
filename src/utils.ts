@@ -1,4 +1,4 @@
-import type { CacheEntry, CacheNode, Key, Memoized } from '../index.d';
+import type { CacheEntry, CacheNode, Key, Memoized } from './internalTypes';
 
 type TypeOf =
   | 'bigint'

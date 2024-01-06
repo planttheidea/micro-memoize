@@ -130,7 +130,7 @@ const promiseMethod = (number: number, otherNumber: number) => {
 const promiseMethodRejected = (number: number) => {
   console.log('promise rejection method fired', number);
 
-  return new Bluebird((resolve, reject) => {
+  return new Bluebird((_resolve, reject) => {
     setTimeout(() => {
       reject(new Error(foo));
     }, 100);
@@ -215,8 +215,6 @@ const memoizedNoFns = memoize(noFns, {
     return [JSON.stringify(args)];
   },
 });
-
-const options = memoizedNoFns.options;
 
 console.log(memoizedNoFns('one', 'two', () => {}));
 console.log(memoizedNoFns('one', 'two', () => {}));

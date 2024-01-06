@@ -1,4 +1,4 @@
-import type { Key, Memoize, Memoized, Options } from '../index.d';
+import type { Key, Memoize, Memoized, Options } from './internalTypes';
 import { Cache } from './Cache';
 import { cloneKey, isMemoized } from './utils';
 
