@@ -30,12 +30,12 @@ export class Cache<Fn extends (...args: any[]) => any> {
   constructor(options: Options<Fn>) {
     const transformKey = getDefault('function', options.transformKey);
 
-    this.a = getDefault('function', options.matchesArg, isSameValueZero);
+    this.a = getDefault('function', options.isArgEqual, isSameValueZero);
     this.l = getDefault('number', options.maxSize, 1);
-    this.m = getDefault('function', options.matchesKey, this.e);
+    this.m = getDefault('function', options.isKeyEqual, this.e);
     this.p = getDefault('boolean', options.async, false);
 
-    if (transformKey || options.matchesKey === this.m) {
+    if (transformKey || options.isKeyEqual === this.m) {
       this.k = transformKey
         ? (args: IArguments | Key) => transformKey(cloneKey<Fn>(args))
         : cloneKey;

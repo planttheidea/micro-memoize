@@ -200,7 +200,7 @@ describe('memoize', () => {
     ]);
   });
 
-  it('will return the memoized function that will use the custom matchesArg method', () => {
+  it('will return the memoized function that will use the custom isArgEqual method', () => {
     let callCount = 0;
 
     const fn = (one: any, two: any) => {
@@ -212,9 +212,9 @@ describe('memoize', () => {
       };
     };
 
-    const memoized = memoize(fn, { matchesArg: deepEqual });
+    const memoized = memoize(fn, { isArgEqual: deepEqual });
 
-    expect(memoized.options.matchesArg).toBe(deepEqual);
+    expect(memoized.options.isArgEqual).toBe(deepEqual);
 
     expect(
       memoized(
@@ -292,7 +292,7 @@ describe('memoize', () => {
     ]);
   });
 
-  it('will return the memoized function that will use the transformKey method with a custom matchesArg', () => {
+  it('will return the memoized function that will use the transformKey method with a custom isArgEqual', () => {
     let callCount = 0;
 
     const fn = (one: any, two: any) => {
@@ -303,7 +303,7 @@ describe('memoize', () => {
         two,
       };
     };
-    const matchesArg = function (key1: any, key2: any) {
+    const isArgEqual = function (key1: any, key2: any) {
       return key1.args === key2.args;
     };
     const transformKey = function (args: any[]) {
@@ -315,11 +315,11 @@ describe('memoize', () => {
     };
 
     const memoized = memoize(fn, {
-      matchesArg,
+      isArgEqual,
       transformKey,
     });
 
-    expect(memoized.options.matchesArg).toBe(matchesArg);
+    expect(memoized.options.isArgEqual).toBe(isArgEqual);
     expect(memoized.options.transformKey).toBe(transformKey);
 
     const fnArg1 = () => {};
@@ -627,14 +627,14 @@ describe('memoize', () => {
     const fn = () => {};
 
     const maxSize = 5;
-    const matchesArg = () => true;
+    const isArgEqual = () => true;
 
     const memoized = memoize(fn, { maxSize });
-    const reMemoized = memoize(memoized, { matchesArg });
+    const reMemoized = memoize(memoized, { isArgEqual });
 
     expect(reMemoized).not.toBe(memoized);
     expect(reMemoized.options.maxSize).toBe(maxSize);
-    expect(reMemoized.options.matchesArg).toBe(matchesArg);
+    expect(reMemoized.options.isArgEqual).toBe(isArgEqual);
   });
 
   it('will throw an error if not a function', () => {
@@ -656,7 +656,7 @@ describe('memoize', () => {
       expect(result2).toBe(result1);
     });
 
-    it('matches for option `matchesArg`', () => {
+    it('matches for option `isArgEqual`', () => {
       type ContrivedObject = {
         deep: string;
       };
@@ -670,7 +670,7 @@ describe('memoize', () => {
         bar: object.bar,
       });
 
-      const memoizedDeepObject = memoize(deepObject, { matchesArg: deepEqual });
+      const memoizedDeepObject = memoize(deepObject, { isArgEqual: deepEqual });
 
       const result1 = memoizedDeepObject({
         foo: {
@@ -702,7 +702,7 @@ describe('memoize', () => {
       expect(result2).toBe(result1);
     });
 
-    it('matches for option `matchesKey`', () => {
+    it('matches for option `isKeyEqual`', () => {
       type ContrivedObject = { foo: string; bar: number; baz: string };
 
       const deepObject = (object: ContrivedObject) => ({
@@ -712,7 +712,7 @@ describe('memoize', () => {
 
       const memoizedShape = memoize(deepObject, {
         // receives the full key in cache and the full key of the most recent call
-        matchesKey(key1, key2) {
+        isKeyEqual(key1, key2) {
           const object1 = key1[0];
           const object2 = key2[0];
 
@@ -949,7 +949,7 @@ describe('memoize', () => {
       }));
 
       const memoized = memoize(ignoreFunctionArg, {
-        matchesKey: (key1, key2) => key1[0] === key2[0],
+        isKeyEqual: (key1, key2) => key1[0] === key2[0],
         // Cache based on the serialized first parameter
         transformKey: (args) => [
           JSON.stringify(args, (_key: string, value: any) =>

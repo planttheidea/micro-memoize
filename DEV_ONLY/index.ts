@@ -81,7 +81,7 @@ console.groupEnd();
 console.group('maxArgs');
 
 const memoizedMax = memoize(method, {
-  matchesKey: (originalKey, newKey) => originalKey[0] === newKey[0],
+  isKeyEqual: (originalKey, newKey) => originalKey[0] === newKey[0],
 });
 
 memoizedMax(foo, bar);
@@ -105,7 +105,7 @@ const deepEqualMethod = ({
 };
 
 const deepEqualMemoized = memoize(deepEqualMethod, {
-  matchesArg: deepEqual,
+  isArgEqual: deepEqual,
 });
 
 deepEqualMemoized({ one: 1, two: 2 });
@@ -208,7 +208,7 @@ const noFns = (one: string, two: string, three: Function) => {
 };
 
 const memoizedNoFns = memoize(noFns, {
-  matchesArg(key1, key2) {
+  isArgEqual(key1, key2) {
     return key1 === key2;
   },
   transformKey(args) {
@@ -233,7 +233,7 @@ const matchingKeyMethod = function (object: {
 };
 
 const matchingKeyMemoized = memoize(matchingKeyMethod, {
-  matchesKey: deepEqual,
+  isKeyEqual: deepEqual,
   maxSize: 10,
 });
 

@@ -2,6 +2,10 @@ import type { Key, Memoize, Memoized, Options } from './internalTypes';
 import { Cache } from './Cache';
 import { cloneKey, isMemoized } from './utils';
 
+export type * from './internalTypes';
+
+export { Cache };
+
 const memoize: Memoize = function memoize<
   Fn extends (...args: any[]) => any,
   Opts extends Options<Fn>,
@@ -19,16 +23,15 @@ const memoize: Memoize = function memoize<
     return memoize(fn.fn, Object.assign({}, fn.options, passedOptions));
   }
 
-  const cache = new Cache(passedOptions);
-
   const memoized: Memoized<Fn, Opts> = function memoized(this: any) {
-    const { h: head, k: transformKey } = cache;
+    const cache = memoized.cache;
+    const transformKey = cache.k;
     const key = transformKey
       ? transformKey(arguments)
       : (arguments as unknown as Key);
     let node = cache.g(key);
 
-    if (node === head) {
+    if (node === cache.h) {
       cache.oh && cache.oh.n(node);
     } else if (node) {
       cache.u(node);
@@ -46,14 +49,12 @@ const memoize: Memoize = function memoize<
     return node.v;
   };
 
-  memoized.cache = cache;
+  memoized.cache = new Cache(passedOptions);
   memoized.fn = fn;
   memoized.isMemoized = true;
   memoized.options = passedOptions;
 
   return memoized;
 };
-
-memoize.Cache = Cache;
 
 export default memoize;

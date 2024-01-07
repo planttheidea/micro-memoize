@@ -114,7 +114,7 @@ export type KeyTransformer<Fn extends (...args: any[]) => any> = (
   args: Parameters<Fn>,
 ) => Key;
 
-export interface Options<Fn extends (...args: any[]) => any> {
+interface OptionsBase<Fn extends (...args: any[]) => any> {
   [key: string]: any;
 
   /**
@@ -137,9 +137,9 @@ export interface Options<Fn extends (...args: any[]) => any> {
    * @default isSameValueZero
    *
    * @note
-   * This option will be ignored if the `matchesKey` option is provided.
+   * This option will be ignored if the `isKeyEqual` option is provided.
    */
-  matchesArg?: (cachedKeyArg: Arg, nextKeyArg: Arg) => boolean;
+  isArgEqual?: (cachedKeyArg: Arg, nextKeyArg: Arg) => boolean;
   /**
    * Whether the two keys are equal in value. This is used to compare
    * the key the function is called with against a given cache key to
@@ -148,15 +148,49 @@ export interface Options<Fn extends (...args: any[]) => any> {
    * @default isShallowEqual
    *
    * @note
-   * If provided, the `matchesArg` option will be ignored.
+   * If provided, the `isArgEqual` option will be ignored.
    */
-  matchesKey?: (cachedKey: Key, nextKey: Key) => boolean;
+  isKeyEqual?: (cachedKey: Key, nextKey: Key) => boolean;
   /**
    * Transform the parameters passed into a custom key for storage in
    * cache.
    */
   transformKey?: KeyTransformer<Fn>;
 }
+
+interface OptionsArgEqual<Fn extends (...args: any[]) => any> extends OptionsBase<Fn> {
+  /**
+   * Whether the two args are equal in value. This is used to compare
+   * specific arguments in order for a cached key versus the key the
+   * function is called with to determine whether the cached entry
+   * can be used.
+   *
+   * @default isSameValueZero
+   *
+   * @note
+   * This option will be ignored if the `isKeyEqual` option is provided.
+   */
+  isArgEqual?: (cachedKeyArg: Arg, nextKeyArg: Arg) => boolean;
+  isKeyEqual?: never;
+}
+
+interface OptionsKeyEqual<Fn extends (...args: any[]) => any> extends OptionsBase<Fn> {
+  /**
+   * Whether the two args are equal in value. This is used to compare
+   * specific arguments in order for a cached key versus the key the
+   * function is called with to determine whether the cached entry
+   * can be used.
+   *
+   * @default isSameValueZero
+   *
+   * @note
+   * This option will be ignored if the `isKeyEqual` option is provided.
+   */
+  isArgEqual?: never;
+  isKeyEqual?: (cachedKey: Key, nextKey: Key) => boolean;
+}
+
+export type Options<Fn extends (...args: any[]) => any> = OptionsArgEqual<Fn> | OptionsKeyEqual<Fn>;
 
 /**
  * Snapshot of the current cache state.
@@ -241,9 +275,4 @@ export interface Memoize {
   ): Memoized<Fn, Opts>;
   // eslint-disable-next-line @typescript-eslint/ban-types
   <Fn extends (...args: any[]) => any>(fn: Fn): Memoized<Fn, {}>;
-
-  /**
-   * Cache class used for cache instances on memoized functions.
-   */
-  Cache: typeof Cache;
 }

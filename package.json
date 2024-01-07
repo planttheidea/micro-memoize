@@ -98,13 +98,12 @@
     "url": "git+https://github.com/planttheidea/micro-memoize.git"
   },
   "scripts": {
-    "benchmark": "npm run clean && npm run build && NODE_ENV=production node ./benchmarks/index.cjs",
+    "benchmark": "npm run build:cjs && NODE_ENV=production node ./benchmarks/index.cjs",
     "build": "npm run build:esm && npm run build:cjs && npm run build:umd && npm run build:min",
     "build:cjs": "rimraf dist/cjs && NODE_ENV=production rollup -c build/rollup/config.cjs.js && tsc -p ./build/tsconfig/cjs.json",
     "build:esm": "rimraf dist/esm && NODE_ENV=production rollup -c build/rollup/config.esm.js && tsc -p ./build/tsconfig/esm.json",
     "build:min": "rimraf dist/min && NODE_ENV=production rollup -c build/rollup/config.min.js && tsc -p ./build/tsconfig/min.json",
     "build:umd": "rimraf dist/umd && NODE_ENV=production rollup -c build/rollup/config.umd.js && tsc -p ./build/tsconfig/umd.json",
-    "clean": "rimraf dist && rimraf mjs",
     "dev": "NODE_ENV=development webpack-dev-server --config=build/webpack.config.js",
     "lint": "NODE_ENV=test eslint src/*.ts",
     "lint:fix": "npm run lint -- --fix",

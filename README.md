@@ -12,8 +12,8 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
     - [Composition](#composition)
   - [Options](#options)
     - [async](#async)
-    - [matchesArg](#matchesarg)
-    - [matchesKey](#matcheskey)
+    - [isArgEqual](#matchesarg)
+    - [isKeyEqual](#matcheskey)
     - [maxSize](#maxsize)
     - [transformKey](#transformkey)
   - [Cache](#cache)
@@ -72,7 +72,7 @@ Starting in `4.0.0`, you can compose memoized functions if you want to have mult
 ```ts
 const simple = memoized(fn); // { maxSize: 1 }
 const upToFive = memoized(simple, { maxSize: 5 }); // { maxSize: 5 }
-const withCustomEquals = memoized(upToFive, { matchesArg: deepEqual }); // { maxSize: 5, matchesArg: deepEqual }
+const withCustomEquals = memoized(upToFive, { isArgEqual: deepEqual }); // { maxSize: 5, isArgEqual: deepEqual }
 ```
 
 **NOTE**: The original function is the function used in the composition, the composition only applies to the options. In the example above, `upToFive` does not call `simple`, it calls `fn`.
@@ -110,7 +110,7 @@ setTimeout(() => {
 
 **NOTE**: If you don't want rejections to auto-remove the entry from cache, set `async` to `false` (or simply do not set it), but be aware this will also remove the cache listeners that fire on successful resolution.
 
-### matchesArg
+### isArgEqual
 
 `function(arg1: any, arg2: any): boolean`, _defaults to `isSameValueZero`_
 
@@ -136,7 +136,7 @@ const deepObject = (object: {
   bar: object.bar,
 });
 
-const memoizedDeepObject = memoize(deepObject, { matchesArg: deepEqual });
+const memoizedDeepObject = memoize(deepObject, { isArgEqual: deepEqual });
 
 console.log(
   memoizedDeepObject({
@@ -169,7 +169,7 @@ console.log(
 
 **NOTE**: The default method tests for [SameValueZero](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero) equality, which is summarized as strictly equal while also considering `NaN` equal to `NaN`.
 
-### matchesKey
+### isKeyEqual
 
 `function(existingKey: any[], passedKey: any[]): boolean`
 
@@ -193,7 +193,7 @@ const deepObject = (object: ContrivedObject) => ({
 
 const memoizedShape = memoize(deepObject, {
   // receives the full key in cache and the full key of the most recent call
-  matchesKey(key1, key2) {
+  isKeyEqual(key1, key2) {
     const object1 = key1[0];
     const object2 = key2[0];
 
@@ -261,13 +261,13 @@ console.log(memoized('one', () => {})); // ['one', () => {}]
 console.log(memoized('one', () => {})); // pulled from cache, ['one', () => {}]
 ```
 
-If your transformed keys require something other than `SameValueZero` equality, you can combine `transformKey` with [`matchesArg`](#isequal) for completely custom key creation and comparison.
+If your transformed keys require something other than `SameValueZero` equality, you can combine `transformKey` with [`isArgEqual`](#isequal) for completely custom key creation and comparison.
 
 ```ts
 const ignoreFunctionArg = (one: string, two: () => void) => [one, two];
 
 const memoized = memoize(ignoreFunctionArg, {
-  matchesKey: (key1, key2) => key1[0] === key2[0],
+  isKeyEqual: (key1, key2) => key1[0] === key2[0],
   // Cache based on the serialized first parameter
   transformKey: (args) => [JSON.stringify(args[0])],
 });

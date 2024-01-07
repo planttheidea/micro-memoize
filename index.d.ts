@@ -1,6 +1,6 @@
 import type { Memoize } from './dist/umd/types/internalTypes.d';
 
-export * from './dist/umd/types/internalTypes.d';
+export type * from './dist/umd/types/internalTypes.d';
 export type { Cache } from './dist/umd/types/Cache.d';
 
 /**
