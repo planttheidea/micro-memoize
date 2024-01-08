@@ -12,8 +12,8 @@ This is a complete rewrite of the library that improves bundle size and runtime 
 - `isEqual` has been renamed to `isArgEqual`, for better clarity vs `isMatchingKey`
 - `isMatchingKey` has been renamed to `isKeyEqual`, for better clarity vs `isEqual`
 - `onCacheAdd` / `onCacheChange` / `onCacheHit` has been rearchitected entirely into a dynamic event listener on the `memoized.cache` namespace
-- `memoized.cache.snapshot` has renamed to `memoized.cache.entries()` to align with common conventions of `Map`
-  - Returns an array of `[Key, value]` pairs instead of `{keys: Key[], size: number, values: any[]}` to align with common JS conventions and allow direct population of `Map` / `WeakMap`
+- `memoized.cache.snapshot` getter has renamed to `memoized.cache.entries()` method to align with common conventions of `Map`
+  - Returns an array of `[key, value]` pairs to align with common JS conventions and allow direct population of `Map` / `WeakMap`
 - `memoized.options` is now a transparent pass-through of the options provided, instead storing the normalized version
 
 ### Enhancements
