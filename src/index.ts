@@ -35,6 +35,7 @@ const memoize: Memoize = function memoize<
       cache.oh && cache.oh.n(node);
     } else if (node) {
       cache.u(node);
+      cache.oh && cache.oh.n(node);
       cache.ou && cache.ou.n(node);
     } else {
       node = cache.n(
