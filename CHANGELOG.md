@@ -1,5 +1,31 @@
 # micro-memoize CHANGELOG
 
+## 5.0.0
+
+**Smaller, faster, with more features**
+
+This is a complete rewrite of the library that improves bundle size and runtime performance while also offering more features. If you are using the simple use case of `memoize(fn)` then you should have no impact. However, if you were making use of specific options, you will be impacted.
+
+### Breaking changes
+
+- `isPromise` has been renamed to `async`, to more clearly identify the type of function it is vs what the result of calling it will be
+- `isEqual` has been renamed to `isArgEqual`, for better clarity vs `isMatchingKey`
+- `isMatchingKey` has been renamed to `isKeyEqual`, for better clarity vs `isEqual`
+- `onCacheAdd` / `onCacheChange` / `onCacheHit` has been rearchitected entirely into a dynamic event listener on the `memoized.cache` namespace
+- `memoized.cache.snapshot` has renamed to `memoized.cache.entries()` to align with common conventions of `Map`
+  - Returns an array of `[Key, value]` pairs instead of `{keys: Key[], size: number, values: any[]}` to align with common JS conventions and allow direct population of `Map` / `WeakMap`
+- `memoized.options` is now a transparent pass-through of the options provided, instead storing the normalized version
+
+### Enhancements
+
+- Speed improvements
+- Reduction in bundle size
+- Cache manipulation is easier with added methods:
+  - `memoized.cache.delete(key)`
+  - `memoized.cache.get(key)`
+  - `memoized.cache.has(key)`
+  - `memoized.cache.set(key, value)`
+
 ## 4.1.2
 
 - Republish of [#102](https://github.com/planttheidea/micro-memoize/pull/102)
