@@ -115,8 +115,6 @@ export type KeyTransformer<Fn extends (...args: any[]) => any> = (
 ) => Key;
 
 interface OptionsBase<Fn extends (...args: any[]) => any> {
-  [key: string]: any;
-
   /**
    * Whether the result of calling the function is a promise. This
    * will automatically remove the entry from cache if the promise is
@@ -158,7 +156,7 @@ interface OptionsBase<Fn extends (...args: any[]) => any> {
   transformKey?: KeyTransformer<Fn>;
 }
 
-interface OptionsArgEqual<Fn extends (...args: any[]) => any> extends OptionsBase<Fn> {
+export interface OptionsArgEqual<Fn extends (...args: any[]) => any> extends OptionsBase<Fn> {
   /**
    * Whether the two args are equal in value. This is used to compare
    * specific arguments in order for a cached key versus the key the
@@ -174,7 +172,7 @@ interface OptionsArgEqual<Fn extends (...args: any[]) => any> extends OptionsBas
   isKeyEqual?: never;
 }
 
-interface OptionsKeyEqual<Fn extends (...args: any[]) => any> extends OptionsBase<Fn> {
+export interface OptionsKeyEqual<Fn extends (...args: any[]) => any> extends OptionsBase<Fn> {
   /**
    * Whether the two args are equal in value. This is used to compare
    * specific arguments in order for a cached key versus the key the

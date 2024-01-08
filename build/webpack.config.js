@@ -19,7 +19,7 @@ export default {
 
   devtool: 'source-map',
 
-  entry: [path.resolve(ROOT, 'DEV_ONLY', 'index.ts')],
+  entry: [path.resolve(ROOT, 'DEV_ONLY', 'moize-next', 'index.tsx')],
 
   mode: 'development',
 
@@ -28,7 +28,7 @@ export default {
       {
         include: [path.resolve(ROOT, 'src'), path.resolve(ROOT, 'DEV_ONLY')],
         loader: 'ts-loader',
-        test: /\.ts$/,
+        test: /\.(ts|tsx)$/,
       },
     ],
   },

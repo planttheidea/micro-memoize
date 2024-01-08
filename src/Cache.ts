@@ -324,6 +324,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
     }
   }
 
+
   u(node: CacheNode<Fn>): void {
     const next = node.n;
     const prev = node.p;
