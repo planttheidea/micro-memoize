@@ -110,7 +110,6 @@
     "dev": "NODE_ENV=development webpack-dev-server --config=build/webpack.config.js",
     "lint": "NODE_ENV=test eslint src/*.ts",
     "lint:fix": "npm run lint -- --fix",
-    "prepublishOnly": "npm run typecheck && npm run lint && npm run test:coverage && npm run build",
     "release": "release-it",
     "release:beta": "release-it --config=.release-it.beta.json",
     "start": "npm run dev",
