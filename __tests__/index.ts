@@ -516,15 +516,21 @@ describe('memoize', () => {
 
     expect(onAdd).not.toHaveBeenCalled();
     expect(onDelete).not.toHaveBeenCalled();
-    expect(onHit).not.toHaveBeenCalled();
+    expect(onHit).toHaveBeenCalledTimes(1);
     expect(onUpdate).toHaveBeenCalledTimes(1);
 
+    expect(onHit).toHaveBeenCalledWith({
+      cache: memoized.cache,
+      entry: [['foo', 'bar'], { one: 'foo', two: 'bar' }],
+      type: 'hit',
+    });
     expect(onUpdate).toHaveBeenCalledWith({
       cache: memoized.cache,
       entry: [['foo', 'bar'], { one: 'foo', two: 'bar' }],
       type: 'update',
     });
 
+    onHit.mockReset();
     onUpdate.mockReset();
 
     memoized('foo', 'bar');
@@ -895,7 +901,7 @@ describe('memoize', () => {
 
       expect(onAdd).not.toHaveBeenCalled();
 
-      expect(onHit).toHaveBeenCalledTimes(2);
+      expect(onHit).toHaveBeenCalledTimes(3);
       expect(onHit).toHaveBeenNthCalledWith(1, {
         cache: memoized.cache,
         entry: [
@@ -905,6 +911,14 @@ describe('memoize', () => {
         type: 'hit',
       });
       expect(onHit).toHaveBeenNthCalledWith(2, {
+        cache: memoized.cache,
+        entry: [
+          ['foo', 'bar'],
+          ['foo', 'bar'],
+        ],
+        type: 'hit',
+      });
+      expect(onHit).toHaveBeenNthCalledWith(3, {
         cache: memoized.cache,
         entry: [
           ['foo', 'bar'],
