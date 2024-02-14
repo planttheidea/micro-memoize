@@ -1,144 +1,56 @@
-import type {
-  AnyFn,
-  Dictionary,
-  Memoized,
-  NormalizedOptions,
-  Options,
-} from '../index.d';
+import type { CacheEntry, CacheNode, Key, Memoized } from './internalTypes';
 
-/**
- * @constant DEFAULT_OPTIONS_KEYS the default options keys
- */
-const DEFAULT_OPTIONS_KEYS: Dictionary<true> = {
-  isEqual: true,
-  isMatchingKey: true,
-  isPromise: true,
-  maxSize: true,
-  onCacheAdd: true,
-  onCacheChange: true,
-  onCacheHit: true,
-  transformKey: true,
-};
+type TypeOf =
+  | 'bigint'
+  | 'boolean'
+  | 'function'
+  | 'number'
+  | 'object'
+  | 'string'
+  | 'symbol'
+  | 'undefined';
 
-/**
- * @function slice
- *
- * @description
- * slice.call() pre-bound
- */
-export const { slice } = Array.prototype;
+export function cloneKey<Fn extends (...args: any[]) => any>(
+  args: IArguments | Parameters<Fn> | Key,
+): [...Parameters<Fn>] {
+  const length = args.length;
+  const key = Array(length) as Parameters<Fn>;
 
-/**
- * @function cloneArray
- *
- * @description
- * clone the array-like object and return the new array
- *
- * @param arrayLike the array-like object to clone
- * @returns the clone as an array
- */
-export function cloneArray(arrayLike: any[] | IArguments) {
-  const { length } = arrayLike;
-
-  if (!length) {
-    return [];
+  for (let index = 0; index < length; ++index) {
+    key[index] = args[index];
   }
 
-  if (length === 1) {
-    return [arrayLike[0]];
-  }
-
-  if (length === 2) {
-    return [arrayLike[0], arrayLike[1]];
-  }
-
-  if (length === 3) {
-    return [arrayLike[0], arrayLike[1], arrayLike[2]];
-  }
-
-  return slice.call(arrayLike, 0);
+  return key;
 }
 
-/**
- * @function getCustomOptions
- *
- * @description
- * get the custom options on the object passed
- *
- * @param options the memoization options passed
- * @returns the custom options passed
- */
-export function getCustomOptions<Fn extends AnyFn>(options: Options<Fn>) {
-  const customOptions: Options<Fn> = {};
-
-  /* eslint-disable no-restricted-syntax */
-
-  for (const key in options) {
-    if (!DEFAULT_OPTIONS_KEYS[key]) {
-      customOptions[key] = options[key];
-    }
-  }
-
-  /* eslint-enable */
-
-  return customOptions;
+export function getDefault<Value>(
+  type: TypeOf,
+  value: Value,
+  defaultValue?: undefined,
+): Value | undefined;
+export function getDefault<Value, DefaultValue>(
+  type: TypeOf,
+  value: Value,
+  defaultValue: DefaultValue,
+): Value extends undefined ? DefaultValue : Value;
+export function getDefault<Value, DefaultValue>(
+  type: TypeOf,
+  value: Value,
+  defaultValue?: DefaultValue,
+) {
+  return typeof value === type ? value : defaultValue;
 }
 
-/**
- * @function isMemoized
- *
- * @description
- * is the function passed already memoized
- *
- * @param fn the function to test
- * @returns is the function already memoized
- */
-export function isMemoized(fn: any): fn is Memoized<AnyFn> {
-  return typeof fn === 'function' && (fn as Memoized<AnyFn>).isMemoized;
+export function getEntry<Fn extends (...args: any[]) => any>(
+  node: CacheNode<Fn>,
+): CacheEntry<Fn> {
+  return [node.k, node.v];
 }
 
-/**
- * @function isSameValueZero
- *
- * @description
- * are the objects equal based on SameValueZero equality
- *
- * @param object1 the first object to compare
- * @param object2 the second object to compare
- * @returns are the two objects equal
- */
-export function isSameValueZero(object1: any, object2: any) {
-  // eslint-disable-next-line no-self-compare
-  return object1 === object2 || (object1 !== object1 && object2 !== object2);
+export function isMemoized(fn: any): fn is Memoized<any, any> {
+  return typeof fn === 'function' && fn.isMemoized;
 }
 
-/**
- * @function mergeOptions
- *
- * @description
- * merge the options into the target
- *
- * @param existingOptions the options provided
- * @param newOptions the options to include
- * @returns the merged options
- */
-export function mergeOptions<Fn extends AnyFn>(
-  existingOptions: NormalizedOptions<AnyFn> | NormalizedOptions<Fn>,
-  newOptions: Options<Fn>,
-): Readonly<NormalizedOptions<Fn>> {
-  const target = {} as NormalizedOptions<Fn>;
-
-  /* eslint-disable no-restricted-syntax */
-
-  for (const key in existingOptions) {
-    target[key] = existingOptions[key];
-  }
-
-  for (const key in newOptions) {
-    target[key] = newOptions[key];
-  }
-
-  /* eslint-enable */
-
-  return target;
+export function isSameValueZero(a: any, b: any) {
+  return a === b || (a !== a && b !== b);
 }
