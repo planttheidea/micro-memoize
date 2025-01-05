@@ -103,5 +103,5 @@
   },
   "sideEffects": false,
   "types": "./index.d.ts",
-  "version": "4.1.3"
+  "version": "4.2.0-beta.0"
 }
