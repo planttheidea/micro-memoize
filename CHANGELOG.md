@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 4.1.3
+
+- [#121](https://github.com/planttheidea/micro-memoize/pull/121) - Avoid reference to broken source maps (fix for [#79](https://github.com/planttheidea/micro-memoize/issues/79))
+
 ## 4.1.2
 
 - Republish of [#102](https://github.com/planttheidea/micro-memoize/pull/102)
