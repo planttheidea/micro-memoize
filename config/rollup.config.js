@@ -2,7 +2,7 @@ import typescript from '@rollup/plugin-typescript';
 import terser from '@rollup/plugin-terser';
 import localTypescript from 'typescript';
 
-import pkg from './package.json';
+import pkg from '../package.json';
 
 const UMD_CONFIG = {
   input: 'src/index.ts',

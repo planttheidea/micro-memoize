@@ -1,14 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 
-const pkg = require('./package.json');
+const pkg = require('../package.json');
 
-const BASE_PATH = __dirname;
+const BASE_PATH = path.resolve(__dirname, '..');
 const SOURCE_ENTRY = path.join(BASE_PATH, pkg.module);
 const SOURCE_TYPES = path.join(BASE_PATH, 'index.d.ts');
 const DESTINATION = 'mjs';
 const DESTINATION_ENTRY = path.join(BASE_PATH, DESTINATION, 'index.mjs');
-const DESTINATION_MAP = `${DESTINATION_ENTRY}.map`;
 const DESTINATION_TYPES = path.join(BASE_PATH, DESTINATION, 'index.d.mts');
 
 function getFilename(filename) {
