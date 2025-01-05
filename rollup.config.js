@@ -11,12 +11,7 @@ const UMD_CONFIG = {
     file: pkg.browser,
     format: 'umd',
     name: pkg.name,
-    sourcemap: true,
-    sourcemapPathTransform(sourcePath) {
-      const [, sourceFile] = sourcePath.split('/src/');
-
-      return `../src/${sourceFile}`;
-    },
+    sourcemap: false,
   },
   plugins: [typescript({ typescript: localTypescript })],
 };
