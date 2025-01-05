@@ -83,8 +83,8 @@
   },
   "scripts": {
     "benchmark": "npm run dist && NODE_ENV=production node ./benchmarks/index.cjs",
-    "build": "NODE_ENV=production rollup -c --bundleConfigAsCjs",
-    "build:mjs": "node ./es-to-mjs.js",
+    "build": "NODE_ENV=production rollup -c config/rollup.config.js --bundleConfigAsCjs",
+    "build:mjs": "node scripts/es-to-mjs.js",
     "clean": "rimraf dist && rimraf mjs",
     "dev": "NODE_ENV=development webpack-dev-server --config=webpack/webpack.config.js",
     "dist": "npm run clean && npm run build && npm run build:mjs",
@@ -95,7 +95,7 @@
     "release": "release-it",
     "release:beta": "release-it --config=.release-it.beta.json",
     "start": "npm run dev",
-    "test": "NODE_PATH=. jest",
+    "test": "NODE_PATH=. jest --config=config/jest.config.js",
     "test:coverage": "npm run test -- --coverage",
     "test:watch": "npm run test -- --watch",
     "typecheck": "tsc --noEmit"
