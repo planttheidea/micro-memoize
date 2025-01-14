@@ -47,17 +47,25 @@ ESM in browsers:
 import memoize from 'micro-memoize';
 ```
 
-ESM in NodeJS:
-
-```ts
-import memoize from 'micro-memoize/mjs';
-```
-
 CommonJS:
 
 ```ts
 const memoize = require('micro-memoize');
 ```
+
+MJS import:
+
+```ts
+import memoize from 'micro-memoize/mjs';
+```
+
+CJS require:
+
+```ts
+const memoize = require('micro-memoize/cjs');
+```
+
+Note: This is mainly used when `moduleResolution` is set to `Node16` / `NodeNext` in TS projects.
 
 ## Usage
 

@@ -1,6 +1,7 @@
 .idea
 .nyc_output
 coverage
+cjs
 dist
 es
 node_modules
