@@ -76,6 +76,7 @@
   "license": "MIT",
   "main": "dist/micro-memoize.cjs.js",
   "module": "dist/micro-memoize.esm.js",
+  "exports": "./mjs/index.mjs",
   "name": "micro-memoize",
   "repository": {
     "type": "git",
