@@ -4,6 +4,8 @@
 .idea
 .npmignore
 .nyc_output
+.yarn
+.yarnrc*
 __tests__
 .prettierrc.js
 .release-it*
