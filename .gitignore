@@ -1,6 +1,5 @@
 .idea
 .nyc_output
-.pnp*
 .yarn
 coverage
 dist

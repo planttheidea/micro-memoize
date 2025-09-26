@@ -4,7 +4,6 @@
 .idea
 .npmignore
 .nyc_output
-.pnp*
 .yarn
 .yarnrc*
 __tests__
