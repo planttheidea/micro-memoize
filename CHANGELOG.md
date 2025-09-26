@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 4.2.0
+
+- [#122](https://github.com/planttheidea/micro-memoize/pull/122) - Add CJS import for CommonJS requires
+
 ## 4.1.3
 
 - [#121](https://github.com/planttheidea/micro-memoize/pull/121) - Avoid reference to broken source maps (fix for [#79](https://github.com/planttheidea/micro-memoize/issues/79))
