@@ -9,7 +9,7 @@
     "moduleResolution": "node",
     "noImplicitAny": true,
     "noUncheckedIndexedAccess": true,
-    "outDir": "./dist",
+    "outDir": "../../dist",
     "sourceMap": false,
     "strict": true,
     "target": "es5"

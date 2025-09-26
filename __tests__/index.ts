@@ -586,18 +586,21 @@ describe('memoize', () => {
         object: { [key: string]: any },
         metadata: { c: number },
       ): Dictionary<any> =>
-        Object.keys(object).reduce((totals: { [key: string]: number }, key) => {
-          if (Array.isArray(object[key])) {
-            totals[key] = object[key].map(
-              (subObject: { [key: string]: number }) =>
-                calc(subObject, metadata),
-            );
-          } else {
-            totals[key] = object[key].a + object[key].b + metadata.c;
-          }
+        Object.keys(object).reduce(
+          (totals: { [key: string]: number | Array<Dictionary<any>> }, key) => {
+            if (Array.isArray(object[key])) {
+              totals[key] = object[key].map(
+                (subObject: { [key: string]: number }) =>
+                  calc(subObject, metadata),
+              );
+            } else {
+              totals[key] = object[key].a + object[key].b + metadata.c;
+            }
 
-          return totals;
-        }, {}),
+            return totals;
+          },
+          {},
+        ),
       {
         maxSize: 10,
       },

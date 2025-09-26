@@ -2,7 +2,6 @@
 .nyc_output
 .pnp*
 .yarn
-.yarnrc*
 coverage
 dist
 es
