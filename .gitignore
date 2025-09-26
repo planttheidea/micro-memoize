@@ -2,6 +2,7 @@
 .nyc_output
 .yarn
 coverage
+cjs
 dist
 es
 node_modules
