@@ -177,16 +177,12 @@ export class Cache<Fn extends (...args: any[]) => any> {
   on<Type extends CacheEventType>(
     type: Type,
     listener: CacheEventListener<Type, Fn>
-  ): () => void {
+  ): void {
     if (!this.o) {
       this.o = new CacheEventEmitter<Fn>(this);
     }
 
     this.o.a(type, listener);
-
-    return () => {
-      this.off(type, listener);
-    };
   }
 
   /**

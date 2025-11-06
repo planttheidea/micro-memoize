@@ -76,7 +76,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
   on<Type extends CacheEventType>(
     type: Type,
     listener: CacheEventListener<Type, Fn>
-  ): () => void;
+  ): void;
 
   /**
    * Add or update the cache entry for the given `key`.

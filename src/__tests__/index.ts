@@ -1144,6 +1144,10 @@ describe("memoize", () => {
       const fn = vi.fn((one: string, two: string) => one + two);
       const memoized = memoize(fn, { maxSize: 3 });
 
+      const deleteSpy = vi.fn();
+
+      memoized.cache.on("delete", deleteSpy);
+
       memoized("foo", "bar");
       memoized("bar", "baz");
       memoized("baz", "quz");
@@ -1157,6 +1161,21 @@ describe("memoize", () => {
       memoized.cache.clear();
 
       expect(memoized.cache.snapshot.entries).toEqual([]);
+      expect(deleteSpy).toHaveBeenCalledTimes(3);
+    });
+
+    it("does nothing when clearing an empty cache", () => {
+      const fn = vi.fn((one: string, two: string) => one + two);
+      const memoized = memoize(fn, { maxSize: 3 });
+
+      const deleteSpy = vi.fn();
+
+      memoized.cache.on("delete", deleteSpy);
+
+      memoized.cache.clear();
+
+      expect(memoized.cache.snapshot.entries).toEqual([]);
+      expect(deleteSpy).not.toHaveBeenCalled();
     });
   });
 });

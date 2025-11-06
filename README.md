@@ -66,14 +66,6 @@ console.log(memoized("one", "two")); // {one: 'one', two: 'two'}
 console.log(memoized("one", "two")); // pulled from cache, {one: 'one', two: 'two'}
 ```
 
-### Types
-
-If you need them, all types are available under the `MicroMemoize` namespace.
-
-```ts
-import { MicroMemoize } from "micro-memoize";
-```
-
 ### Composition
 
 Starting in `4.0.0`, you can compose memoized functions if you want to have multiple types of memoized versions based on different options.
