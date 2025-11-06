@@ -80,6 +80,22 @@ export class Cache<Fn extends (...args: any[]) => any> {
   }
 
   /**
+   * The [key, value] pairs for the existing entries in cache.
+   */
+  get snapshot(): CacheEntries<Fn> {
+    const entries: Array<CacheEntry<Fn>> = [];
+
+    let node = this.h;
+
+    while (node != null) {
+      entries.push(getEntry(node));
+      node = node.n;
+    }
+
+    return entries;
+  }
+
+  /**
    * Clear the cache.
    */
   clear(): void {
@@ -101,22 +117,6 @@ export class Cache<Fn extends (...args: any[]) => any> {
     }
 
     return false;
-  }
-
-  /**
-   * Get the [key, value] pairs for the existing entries in cache.
-   */
-  entries(): CacheEntries<Fn> {
-    const entries: Array<CacheEntry<Fn>> = [];
-
-    let node = this.h;
-
-    while (node != null) {
-      entries.push(getEntry(node));
-      node = node.n;
-    }
-
-    return entries;
   }
 
   /**

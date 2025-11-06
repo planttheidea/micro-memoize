@@ -20,7 +20,7 @@ describe('memoize', () => {
 
     const memoized = memoize(fn);
 
-    expect(memoized.cache.entries()).toEqual([]);
+    expect(memoized.cache.snapshot).toEqual([]);
 
     expect(memoized.isMemoized).toEqual(true);
 
@@ -37,7 +37,7 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(1);
 
-    expect(memoized.cache.entries()).toEqual([
+    expect(memoized.cache.snapshot).toEqual([
       [['one', 'two'], { one: 'one', two: 'two' }],
     ]);
   });
@@ -56,7 +56,7 @@ describe('memoize', () => {
 
     const memoized = memoize(fn);
 
-    expect(memoized.cache.entries()).toEqual([]);
+    expect(memoized.cache.snapshot).toEqual([]);
 
     expect(memoized.isMemoized).toEqual(true);
 
@@ -85,7 +85,7 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(3);
 
-    expect(memoized.cache.entries()).toEqual([
+    expect(memoized.cache.snapshot).toEqual([
       [['one', 'two'], { one: 'one', two: 'two' }],
     ]);
   });
@@ -105,7 +105,7 @@ describe('memoize', () => {
 
     const memoized = memoize(fn, { maxSize });
 
-    expect(memoized.cache.entries()).toEqual([]);
+    expect(memoized.cache.snapshot).toEqual([]);
 
     expect(memoized.isMemoized).toEqual(true);
 
@@ -138,7 +138,7 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(4);
 
-    expect(memoized.cache.entries()).toEqual([
+    expect(memoized.cache.snapshot).toEqual([
       [['three', 'four'], { one: 'three', two: 'four' }],
       [['two', 'three'], { one: 'two', two: 'three' }],
       [['four', 'five'], { one: 'four', two: 'five' }],
@@ -161,7 +161,7 @@ describe('memoize', () => {
 
     const memoized = memoize(fn, { maxSize });
 
-    expect(memoized.cache.entries()).toEqual([]);
+    expect(memoized.cache.snapshot).toEqual([]);
 
     expect(memoized.isMemoized).toEqual(true);
 
@@ -194,7 +194,7 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(4);
 
-    expect(memoized.cache.entries()).toEqual([
+    expect(memoized.cache.snapshot).toEqual([
       [['three', 'four'], { one: 'three', two: 'four' }],
       [['two', 'three'], { one: 'two', two: 'three' }],
       [['four', 'five'], { one: 'four', two: 'five' }],
@@ -239,7 +239,7 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(1);
 
-    expect(memoized.cache.entries()).toEqual([
+    expect(memoized.cache.snapshot).toEqual([
       [
         [{ deep: { value: 'value' } }, { other: { deep: { value: 'value' } } }],
         {
@@ -288,7 +288,7 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(1);
 
-    expect(memoized.cache.entries()).toEqual([
+    expect(memoized.cache.snapshot).toEqual([
       [['[{"one":"one"},null]'], { one: { one: 'one' }, two: fnArg1 }],
     ]);
   });
@@ -342,7 +342,7 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(1);
 
-    expect(memoized.cache.entries()).toEqual([
+    expect(memoized.cache.snapshot).toEqual([
       [
         [{ args: '[{"one":"one"},null]' }],
         { one: { one: 'one' }, two: fnArg1 },
@@ -406,7 +406,7 @@ describe('memoize', () => {
 
     const pending = memoized('foo');
 
-    expect(memoized.cache.entries().length).toEqual(1);
+    expect(memoized.cache.snapshot.length).toEqual(1);
 
     const catchSpy = vi.fn();
 
@@ -445,13 +445,13 @@ describe('memoize', () => {
 
     const pending = memoized('foo');
 
-    expect(memoized.cache.entries().length).toEqual(1);
+    expect(memoized.cache.snapshot.length).toEqual(1);
 
     const catchSpy = vi.fn();
 
     await pending.catch(catchSpy);
 
-    expect(memoized.cache.entries()).toEqual([]);
+    expect(memoized.cache.snapshot).toEqual([]);
 
     expect(catchSpy).toHaveBeenCalledWith(error);
   });
@@ -758,7 +758,7 @@ describe('memoize', () => {
 
       const pending = memoized('one', 'two');
 
-      expect(memoized.cache.entries()).toEqual([
+      expect(memoized.cache.snapshot).toEqual([
         [['one', 'two'], expect.any(Promise)],
       ]);
 
@@ -766,7 +766,7 @@ describe('memoize', () => {
 
       await pending.catch(catchSpy);
 
-      expect(memoized.cache.entries()).toEqual([]);
+      expect(memoized.cache.snapshot).toEqual([]);
 
       expect(catchSpy).toHaveBeenCalledWith(
         new Error('{"one":"one","two":"two"}'),
@@ -784,7 +784,7 @@ describe('memoize', () => {
 
       expect(manyPossibleArgs).toHaveBeenCalledTimes(3);
 
-      expect(memoized.cache.entries()).toEqual([
+      expect(memoized.cache.snapshot).toEqual([
         [
           ['three', 'four'],
           ['three', 'four'],
@@ -981,7 +981,7 @@ describe('memoize', () => {
       memoized('one', () => {});
 
       expect(ignoreFunctionArg).toHaveBeenCalledTimes(1);
-      expect(memoized.cache.entries()).toEqual([
+      expect(memoized.cache.snapshot).toEqual([
         [
           ['["one","() => {\\n      }"]'],
           { one: 'one', two: expect.any(Function) },
@@ -1019,11 +1019,11 @@ describe('memoize', () => {
       const fn = vi.fn((one: string, two: string) => one + two);
       const memoized = memoize(fn);
 
-      expect(memoized.cache.entries()).toEqual([]);
+      expect(memoized.cache.snapshot).toEqual([]);
 
       memoized.cache.set(['foo', 'bar'], 'foobar');
 
-      expect(memoized.cache.entries()).toEqual([[['foo', 'bar'], 'foobar']]);
+      expect(memoized.cache.snapshot).toEqual([[['foo', 'bar'], 'foobar']]);
 
       expect(memoized.cache.get(['foo', 'bar'])).toBe('foobar');
 
@@ -1040,11 +1040,11 @@ describe('memoize', () => {
 
       fn.mockClear();
 
-      expect(memoized.cache.entries()).toEqual([[['foo', 'bar'], 'foobar']]);
+      expect(memoized.cache.snapshot).toEqual([[['foo', 'bar'], 'foobar']]);
 
       memoized.cache.set(['foo', 'bar'], 'OVERRIDE');
 
-      expect(memoized.cache.entries()).toEqual([[['foo', 'bar'], 'OVERRIDE']]);
+      expect(memoized.cache.snapshot).toEqual([[['foo', 'bar'], 'OVERRIDE']]);
 
       expect(memoized.cache.get(['foo', 'bar'])).toBe('OVERRIDE');
 
@@ -1062,14 +1062,14 @@ describe('memoize', () => {
 
       fn.mockClear();
 
-      expect(memoized.cache.entries()).toEqual([
+      expect(memoized.cache.snapshot).toEqual([
         [['bar', 'baz'], 'barbaz'],
         [['foo', 'bar'], 'foobar'],
       ]);
 
       memoized.cache.set(['foo', 'bar'], 'OVERRIDE');
 
-      expect(memoized.cache.entries()).toEqual([
+      expect(memoized.cache.snapshot).toEqual([
         [['foo', 'bar'], 'OVERRIDE'],
         [['bar', 'baz'], 'barbaz'],
       ]);
@@ -1087,13 +1087,13 @@ describe('memoize', () => {
 
       memoized.cache.set(['foo', 'bar'], 'foobar');
 
-      expect(memoized.cache.entries()).toEqual([[['foo', 'bar'], 'foobar']]);
+      expect(memoized.cache.snapshot).toEqual([[['foo', 'bar'], 'foobar']]);
 
       const result = memoized.cache.delete(['foo', 'bar']);
 
       expect(result).toBe(true);
 
-      expect(memoized.cache.entries()).toEqual([]);
+      expect(memoized.cache.snapshot).toEqual([]);
     });
 
     it('allows deleting older values in cache', () => {
@@ -1104,7 +1104,7 @@ describe('memoize', () => {
       memoized.cache.set(['bar', 'baz'], 'barbaz');
       memoized.cache.set(['baz', 'quz'], 'bazquz');
 
-      expect(memoized.cache.entries()).toEqual([
+      expect(memoized.cache.snapshot).toEqual([
         [['baz', 'quz'], 'bazquz'],
         [['bar', 'baz'], 'barbaz'],
         [['foo', 'bar'], 'foobar'],
@@ -1114,7 +1114,7 @@ describe('memoize', () => {
 
       expect(result).toBe(true);
 
-      expect(memoized.cache.entries()).toEqual([
+      expect(memoized.cache.snapshot).toEqual([
         [['baz', 'quz'], 'bazquz'],
         [['foo', 'bar'], 'foobar'],
       ]);
@@ -1143,7 +1143,7 @@ describe('memoize', () => {
       memoized('bar', 'baz');
       memoized('baz', 'quz');
 
-      expect(memoized.cache.entries()).toEqual([
+      expect(memoized.cache.snapshot).toEqual([
         [['baz', 'quz'], 'bazquz'],
         [['bar', 'baz'], 'barbaz'],
         [['foo', 'bar'], 'foobar'],
@@ -1151,7 +1151,7 @@ describe('memoize', () => {
 
       memoized.cache.clear();
 
-      expect(memoized.cache.entries()).toEqual([]);
+      expect(memoized.cache.snapshot).toEqual([]);
     });
   });
 });

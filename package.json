@@ -88,7 +88,7 @@
     "build:cjs": "node scripts/create-cjs-import.js",
     "build:mjs": "node scripts/create-mjs-import.js",
     "clean": "rm -rf dist && rm -rf mjs",
-    "dev": "NODE_ENV=development webpack-dev-server --config=webpack/webpack.config.js",
+    "dev": "vite --config config/vite.config.js",
     "dist": "npm run clean && npm run build",
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src/*.ts --max-warnings 0",
     "lint:fix": "ESLINT_USE_FLAT_CONFIG=false npm run lint -- --fix",

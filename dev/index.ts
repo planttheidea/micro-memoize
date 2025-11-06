@@ -6,7 +6,7 @@ import Bluebird from 'bluebird';
 import { deepEqual } from 'fast-equals';
 
 import memoize from '../src';
-import { Key, RawKey } from '../index.d';
+import { Key, RawKey } from '..';
 
 // import '../benchmarks';
 
@@ -45,8 +45,7 @@ memoized(foo, bar);
 console.log(memoized.cache.snapshot);
 console.log(memoized.cache);
 
-memoized.cache.keys = [];
-memoized.cache.values = [];
+memoized.cache.clear();
 
 console.log(memoized.cache.snapshot);
 console.log(memoized.cache);
@@ -55,11 +54,14 @@ console.groupEnd();
 
 console.group('standard with larger cache size');
 
-const memoizedLargerCache = memoize(method, {
-  onCacheChange(cache) {
-    console.log([...cache.keys]);
-  },
-  maxSize: 3,
+const memoizedLargerCache = memoize(method, { maxSize: 3 });
+
+memoizedLargerCache.cache.on('add', (event) => {
+  console.log('add', event);
+});
+
+memoizedLargerCache.cache.on('update', (event) => {
+  console.log('update', event);
 });
 
 memoizedLargerCache(foo, bar);
@@ -80,7 +82,7 @@ console.group('maxArgs');
 const isMatchingKeyMaxArgs = (originalKey: Key, newKey: RawKey): boolean =>
   originalKey[0] === newKey[0];
 
-const memoizedMax = memoize(method, { isMatchingKey: isMatchingKeyMaxArgs });
+const memoizedMax = memoize(method, { isKeyEqual: isMatchingKeyMaxArgs });
 
 memoizedMax(foo, bar);
 memoizedMax(foo, baz);
@@ -103,7 +105,7 @@ const deepEqualMethod = ({
 };
 
 const deepEqualMemoized = memoize(deepEqualMethod, {
-  isEqual: deepEqual,
+  isArgEqual: deepEqual,
 });
 
 deepEqualMemoized({ one: 1, two: 2 });
@@ -135,9 +137,9 @@ const promiseMethodRejected = (number: number) => {
   });
 };
 
-const memoizedPromise = memoize(promiseMethod, { isPromise: true });
+const memoizedPromise = memoize(promiseMethod, { async: true });
 const memoizedPromiseRejected = memoize(promiseMethodRejected, {
-  isPromise: true,
+  async: true,
 });
 
 memoizedPromiseRejected(3)
