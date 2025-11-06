@@ -39,7 +39,7 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
 
 ## Summary
 
-As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1.4kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
+As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1.35kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
 
 ## Importing
 
@@ -526,32 +526,38 @@ This is the most robust use-case, with the same complexities as multiple primiti
 
 ## Browser support
 
-- Chrome (all versions)
-- Firefox (all versions)
-- Edge (all versions)
-- Opera 15+
-- IE 9+
-- Safari 6+
-- iOS 8+
-- Android 4+
+- Chrome 47+
+- Firefox 15+
+- Edge 12+
+- Opera 34+
+- Safari 10+
 
 ## Node support
 
-- 4+
+- 6+
 
 ## Development
 
 Standard stuff, clone the repo and `npm install` dependencies. The npm scripts available:
 
-- `build` => run webpack to build development `dist` file with NODE_ENV=development
-- `build:minifed` => run webpack to build production `dist` file with NODE_ENV=production
+- `benchmark` => run benchmarks against well-known alternative packages
+- `build` => run `rollup` to build the `dist` files
+- `build:cjs` => run `rollup` to build the `dist` files specific to CJS requires
+- `build:esm` => run `rollup` to build the `dist` files specific to ESM imports
+- `build:min` => run `rollup` to build the `dist` files specific to pre-minified files
+- `build:umd` => run `rollup` to build the `dist` files specific to legacy environments, such as Node 10
+- `clean`: remove `dist` folder
+- `clean:cjs`: remove `dist/cjs` folder
+- `clean:esm`: remove `dist/esm` folder
+- `clean:min`: remove `dist/min` folder
+- `clean:umd`: remove `dist/umd` folder
 - `dev` => run webpack dev server to run example app (playground!)
 - `dist` => runs `build` and `build-minified`
 - `lint` => run ESLint against all files in the `src` folder
-- `prepublish` => runs `compile-for-publish`
-- `prepublish:compile` => run `lint`, `test`, `transpile:es`, `transpile:lib`, `dist`
-- `test` => run AVA test functions with `NODE_ENV=test`
-- `test:coverage` => run `test` but with `nyc` for coverage checker
-- `test:watch` => run `test`, but with persistent watcher
-- `transpile:lib` => run babel against all files in `src` to create files in `lib`
-- `transpile:es` => run babel against all files in `src` to create files in `es`, preserving ES2015 modules (for [`pkg.module`](https://github.com/rollup/rollup/wiki/pkg.module))
+- `release` => runs the release process, which publishes the latest version of the package
+- `release:beta` => runs the beta release process, which publishes the next beta version of the package
+- `release:scripts` => run the precursor tasks as part of the release process
+- `test` => run unit tests
+- `test:coverage` => run `test` but with coverage
+- `test:watch` => run `test` but with persistent watcher
+- `typecheck` => run `tsc` to verify types are valid

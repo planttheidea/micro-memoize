@@ -1,6 +1,6 @@
 import type { Key, Memoize, Memoized, Options } from "./internalTypes.ts";
 import { Cache } from "./Cache.js";
-import { cloneKey, isMemoized } from "./utils.js";
+import { isMemoized } from "./utils.js";
 
 export type * from "./internalTypes.ts";
 
@@ -23,31 +23,28 @@ export const memoize: Memoize = function memoize<
     return memoize(fn.fn, Object.assign({}, fn.options, passedOptions));
   }
 
-  const memoized: Memoized<Fn, Opts> = function memoized(this: any) {
+  const memoized: Memoized<Fn, Opts> = function memoized(
+    this: any,
+    ...args: Parameters<Fn>
+  ) {
     const cache = memoized.cache;
-    const key = cache.k ? cache.k(arguments) : (arguments as unknown as Key);
+    const key: Key = cache.k ? cache.k(args) : args;
 
     let node = cache.g(key);
 
-    if (node) {
-      if (node === cache.h) {
-        cache.o && cache.o.n("hit", node);
-      } else {
-        cache.u(node);
-
-        if (cache.o) {
-          cache.o.n("hit", node);
-          cache.o.n("update", node);
-        }
-      }
-    } else {
-      node = cache.n(
-        cache.k ? key : cloneKey(key),
-        // @ts-expect-error - allow usage of arguments as pass-through to fn
-        fn.apply(this, arguments) as ReturnType<Fn>
-      );
+    if (!node) {
+      node = cache.n(key, fn.apply(this, args) as ReturnType<Fn>);
 
       cache.o && cache.o.n("add", node);
+    } else if (node !== cache.h) {
+      cache.u(node);
+
+      if (cache.o) {
+        cache.o.n("hit", node);
+        cache.o.n("update", node);
+      }
+    } else if (cache.o) {
+      cache.o.n("hit", node);
     }
 
     return node.v;

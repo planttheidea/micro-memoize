@@ -5,11 +5,12 @@ import type {
   CacheEventType,
   CacheEventListener,
   CacheNode,
-  Key,
-  Options,
   CacheSnapshot,
+  Key,
+  KeyTransformer,
+  Options,
 } from "./internalTypes.ts";
-import { cloneKey, getDefault, isSameValueZero } from "./utils.js";
+import { getDefault, isSameValueZero } from "./utils.js";
 
 export class Cache<Fn extends (...args: any[]) => any> {
   /**
@@ -29,7 +30,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
   /**
    * The transformer for the [k]ey stored in cache.
    */
-  k: ((args: IArguments | Key) => Key) | undefined;
+  k: KeyTransformer<Fn> | undefined;
   /**
    * Whether the entire key [m]atches an existing key in cache.
    */
@@ -55,14 +56,17 @@ export class Cache<Fn extends (...args: any[]) => any> {
     const transformKey = getDefault("function", options.transformKey);
 
     this.a = getDefault("function", options.isArgEqual, isSameValueZero);
-    this.m = getDefault("function", options.isKeyEqual, this.e.bind(this));
+    this.m = getDefault(
+      "function",
+      options.isKeyEqual,
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      this.e
+    );
     this.p = getDefault("boolean", options.async, false);
     this.s = getDefault("number", options.maxSize, 1);
 
     if (transformKey || options.isKeyEqual === this.m) {
-      this.k = transformKey
-        ? (args: IArguments | Key) => transformKey(cloneKey<Fn>(args))
-        : cloneKey;
+      this.k = transformKey;
     }
   }
 
@@ -145,9 +149,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
     const node = this.k ? this.gt(key) : this.g(key);
 
     if (node) {
-      if (node !== this.h) {
-        this.u(node);
-      }
+      node !== this.h && this.u(node);
 
       return node.v;
     }
@@ -196,11 +198,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
 
     if (node) {
       node.v = value;
-
-      if (node !== this.h) {
-        this.u(node);
-      }
-
+      node !== this.h && this.u(node);
       this.o && this.o.n("update", node);
     } else {
       node = this.n(normalizedKey, value);

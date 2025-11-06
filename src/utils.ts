@@ -1,4 +1,4 @@
-import type { Key, Memoized } from "./internalTypes.ts";
+import type { Memoized } from "./internalTypes.ts";
 
 type TypeOf =
   | "bigint"
@@ -9,19 +9,6 @@ type TypeOf =
   | "string"
   | "symbol"
   | "undefined";
-
-export function cloneKey<Fn extends (...args: any[]) => any>(
-  args: IArguments | Parameters<Fn> | Key
-): [...Parameters<Fn>] {
-  const length = args.length;
-  const key = Array(length) as Parameters<Fn>;
-
-  for (let index = 0; index < length; ++index) {
-    key[index] = args[index];
-  }
-
-  return key;
-}
 
 export function getDefault<Value>(
   type: TypeOf,
