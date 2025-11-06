@@ -248,6 +248,6 @@ export interface Memoize {
     fn: Fn,
     passedOptions: Opts,
   ): Memoized<Fn, Opts>;
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   <Fn extends (...args: any[]) => any>(fn: Fn): Memoized<Fn, {}>;
 }

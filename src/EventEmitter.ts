@@ -15,7 +15,7 @@ export class CacheEventEmitter<
   /**
    * The [s]ize of the cache of listeners active for the emitter.
    */
-  s: number = 0;
+  s = 0;
 
   /**
    * The [c]ache the emitter is associated with.
@@ -39,7 +39,7 @@ export class CacheEventEmitter<
    * Method to [a]dd a listener for the given cache change event.
    */
   a(listener: CacheEventListener<Type, Fn>): void {
-    if (this.l.indexOf(listener) === -1) {
+    if (!this.l.includes(listener)) {
       this.l.push(listener);
       ++this.s;
     }
@@ -52,7 +52,7 @@ export class CacheEventEmitter<
     const entry: CacheEntry<Fn> = getEntry(node);
 
     for (let index = 0; index < this.s; ++index) {
-      this.l[index]!({
+      this.l[index]({
         cache: this.c,
         entry,
         reason,

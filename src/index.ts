@@ -30,11 +30,11 @@ const memoize: Memoize = function memoize<
 
     if (node) {
       if (node === cache.h) {
-        cache.oh && cache.oh.n(node);
+        cache.oh?.n(node);
       } else {
         cache.u(node);
-        cache.oh && cache.oh.n(node);
-        cache.ou && cache.ou.n(node);
+        cache.oh?.n(node);
+        cache.ou?.n(node);
       }
 
       return node.v;
@@ -43,10 +43,10 @@ const memoize: Memoize = function memoize<
     const newNode = cache.n(
       cache.k ? key : cloneKey(key),
       // @ts-expect-error - allow usage of arguments as pass-through to fn
-      fn.apply(this, arguments),
+      fn.apply(this, arguments) as ReturnType<Fn>,
     );
 
-    cache.oa && cache.oa.n(newNode);
+    cache.oa?.n(newNode);
 
     return newNode.v;
   };

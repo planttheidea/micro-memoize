@@ -48,6 +48,7 @@
     "simple-statistics": "^7.8.8",
     "tslib": "^2.8.1",
     "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3",
     "underscore": "^1.13.7",
     "vite": "^7.2.1",
     "vitest": "^4.0.7"
@@ -90,8 +91,8 @@
     "clean:umd": "rm -rf dist/umd",
     "dev": "vite --config config/vite.config.js",
     "dist": "npm run clean && npm run build",
-    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src/*.ts --max-warnings 0",
-    "lint:fix": "ESLINT_USE_FLAT_CONFIG=false npm run lint -- --fix",
+    "lint": "eslint --max-warnings 0",
+    "lint:fix": "npm run lint -- --fix",
     "release": "release-it",
     "release:beta": "release-it --config=.release-it.beta.json",
     "release:scripts": "npm run typecheck && npm run lint && npm run test:coverage && npm run dist",

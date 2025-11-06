@@ -3,7 +3,6 @@ import type {
   Arg,
   CacheEntries,
   CacheEntry,
-  CacheEvent,
   CacheEventType,
   CacheEventListener,
   CacheNode,
@@ -111,7 +110,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
 
     if (node) {
       this.d(node);
-      this.od && this.od.n(node);
+      this.od?.n(node);
 
       return true;
     }
@@ -126,7 +125,9 @@ export class Cache<Fn extends (...args: any[]) => any> {
     const node = this.k ? this.gt(key) : this.g(key);
 
     if (node) {
-      node !== this.h && this.u(node);
+      if (node !== this.h) {
+        this.u(node);
+      }
 
       return node.v;
     }
@@ -200,12 +201,15 @@ export class Cache<Fn extends (...args: any[]) => any> {
     if (node) {
       node.v = value;
 
-      node !== this.h && this.u(node);
-      this.ou && this.ou.n(node);
+      if (node !== this.h) {
+        this.u(node);
+      }
+
+      this.ou?.n(node);
     } else {
       node = this.n(normalizedKey, value);
 
-      this.oa && this.oa.n(node);
+      this.oa?.n(node);
     }
 
     return node;
@@ -301,6 +305,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
       return this.oh;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (type === 'update') {
       return this.ou;
     }
@@ -310,7 +315,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
    * Method to [g]et an existing node from cache based on the [t]ransformed `key`.
    */
   gt(key: Parameters<Fn>): CacheNode<Fn> | undefined {
-    return this.g(this.k!(key));
+    return this.g(this.k ? this.k(key) : key);
   }
 
   /**
@@ -324,7 +329,9 @@ export class Cache<Fn extends (...args: any[]) => any> {
     if (this.p) {
       node.v = value.then(
         (value: any) => {
-          this.ou && this.g(key) && this.ou.n(node, 'resolved');
+          if (this.ou && this.g(key)) {
+            this.ou.n(node, 'resolved')
+          }
 
           return value;
         },
@@ -332,7 +339,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
           if (this.g(key)) {
             this.d(node);
 
-            this.od && this.od.n(node, 'rejected');
+            this.od?.n(node, 'rejected');
           }
 
           throw error;
@@ -350,7 +357,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
 
     if (++this.size > this.s && prevTail) {
       this.d(prevTail);
-      this.od && this.od.n(prevTail, 'evicted');
+      this.od?.n(prevTail, 'evicted');
     }
 
     return node;
@@ -371,9 +378,13 @@ export class Cache<Fn extends (...args: any[]) => any> {
       prev.n = next;
     }
 
-    this.h!.p = node;
+    if (this.h) {
+      this.h.p = node;
+    }
+
     node.n = this.h;
     node.p = undefined;
+
     this.h = node;
 
     if (node === this.t) {

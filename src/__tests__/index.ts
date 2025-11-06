@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { deepEqual } from 'fast-equals';
 import { describe, expect, it, test, vi } from 'vitest';
 import memoize from '../index.js';
@@ -430,7 +431,7 @@ describe('memoize', () => {
 
     const error = new Error('boom');
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const fn = async (_ignored: string) => {
       await new Promise((resolve) => {
         setTimeout(resolve, timeout);
@@ -573,21 +574,19 @@ describe('memoize', () => {
     });
   });
 
-  type Dictionary<Type> = {
-    [key: string]: Type;
-  };
+  type Dictionary<Type> = Record<string, Type>;
 
   test('if recursive calls to self will be respected at runtime', () => {
     const calc = memoize(
       (
-        object: { [key: string]: any },
+        object: Record<string, any>,
         metadata: { c: number },
       ): Dictionary<any> =>
         Object.keys(object).reduce(
-          (totals: { [key: string]: number | Dictionary<any>[] }, key) => {
+          (totals: Record<string, number | Array<Dictionary<any>>>, key) => {
             if (Array.isArray(object[key])) {
               totals[key] = object[key].map(
-                (subObject: { [key: string]: number }) =>
+                (subObject: Record<string, number>) =>
                   calc(subObject, metadata),
               );
             } else {
@@ -671,9 +670,9 @@ describe('memoize', () => {
     });
 
     it('matches for option `isArgEqual`', () => {
-      type ContrivedObject = {
+      interface ContrivedObject {
         deep: string;
-      };
+      }
 
       const deepObject = (object: {
         foo: ContrivedObject;
@@ -717,7 +716,7 @@ describe('memoize', () => {
     });
 
     it('matches for option `isKeyEqual`', () => {
-      type ContrivedObject = { foo: string; bar: number; baz: string };
+      interface ContrivedObject { foo: string; bar: number; baz: string }
 
       const deepObject = (object: ContrivedObject) => ({
         foo: object.foo,
