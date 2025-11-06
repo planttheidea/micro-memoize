@@ -46,6 +46,14 @@
     "vite": "^7.2.1",
     "vitest": "^4.0.7"
   },
+  "files": [
+    "dist",
+    "CHANGELOG.md",
+    "index.d.ts",
+    "LICENSE",
+    "package.json",
+    "README.md"
+  ],
   "homepage": "https://github.com/planttheidea/micro-memoize#readme",
   "keywords": [
     "memoize",
