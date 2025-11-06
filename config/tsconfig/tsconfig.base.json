@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    "baseUrl": "src",
+    "baseUrl": "../../src",
     "esModuleInterop": true,
     "jsx": "react",
     "lib": ["dom", "es2015"],

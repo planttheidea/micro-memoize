@@ -40,13 +40,15 @@ const memoize: Memoize = function memoize<
       return node.v;
     }
 
-    // @ts-expect-error - allow usage of arguments as pass-through to fn
-    const value = fn.apply(this, arguments);
-    const newNode = cache.n(cache.k ? key : cloneKey(key), value);
+    const newNode = cache.n(
+      cache.k ? key : cloneKey(key),
+      // @ts-expect-error - allow usage of arguments as pass-through to fn
+      fn.apply(this, arguments),
+    );
 
     cache.oa && cache.oa.n(newNode);
 
-    return value;
+    return newNode.v;
   };
 
   memoized.cache = new Cache(passedOptions);
