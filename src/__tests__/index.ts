@@ -467,6 +467,71 @@ describe("memoize", () => {
     expect(catchSpy).toHaveBeenCalledWith(error);
   });
 
+  it("will notify when the manually-set value in cache resolves", async () => {
+    const timeout = 200;
+
+    const fn = (value: string) =>
+      new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(value);
+        }, timeout);
+      });
+
+    const memoized = memoize(fn, { async: true });
+
+    expect(memoized.options.async).toBe(true);
+
+    const onUpdate = vi.fn();
+
+    memoized.cache.on("update", onUpdate);
+
+    const promise = Promise.resolve("bar");
+
+    memoized.cache.set(["foo"], promise);
+
+    expect(onUpdate).not.toHaveBeenCalled();
+
+    await promise;
+
+    expect(onUpdate).toHaveBeenCalled();
+  });
+
+  it("will notify when the manually-set value in cache rejects", async () => {
+    const timeout = 200;
+
+    const fn = (value: string) =>
+      new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(value);
+        }, timeout);
+      });
+
+    const memoized = memoize(fn, { async: true });
+
+    expect(memoized.options.async).toBe(true);
+
+    const onDelete = vi.fn();
+
+    memoized.cache.on("delete", onDelete);
+
+    const catchSpy = vi.fn();
+
+    const error = new Error("boom");
+    const promise = Promise.reject(error).catch(catchSpy);
+
+    memoized.cache.set(["foo"], promise);
+
+    try {
+      expect(onDelete).not.toHaveBeenCalled();
+
+      await promise;
+    } catch (e) {
+      expect(e).toBe(error);
+
+      expect(onDelete).toHaveBeenCalled();
+    }
+  });
+
   it("will fire the cache event method passed with the cache when it is added, hit, and updated", () => {
     const fn = (one: string, two: string) => ({ one, two });
 

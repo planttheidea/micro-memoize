@@ -188,13 +188,13 @@ export class Cache<Fn extends (...args: any[]) => any> {
   /**
    * Add or update the cache entry for the given `key`.
    */
-  set(key: Parameters<Fn>, value: ReturnType<Fn>): ReturnType<Fn> {
+  set(key: Parameters<Fn>, value: ReturnType<Fn>): void {
     const normalizedKey = this.k ? this.k(key) : key;
 
     let node = this.g(normalizedKey);
 
     if (node) {
-      node.v = value;
+      node.v = this.p && value !== node.v ? this.w(value) : value;
       node !== this.h && this.u(node);
       this.o && this.o.n("update", node);
     } else {
@@ -202,8 +202,6 @@ export class Cache<Fn extends (...args: any[]) => any> {
 
       this.o && this.o.n("add", node);
     }
-
-    return node.v;
   }
 
   /**
@@ -296,23 +294,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
     const node = { k: key, n: prevHead, p: undefined, v: value };
 
     if (this.p) {
-      node.v = value.then(
-        (value: any) => {
-          if (this.o && this.g(key)) {
-            this.o.n("update", node, "resolved");
-          }
-
-          return value;
-        },
-        (error: Error) => {
-          if (this.g(key)) {
-            this.d(node);
-            this.o && this.o.n("delete", node, "rejected");
-          }
-
-          throw error;
-        }
-      );
+      node.v = this.w(node);
     }
 
     this.h = node;
@@ -358,5 +340,31 @@ export class Cache<Fn extends (...args: any[]) => any> {
     if (node === this.t) {
       this.t = prev;
     }
+  }
+
+  /**
+   * Method to [w]rap the promise in a handler to automatically delete the
+   * entry if it rejects.
+   */
+  w(node: CacheNode<Fn>): ReturnType<Fn> {
+    const { k: key, v: value } = node;
+
+    return value.then(
+      (value: any) => {
+        if (this.o && this.g(key)) {
+          this.o.n("update", node, "resolved");
+        }
+
+        return value;
+      },
+      (error: Error) => {
+        if (this.g(key)) {
+          this.d(node);
+          this.o && this.o.n("delete", node, "rejected");
+        }
+
+        throw error;
+      }
+    );
   }
 }
