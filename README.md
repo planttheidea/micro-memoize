@@ -460,69 +460,121 @@ Benchmarks was performed on an i9 16-core Linux laptop with 64GB of memory using
 
 This is usually what benchmarks target for ... its the least-likely use-case, but the easiest to optimize, often at the expense of more common use-cases.
 
-|                   | Operations / second |
-| ----------------- | ------------------- |
-| fast-memoize      | 59,069,204          |
-| **micro-memoize** | **48,267,295**      |
-| lru-memoize       | 46,781,143          |
-| Addy Osmani       | 32,372,414          |
-| lodash            | 29,297,916          |
-| ramda             | 25,054,838          |
-| mem               | 24,848,072          |
-| underscore        | 24,847,818          |
-| memoizee          | 18,272,987          |
-| memoizerific      | 7,302,835           |
+```bash
+┌───────────────┬─────────────┐
+│ Name          │ Ops / sec   │
+├───────────────┼─────────────┤
+│ micro-memoize │ 144,299,591 │
+├───────────────┼─────────────┤
+│ fast-memoize  │ 104,602,763 │
+├───────────────┼─────────────┤
+│ mem           │ 93,733,592  │
+├───────────────┼─────────────┤
+│ lru-memoize   │ 89,878,902  │
+├───────────────┼─────────────┤
+│ lodash        │ 84,528,119  │
+├───────────────┼─────────────┤
+│ underscore    │ 58,725,437  │
+├───────────────┼─────────────┤
+│ addy osmani   │ 56,327,017  │
+├───────────────┼─────────────┤
+│ ramda         │ 50,592,946  │
+├───────────────┼─────────────┤
+│ memoizee      │ 42,364,855  │
+├───────────────┼─────────────┤
+│ memoizerific  │ 18,929,830  │
+└───────────────┴─────────────┘
+```
 
 ### Single parameter (complex object)
 
 This is what most memoization libraries target as the primary use-case, as it removes the complexities of multiple arguments but allows for usage with one to many values.
 
-|                   | Operations / second |
-| ----------------- | ------------------- |
-| **micro-memoize** | **40,360,621**      |
-| lodash            | 30,862,028          |
-| lru-memoize       | 25,740,572          |
-| memoizee          | 12,058,375          |
-| memoizerific      | 6,854,855           |
-| ramda             | 2,287,030           |
-| underscore        | 2,270,574           |
-| Addy Osmani       | 2,076,031           |
-| mem               | 2,001,984           |
-| fast-memoize      | 1,591,019           |
+```bash
+┌───────────────┬────────────┐
+│ Name          │ Ops / sec  │
+├───────────────┼────────────┤
+│ micro-memoize │ 54,531,490 │
+├───────────────┼────────────┤
+│ lodash        │ 53,275,536 │
+├───────────────┼────────────┤
+│ lru-memoize   │ 51,352,280 │
+├───────────────┼────────────┤
+│ memoizee      │ 25,313,982 │
+├───────────────┼────────────┤
+│ memoizerific  │ 15,547,722 │
+├───────────────┼────────────┤
+│ mem           │ 6,143,526  │
+├───────────────┼────────────┤
+│ ramda         │ 5,431,818  │
+├───────────────┼────────────┤
+│ underscore    │ 5,004,560  │
+├───────────────┼────────────┤
+│ addy osmani   │ 4,334,210  │
+├───────────────┼────────────┤
+│ fast-memoize  │ 2,854,318  │
+└───────────────┴────────────┘
+```
 
 ### Multiple parameters (primitives only)
 
 This is a very common use-case for function calls, but can be more difficult to optimize because you need to account for multiple possibilities ... did the number of arguments change, are there default arguments, etc.
 
-|                   | Operations / second |
-| ----------------- | ------------------- |
-| **micro-memoize** | **33,546,353**      |
-| lru-memoize       | 20,884,669          |
-| memoizee          | 7,831,161           |
-| Addy Osmani       | 6,447,448           |
-| memoizerific      | 5,587,779           |
-| mem               | 2,620,943           |
-| underscore        | 1,617,687           |
-| ramda             | 1,569,167           |
-| lodash            | 1,512,515           |
-| fast-memoize      | 1,376,665           |
+```bash
+┌───────────────┬────────────┐
+│ Name          │ Ops / sec  │
+├───────────────┼────────────┤
+│ micro-memoize │ 45,689,364 │
+├───────────────┼────────────┤
+│ lru-memoize   │ 44,492,539 │
+├───────────────┼────────────┤
+│ memoizee      │ 16,292,139 │
+├───────────────┼────────────┤
+│ memoizerific  │ 11,978,541 │
+├───────────────┼────────────┤
+│ addy osmani   │ 8,799,269  │
+├───────────────┼────────────┤
+│ mem           │ 8,195,197  │
+├───────────────┼────────────┤
+│ ramda         │ 2,700,776  │
+├───────────────┼────────────┤
+│ fast-memoize  │ 2,688,259  │
+├───────────────┼────────────┤
+│ underscore    │ 2,625,435  │
+├───────────────┼────────────┤
+│ lodash        │ 2,483,844  │
+└───────────────┴────────────┘
+```
 
 ### Multiple parameters (complex objects)
 
 This is the most robust use-case, with the same complexities as multiple primitives but managing bulkier objects with additional edge scenarios (destructured with defaults, for example).
 
-|                   | Operations / second |
-| ----------------- | ------------------- |
-| **micro-memoize** | **34,857,438**      |
-| lru-memoize       | 20,838,330          |
-| memoizee          | 7,820,066           |
-| memoizerific      | 5,761,357           |
-| mem               | 1,184,550           |
-| ramda             | 1,034,937           |
-| underscore        | 1,021,480           |
-| Addy Osmani       | 1,014,642           |
-| lodash            | 1,014,060           |
-| fast-memoize      | 949,213             |
+```bash
+┌───────────────┬────────────┐
+│ Name          │ Ops / sec  │
+├───────────────┼────────────┤
+│ micro-memoize │ 44,239,079 │
+├───────────────┼────────────┤
+│ lru-memoize   │ 44,124,175 │
+├───────────────┼────────────┤
+│ memoizee      │ 16,776,829 │
+├───────────────┼────────────┤
+│ memoizerific  │ 12,959,257 │
+├───────────────┼────────────┤
+│ mem           │ 6,460,517  │
+├───────────────┼────────────┤
+│ addy osmani   │ 3,528,575  │
+├───────────────┼────────────┤
+│ ramda         │ 2,325,753  │
+├───────────────┼────────────┤
+│ fast-memoize  │ 2,298,835  │
+├───────────────┼────────────┤
+│ underscore    │ 2,260,145  │
+├───────────────┼────────────┤
+│ lodash        │ 2,170,409  │
+└───────────────┴────────────┘
+```
 
 ## Browser support
 
