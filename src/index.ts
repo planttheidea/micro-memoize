@@ -1,141 +1,60 @@
+import type { Key, Memoize, Memoized, Options } from './internalTypes';
 import { Cache } from './Cache';
-import type {
-  AnyFn,
-  CacheModifiedHandler,
-  Key,
-  KeyTransformer,
-  Memoized,
-  Options,
-} from '../index.d';
-import {
-  cloneArray,
-  getCustomOptions,
-  isMemoized,
-  isSameValueZero,
-  mergeOptions,
-} from './utils';
+import { cloneKey, isMemoized } from './utils';
 
-function createMemoizedFunction<Fn extends AnyFn>(
-  fn: Fn | Memoized<Fn>,
-  options: Options<Fn> = {},
-): Memoized<Fn> {
-  if (isMemoized(fn)) {
-    return createMemoizedFunction<Fn>(
-      fn.fn as Fn,
-      mergeOptions(fn.options, options),
+export type * from './internalTypes';
+
+export { Cache };
+
+const memoize: Memoize = function memoize<
+  Fn extends (...args: any[]) => any,
+  Opts extends Options<Fn>,
+>(
+  fn: Fn | Memoized<Fn, Opts>,
+  passedOptions: Opts = {} as Opts,
+): Memoized<Fn, Opts> {
+  if (typeof fn !== 'function') {
+    throw new TypeError(
+      `Expected first parameter to be function; received ${typeof fn}`,
     );
   }
 
-  if (typeof fn !== 'function') {
-    throw new TypeError('You must pass a function to `memoize`.');
+  if (isMemoized(fn)) {
+    return memoize(fn.fn, Object.assign({}, fn.options, passedOptions));
   }
 
-  const {
-    isEqual = isSameValueZero,
-    isMatchingKey,
-    isPromise = false,
-    maxSize = 1,
-    onCacheAdd,
-    onCacheChange,
-    onCacheHit,
-    transformKey,
-  } = options;
+  const memoized: Memoized<Fn, Opts> = function memoized(this: any) {
+    const cache = memoized.cache;
+    const key = cache.k ? cache.k(arguments) : (arguments as unknown as Key);
+    const node = cache.g(key);
 
-  const normalizedOptions = mergeOptions<Fn>(
-    {
-      isEqual,
-      isMatchingKey,
-      isPromise,
-      maxSize,
-      onCacheAdd,
-      onCacheChange,
-      onCacheHit,
-      transformKey,
-    },
-    getCustomOptions(options),
-  );
+    if (node) {
+      if (node === cache.h) {
+        cache.oh && cache.oh.n(node);
+      } else {
+        cache.u(node);
+        cache.oh && cache.oh.n(node);
+        cache.ou && cache.ou.n(node);
+      }
 
-  const cache = new Cache(normalizedOptions);
-
-  const {
-    keys,
-    values,
-    canTransformKey,
-    shouldCloneArguments,
-    shouldUpdateOnAdd,
-    shouldUpdateOnChange,
-    shouldUpdateOnHit,
-  } = cache;
-
-  const memoized = function (this: any) {
-    let key = shouldCloneArguments
-      ? cloneArray(arguments)
-      : (arguments as unknown as Key);
-
-    if (canTransformKey) {
-      key = (transformKey as KeyTransformer)(key);
+      return node.v;
     }
 
-    const keyIndex = keys.length ? cache.getKeyIndex(key) : -1;
+    // @ts-expect-error - allow usage of arguments as pass-through to fn
+    const value = fn.apply(this, arguments);
+    const newNode = cache.n(cache.k ? key : cloneKey(key), value);
 
-    if (keyIndex !== -1) {
-      if (shouldUpdateOnHit) {
-        (onCacheHit as CacheModifiedHandler<Fn>)(
-          cache,
-          normalizedOptions,
-          memoized,
-        );
-      }
+    cache.oa && cache.oa.n(newNode);
 
-      if (keyIndex) {
-        cache.orderByLru(keys[keyIndex]!, values[keyIndex], keyIndex);
+    return value;
+  };
 
-        if (shouldUpdateOnChange) {
-          (onCacheChange as CacheModifiedHandler<Fn>)(
-            cache,
-            normalizedOptions,
-            memoized,
-          );
-        }
-      }
-    } else {
-      const newValue = fn.apply(this, arguments as unknown as any[]);
-      const newKey = shouldCloneArguments
-        ? (key as any[])
-        : cloneArray(arguments);
-
-      cache.orderByLru(newKey, newValue, keys.length);
-
-      if (isPromise) {
-        cache.updateAsyncCache(memoized);
-      }
-
-      if (shouldUpdateOnAdd) {
-        (onCacheAdd as CacheModifiedHandler<Fn>)(
-          cache,
-          normalizedOptions,
-          memoized,
-        );
-      }
-
-      if (shouldUpdateOnChange) {
-        (onCacheChange as CacheModifiedHandler<Fn>)(
-          cache,
-          normalizedOptions,
-          memoized,
-        );
-      }
-    }
-
-    return values[0];
-  } as Memoized<Fn>;
-
-  memoized.cache = cache;
+  memoized.cache = new Cache(passedOptions);
   memoized.fn = fn;
-  memoized.isMemoized = true as const;
-  memoized.options = normalizedOptions;
+  memoized.isMemoized = true;
+  memoized.options = passedOptions;
 
   return memoized;
-}
+};
 
-export default createMemoizedFunction;
+export default memoize;
