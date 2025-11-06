@@ -1,6 +1,6 @@
 {
   "author": "tony.quetano@planttheidea.com",
-  "browser": "dist/micro-memoize.js",
+  "browser": "dist/umd/micro-memoize.js",
   "browserslist": [
     "defaults",
     "Explorer >= 9",
@@ -14,9 +14,11 @@
   },
   "description": "A tiny, crazy fast memoization library for the 95% use-case",
   "devDependencies": {
+    "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^12.1.4",
+    "@rollup/plugin-typescript": "^12.3.0",
     "@types/bluebird": "^3.5.42",
+    "@types/node": "^24.10.0",
     "@types/react": "^19.1.13",
     "@typescript-eslint/eslint-plugin": "^8.44.1",
     "@typescript-eslint/parser": "^8.44.1",
@@ -28,10 +30,8 @@
     "eslint": "^9.36.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react": "^7.37.5",
-    "eslint-webpack-plugin": "^5.0.2",
     "fast-equals": "^5.3.2",
     "fast-memoize": "^2.5.2",
-    "html-webpack-plugin": "^5.6.4",
     "in-publish": "^2.0.1",
     "lodash": "^4.17.21",
     "lru-memoize": "^1.1.0",
@@ -47,15 +47,11 @@
     "rollup": "^4.52.2",
     "rsvp": "^4.8.5",
     "simple-statistics": "^7.8.8",
-    "ts-loader": "^9.5.4",
     "tslib": "^2.8.1",
     "typescript": "^5.9.2",
     "underscore": "^1.13.7",
     "vite": "^7.2.1",
-    "vitest": "^4.0.7",
-    "webpack": "^5.101.3",
-    "webpack-cli": "^6.0.1",
-    "webpack-dev-server": "^5.2.2"
+    "vitest": "^4.0.7"
   },
   "homepage": "https://github.com/planttheidea/micro-memoize#readme",
   "keywords": [
@@ -74,8 +70,8 @@
     "expire"
   ],
   "license": "MIT",
-  "main": "dist/micro-memoize.cjs.js",
-  "module": "dist/micro-memoize.esm.js",
+  "main": "dist/cjs/micro-memoize.cjs",
+  "module": "dist/esm/micro-memoize.mjs",
   "name": "micro-memoize",
   "repository": {
     "type": "git",
@@ -83,11 +79,16 @@
   },
   "scripts": {
     "benchmark": "npm run dist && NODE_ENV=production node ./benchmarks/index.cjs",
-    "build": "npm run build:bundle && npm run build:mjs && npm run build:cjs",
-    "build:bundle": "NODE_ENV=production rollup -c config/rollup.config.js --bundleConfigAsCjs",
-    "build:cjs": "node scripts/create-cjs-import.js",
-    "build:mjs": "node scripts/create-mjs-import.js",
-    "clean": "rm -rf dist && rm -rf mjs",
+    "build": "npm run clean && npm run build:esm && npm run build:cjs && npm run build:umd && npm run build:min",
+    "build:cjs": "NODE_ENV=production rollup -c config/rollup/config.cjs.js && tsc -p config/tsconfig/cjs.json && node scripts/create-cts-files.js",
+    "build:esm": "NODE_ENV=production rollup -c config/rollup/config.esm.js && tsc -p config/tsconfig/esm.json && node scripts/create-mts-files.js",
+    "build:min": "NODE_ENV=production rollup -c config/rollup/config.min.js && tsc -p config/tsconfig/min.json",
+    "build:umd": "NODE_ENV=production rollup -c config/rollup/config.umd.js && tsc -p config/tsconfig/umd.json",
+    "clean": "rm -rf dist",
+    "clean:cjs": "rm -rf dist/cjs",
+    "clean:esm": "rm -rf dist/esm",
+    "clean:min": "rm -rf dist/min",
+    "clean:umd": "rm -rf dist/umd",
     "dev": "vite --config config/vite.config.js",
     "dist": "npm run clean && npm run build",
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src/*.ts --max-warnings 0",
@@ -103,6 +104,7 @@
     "typecheck": "tsc --noEmit"
   },
   "sideEffects": false,
+  "type": "module",
   "types": "./index.d.ts",
   "version": "4.2.0"
 }

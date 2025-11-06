@@ -1,8 +1,8 @@
-import type { Key, Memoize, Memoized, Options } from './internalTypes';
-import { Cache } from './Cache';
-import { cloneKey, isMemoized } from './utils';
+import type { Key, Memoize, Memoized, Options } from './internalTypes.ts';
+import { Cache } from './Cache.js';
+import { cloneKey, isMemoized } from './utils.js';
 
-export type * from './internalTypes';
+export type * from './internalTypes.ts';
 
 export { Cache };
 

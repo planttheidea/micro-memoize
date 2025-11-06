@@ -1,4 +1,4 @@
-import type { Cache } from './Cache';
+import type { Cache } from './Cache.ts';
 
 /**
  * Key used for cache entries.

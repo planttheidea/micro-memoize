@@ -1,4 +1,4 @@
-import type { CacheEntry, CacheNode, Key, Memoized } from './internalTypes';
+import type { CacheEntry, CacheNode, Key, Memoized } from './internalTypes.ts';
 
 type TypeOf =
   | 'bigint'

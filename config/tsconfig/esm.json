@@ -1,0 +1,7 @@
+{
+  "extends": "./declarations.json",
+  "compilerOptions": {
+    "declarationDir": "../../dist/esm/types",
+    "outDir": "../../dist/esm"
+  }
+}

@@ -1,12 +1,12 @@
-import { Cache } from './Cache';
-import {
+import type { Cache } from './Cache.ts';
+import type {
   CacheEntry,
   CacheEvent,
   CacheEventListener,
   CacheEventType,
   CacheNode,
-} from './internalTypes';
-import { getEntry } from './utils';
+} from './internalTypes.ts';
+import { getEntry } from './utils.js';
 
 export class CacheEventEmitter<
   Type extends CacheEventType,

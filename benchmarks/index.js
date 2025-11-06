@@ -1,6 +1,16 @@
-const _ = require('lodash');
-const { createSuite } = require('benchee');
-const Table = require('cli-table2');
+import lodash from 'lodash/memoize';
+import { createSuite } from 'benchee';
+import Table from 'cli-table2';
+
+import { addOsmaniMemoize } from './addy-osmani.js';
+import fastMemoize from 'fast-memoize';
+import lruMemoize from 'lru-memoize';
+import mem from 'mem';
+import memoizee from 'memoizee';
+import memoizerific from 'memoizerific';
+// OURS
+import { memoizeWith } from 'ramda';
+import { memoize as underscore } from 'underscore';
 
 const resolveArguments = function () {
   return arguments.length > 1
@@ -9,6 +19,8 @@ const resolveArguments = function () {
     ? JSON.stringify(arguments[0])
     : arguments[0];
 };
+
+const ramda = memoizeWith(resolveArguments);
 
 const getResults = (results) => {
   const table = new Table({
@@ -22,16 +34,16 @@ const getResults = (results) => {
   return table.toString();
 };
 
-const addyOsmani = require('./addy-osmani.cjs');
-const fastMemoize = require('fast-memoize');
-const lodash = _.memoize;
-const lruMemoize = require('lru-memoize').default;
-const mem = require('mem').default;
-const memoizee = require('memoizee');
-const memoizerific = require('memoizerific');
-const memoize = require('../dist/micro-memoize.cjs.js');
-const ramda = require('ramda').memoizeWith(resolveArguments);
-const underscore = require('underscore').memoize;
+// const addyOsmani = require('./addy-osmani.cjs');
+// const fastMemoize = require('fast-memoize');
+// const lodash = _.memoize;
+// const lruMemoize = require('lru-memoize').default;
+// const mem = require('mem').default;
+// const memoizee = require('memoizee');
+// const memoizerific = require('memoizerific');
+// const memoize = require('../dist/micro-memoize.cjs.js');
+// const ramda = require('ramda').memoizeWith(resolveArguments);
+// const underscore = require('underscore').memoize;
 
 /************* tests *************/
 
@@ -104,7 +116,7 @@ const fibonacciMultipleObject = (object, check) => {
 /************* benchmarks *************/
 
 const singularPrimitive = {
-  'addy osmani': addyOsmani(fibonacciSinglePrimitive),
+  'addy osmani': addOsmaniMemoize(fibonacciSinglePrimitive),
   'fast-memoize': fastMemoize(fibonacciSinglePrimitive),
   lodash: lodash(fibonacciSinglePrimitive),
   'lru-memoize': lruMemoize(1)(fibonacciSinglePrimitive),
@@ -117,7 +129,7 @@ const singularPrimitive = {
 };
 
 const singularArray = {
-  'addy osmani': addyOsmani(fibonacciSingleArray),
+  'addy osmani': addOsmaniMemoize(fibonacciSingleArray),
   'fast-memoize': fastMemoize(fibonacciSingleArray),
   lodash: lodash(fibonacciSingleArray),
   'lru-memoize': lruMemoize(1)(fibonacciSingleArray),
@@ -130,7 +142,7 @@ const singularArray = {
 };
 
 const singularObject = {
-  'addy osmani': addyOsmani(fibonacciSingleObject),
+  'addy osmani': addOsmaniMemoize(fibonacciSingleObject),
   'fast-memoize': fastMemoize(fibonacciSingleObject),
   lodash: lodash(fibonacciSingleObject),
   'lru-memoize': lruMemoize(1)(fibonacciSingleObject),
@@ -143,7 +155,7 @@ const singularObject = {
 };
 
 const multiplePrimitive = {
-  'addy osmani': addyOsmani(fibonacciMultiplePrimitive),
+  'addy osmani': addOsmaniMemoize(fibonacciMultiplePrimitive),
   'fast-memoize': fastMemoize(fibonacciMultiplePrimitive),
   lodash: lodash(fibonacciMultiplePrimitive, resolveArguments),
   'lru-memoize': lruMemoize(1)(fibonacciMultiplePrimitive),
@@ -156,7 +168,7 @@ const multiplePrimitive = {
 };
 
 const multipleArray = {
-  'addy osmani': addyOsmani(fibonacciMultipleArray),
+  'addy osmani': addOsmaniMemoize(fibonacciMultipleArray),
   'fast-memoize': fastMemoize(fibonacciMultipleArray),
   lodash: lodash(fibonacciMultipleArray, resolveArguments),
   'lru-memoize': lruMemoize(1)(fibonacciMultipleArray),
@@ -169,7 +181,7 @@ const multipleArray = {
 };
 
 const multipleObject = {
-  'addy osmani': addyOsmani(fibonacciMultipleObject),
+  'addy osmani': addOsmaniMemoize(fibonacciMultipleObject),
   'fast-memoize': fastMemoize(fibonacciMultipleObject),
   lodash: lodash(fibonacciMultipleObject, resolveArguments),
   'lru-memoize': lruMemoize(1)(fibonacciMultipleObject),
