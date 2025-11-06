@@ -419,6 +419,10 @@ describe('memoize', () => {
       reason: 'rejected',
       type: 'delete',
     });
+
+    memoized.cache.off('delete', onDelete);
+
+    expect(memoized.cache.od).toBeUndefined();
   });
 
   it('will return a memoized method that will auto-remove the key from cache if async is true and the async is rejected', async () => {
@@ -1090,6 +1094,30 @@ describe('memoize', () => {
       expect(result).toBe(true);
 
       expect(memoized.cache.entries()).toEqual([]);
+    });
+
+    it('allows deleting older values in cache', () => {
+      const fn = vi.fn((one: string, two: string) => one + two);
+      const memoized = memoize(fn, { maxSize: 3 });
+
+      memoized.cache.set(['foo', 'bar'], 'foobar');
+      memoized.cache.set(['bar', 'baz'], 'barbaz');
+      memoized.cache.set(['baz', 'quz'], 'bazquz');
+
+      expect(memoized.cache.entries()).toEqual([
+        [['baz', 'quz'], 'bazquz'],
+        [['bar', 'baz'], 'barbaz'],
+        [['foo', 'bar'], 'foobar'],
+      ]);
+
+      const result = memoized.cache.delete(['bar', 'baz']);
+
+      expect(result).toBe(true);
+
+      expect(memoized.cache.entries()).toEqual([
+        [['baz', 'quz'], 'bazquz'],
+        [['foo', 'bar'], 'foobar'],
+      ]);
     });
 
     it('returns false when deleting an item that does not exist', () => {

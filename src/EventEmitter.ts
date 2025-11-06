@@ -35,10 +35,6 @@ export class CacheEventEmitter<
     this.t = type;
   }
 
-  get size() {
-    return this.s;
-  }
-
   /**
    * Method to [a]dd a listener for the given cache change event.
    */
