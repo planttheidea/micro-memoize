@@ -1,9 +1,9 @@
-import type { Cache } from "./Cache.js";
+import type { Cache } from './Cache.js';
 import type {
   CacheEventListener,
   CacheEventType,
   CacheNode,
-} from "./internalTypes.js";
+} from './internalTypes.js';
 
 type ListenerMap<Fn extends (...args: any[]) => any> = Partial<
   Record<string, Array<CacheEventListener<CacheEventType, Fn>>>
@@ -35,7 +35,7 @@ export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
    */
   a<Type extends CacheEventType>(
     type: Type,
-    listener: CacheEventListener<Type, Fn>
+    listener: CacheEventListener<Type, Fn>,
   ): void {
     const listeners = this.l[type];
 
@@ -72,7 +72,7 @@ export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
    */
   r<Type extends CacheEventType>(
     type: Type,
-    listener: CacheEventListener<Type, Fn>
+    listener: CacheEventListener<Type, Fn>,
   ): void {
     const listeners = this.l[type];
 

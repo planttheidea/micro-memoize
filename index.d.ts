@@ -112,6 +112,12 @@ export class Cache<Fn extends (...args: any[]) => any> {
    * Method to [u]date the location of the given `node` in cache.
    */
   u(node: CacheNode<Fn>): void;
+
+  /**
+   * Method to [w]rap the promise in a handler to automatically delete the
+   * entry if it rejects.
+   */
+  w(node: CacheNode<Fn>): ReturnType<Fn>;
 }
 
 type ListenerMap<Fn extends (...args: any[]) => any> = Partial<

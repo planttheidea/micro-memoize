@@ -36,6 +36,7 @@
     "mem": "^10.0.0",
     "memoizee": "^0.4.17",
     "memoizerific": "^1.11.3",
+    "prettier": "^3.6.2",
     "ramda": "^0.32.0",
     "react": "^19.2.0",
     "release-it": "^19.0.6",

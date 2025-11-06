@@ -1,4 +1,4 @@
-import { CacheEventEmitter } from "./CacheEventEmitter.js";
+import { CacheEventEmitter } from './CacheEventEmitter.js';
 import type {
   Arg,
   CacheEntry,
@@ -9,8 +9,8 @@ import type {
   Key,
   KeyTransformer,
   Options,
-} from "./internalTypes.ts";
-import { getDefault, isSameValueZero } from "./utils.js";
+} from './internalTypes.ts';
+import { getDefault, isSameValueZero } from './utils.js';
 
 export class Cache<Fn extends (...args: any[]) => any> {
   /**
@@ -52,17 +52,17 @@ export class Cache<Fn extends (...args: any[]) => any> {
   t: CacheNode<Fn> | undefined;
 
   constructor(options: Options<Fn>) {
-    const transformKey = getDefault("function", options.transformKey);
+    const transformKey = getDefault('function', options.transformKey);
 
-    this.a = getDefault("function", options.isArgEqual, isSameValueZero);
+    this.a = getDefault('function', options.isArgEqual, isSameValueZero);
     this.m = getDefault(
-      "function",
+      'function',
       options.isKeyEqual,
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      this.e
+      this.e,
     );
-    this.p = getDefault("boolean", options.async, false);
-    this.s = getDefault("number", options.maxSize, 1);
+    this.p = getDefault('boolean', options.async, false);
+    this.s = getDefault('number', options.maxSize, 1);
 
     if (transformKey || options.isKeyEqual === this.m) {
       this.k = transformKey;
@@ -120,7 +120,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
 
     if (emitter && nodes) {
       for (let index = 0; index < nodes.length; ++index) {
-        emitter.n("delete", nodes[index]);
+        emitter.n('delete', nodes[index], 'clear');
       }
     }
   }
@@ -133,7 +133,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
 
     if (node) {
       this.d(node);
-      this.o && this.o.n("delete", node);
+      this.o && this.o.n('delete', node);
 
       return true;
     }
@@ -144,11 +144,19 @@ export class Cache<Fn extends (...args: any[]) => any> {
   /**
    * Get the value in cache based on the given `key`.
    */
-  get(key: Parameters<Fn>): ReturnType<Fn> | undefined {
+  get(
+    key: Parameters<Fn>,
+    reason = 'explicit get',
+  ): ReturnType<Fn> | undefined {
     const node = this.k ? this.gt(key) : this.g(key);
 
     if (node) {
-      node !== this.h && this.u(node);
+      if (node !== this.h) {
+        this.u(node);
+        this.o && this.o.n('update', node, reason);
+      } else if (this.o) {
+        this.o.n('hit', node, reason);
+      }
 
       return node.v;
     }
@@ -166,7 +174,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
    */
   off<Type extends CacheEventType>(
     type: Type,
-    listener: CacheEventListener<Type, Fn>
+    listener: CacheEventListener<Type, Fn>,
   ): void {
     this.o && this.o.r(type, listener);
   }
@@ -176,7 +184,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
    */
   on<Type extends CacheEventType>(
     type: Type,
-    listener: CacheEventListener<Type, Fn>
+    listener: CacheEventListener<Type, Fn>,
   ): void {
     if (!this.o) {
       this.o = new CacheEventEmitter<Fn>(this);
@@ -188,7 +196,11 @@ export class Cache<Fn extends (...args: any[]) => any> {
   /**
    * Add or update the cache entry for the given `key`.
    */
-  set(key: Parameters<Fn>, value: ReturnType<Fn>): void {
+  set(
+    key: Parameters<Fn>,
+    value: ReturnType<Fn>,
+    reason = 'explicit set',
+  ): void {
     const normalizedKey = this.k ? this.k(key) : key;
 
     let node = this.g(normalizedKey);
@@ -196,11 +208,11 @@ export class Cache<Fn extends (...args: any[]) => any> {
     if (node) {
       node.v = this.p && value !== node.v ? this.w(value) : value;
       node !== this.h && this.u(node);
-      this.o && this.o.n("update", node);
+      this.o && this.o.n('update', node, reason);
     } else {
       node = this.n(normalizedKey, value);
 
-      this.o && this.o.n("add", node);
+      this.o && this.o.n('add', node, reason);
     }
   }
 
@@ -307,7 +319,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
 
     if (++this.c > this.s && prevTail) {
       this.d(prevTail);
-      this.o && this.o.n("delete", prevTail, "evicted");
+      this.o && this.o.n('delete', prevTail, 'evicted');
     }
 
     return node;
@@ -352,7 +364,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
     return value.then(
       (value: any) => {
         if (this.o && this.g(key)) {
-          this.o.n("update", node, "resolved");
+          this.o.n('update', node, 'resolved');
         }
 
         return value;
@@ -360,11 +372,11 @@ export class Cache<Fn extends (...args: any[]) => any> {
       (error: Error) => {
         if (this.g(key)) {
           this.d(node);
-          this.o && this.o.n("delete", node, "rejected");
+          this.o && this.o.n('delete', node, 'rejected');
         }
 
         throw error;
-      }
+      },
     );
   }
 }

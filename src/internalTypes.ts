@@ -1,4 +1,4 @@
-import type { Cache } from "./Cache.ts";
+import type { Cache } from './Cache.ts';
 
 /**
  * Key used for cache entries.
@@ -22,12 +22,12 @@ export interface CacheNode<Fn extends (...args: any[]) => any> {
 /**
  * The type of cache event fired.
  */
-export type CacheEventType = "add" | "delete" | "hit" | "update";
+export type CacheEventType = 'add' | 'delete' | 'hit' | 'update';
 
 /**
  * The reason for the given cache event type (optional).
  */
-export type CacheEventReason = "evicted" | "rejected" | "resolved";
+export type CacheEventReason = 'evicted' | 'rejected' | 'resolved';
 
 interface CacheEventBase<Fn extends (...args: any[]) => any> {
   cache: Cache<Fn>;
@@ -43,7 +43,7 @@ interface CacheEventBase<Fn extends (...args: any[]) => any> {
 export interface OnAddEvent<Fn extends (...args: any[]) => any>
   extends CacheEventBase<Fn> {
   reason?: undefined;
-  type: "add";
+  type: 'add';
 }
 
 /**
@@ -51,8 +51,8 @@ export interface OnAddEvent<Fn extends (...args: any[]) => any>
  */
 export interface OnDeleteEvent<Fn extends (...args: any[]) => any>
   extends CacheEventBase<Fn> {
-  reason?: "evicted" | "rejected";
-  type: "delete";
+  reason?: 'evicted' | 'rejected';
+  type: 'delete';
 }
 
 /**
@@ -61,7 +61,7 @@ export interface OnDeleteEvent<Fn extends (...args: any[]) => any>
 export interface OnHitEvent<Fn extends (...args: any[]) => any>
   extends CacheEventBase<Fn> {
   reason?: undefined;
-  type: "hit";
+  type: 'hit';
 }
 
 /**
@@ -71,8 +71,8 @@ export interface OnHitEvent<Fn extends (...args: any[]) => any>
  */
 export interface OnUpdateEvent<Fn extends (...args: any[]) => any>
   extends CacheEventBase<Fn> {
-  reason?: "resolved";
-  type: "update";
+  reason?: 'resolved';
+  type: 'update';
 }
 
 /**
@@ -80,23 +80,23 @@ export interface OnUpdateEvent<Fn extends (...args: any[]) => any>
  */
 export type CacheEvent<
   Type extends CacheEventType,
-  Fn extends (...args: any[]) => any
-> = Type extends "add"
+  Fn extends (...args: any[]) => any,
+> = Type extends 'add'
   ? OnAddEvent<Fn>
-  : Type extends "delete"
-  ? OnDeleteEvent<Fn>
-  : Type extends "hit"
-  ? OnHitEvent<Fn>
-  : Type extends "update"
-  ? OnUpdateEvent<Fn>
-  : never;
+  : Type extends 'delete'
+    ? OnDeleteEvent<Fn>
+    : Type extends 'hit'
+      ? OnHitEvent<Fn>
+      : Type extends 'update'
+        ? OnUpdateEvent<Fn>
+        : never;
 
 /**
  * A listener for the given type of cache event.
  */
 export type CacheEventListener<
   Type extends CacheEventType,
-  Fn extends (...args: any[]) => any
+  Fn extends (...args: any[]) => any,
 > = (event: CacheEvent<Type, Fn>) => void;
 
 /**
@@ -104,7 +104,7 @@ export type CacheEventListener<
  * a custom cache key.
  */
 export type KeyTransformer<Fn extends (...args: any[]) => any> = (
-  args: Parameters<Fn>
+  args: Parameters<Fn>,
 ) => Key;
 
 interface OptionsBase<Fn extends (...args: any[]) => any> {
@@ -189,7 +189,7 @@ export type Options<Fn extends (...args: any[]) => any> =
 
 export type CacheEntry<Fn extends (...args: any[]) => any> = [
   Key,
-  ReturnType<Fn>
+  ReturnType<Fn>,
 ];
 
 /**
@@ -204,7 +204,7 @@ export interface CacheSnapshot<Fn extends (...args: any[]) => any> {
 
 export interface Memoized<
   Fn extends (...args: any[]) => any,
-  Opts extends Options<Fn>
+  Opts extends Options<Fn>,
 > {
   (...args: Parameters<Fn>): ReturnType<Fn>;
 
@@ -232,22 +232,22 @@ export interface Memoize {
       (...args: any[]) => any,
       Options<(...args: any[]) => any>
     >,
-    Opts extends Options<Fn["fn"]>
+    Opts extends Options<Fn['fn']>,
   >(
     fn: Fn,
-    passedOptions: Opts
-  ): Memoized<Fn["fn"], Fn["options"] & Opts>;
+    passedOptions: Opts,
+  ): Memoized<Fn['fn'], Fn['options'] & Opts>;
   <
     Fn extends Memoized<
       (...args: any[]) => any,
       Options<(...args: any[]) => any>
-    >
+    >,
   >(
-    fn: Fn
-  ): Memoized<Fn, Fn["options"]>;
+    fn: Fn,
+  ): Memoized<Fn, Fn['options']>;
   <Fn extends (...args: any[]) => any, Opts extends Options<Fn>>(
     fn: Fn,
-    passedOptions: Opts
+    passedOptions: Opts,
   ): Memoized<Fn, Opts>;
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   <Fn extends (...args: any[]) => any>(fn: Fn): Memoized<Fn, {}>;

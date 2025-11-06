@@ -1,21 +1,21 @@
-import type { Key, Memoize, Memoized, Options } from "./internalTypes.ts";
-import { Cache } from "./Cache.js";
-import { isMemoized } from "./utils.js";
+import type { Key, Memoize, Memoized, Options } from './internalTypes.ts';
+import { Cache } from './Cache.js';
+import { isMemoized } from './utils.js';
 
-export type * from "./internalTypes.ts";
+export type * from './internalTypes.ts';
 
 export { Cache };
 
 export const memoize: Memoize = function memoize<
   Fn extends (...args: any[]) => any,
-  Opts extends Options<Fn>
+  Opts extends Options<Fn>,
 >(
   fn: Fn | Memoized<Fn, Opts>,
-  passedOptions: Opts = {} as Opts
+  passedOptions: Opts = {} as Opts,
 ): Memoized<Fn, Opts> {
-  if (typeof fn !== "function") {
+  if (typeof fn !== 'function') {
     throw new TypeError(
-      `Expected first parameter to be function; received ${typeof fn}`
+      `Expected first parameter to be function; received ${typeof fn}`,
     );
   }
 
@@ -35,16 +35,16 @@ export const memoize: Memoize = function memoize<
     if (!node) {
       node = cache.n(key, fn.apply(this, args) as ReturnType<Fn>);
 
-      cache.o && cache.o.n("add", node);
+      cache.o && cache.o.n('add', node);
     } else if (node !== cache.h) {
       cache.u(node);
 
       if (cache.o) {
-        cache.o.n("hit", node);
-        cache.o.n("update", node);
+        cache.o.n('hit', node);
+        cache.o.n('update', node);
       }
     } else if (cache.o) {
-      cache.o.n("hit", node);
+      cache.o.n('hit', node);
     }
 
     return node.v;

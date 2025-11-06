@@ -4212,6 +4212,7 @@ __metadata:
     mem: "npm:^10.0.0"
     memoizee: "npm:^0.4.17"
     memoizerific: "npm:^1.11.3"
+    prettier: "npm:^3.6.2"
     ramda: "npm:^0.32.0"
     react: "npm:^19.2.0"
     release-it: "npm:^19.0.6"
@@ -4864,6 +4865,15 @@ __metadata:
   version: 1.2.1
   resolution: "prelude-ls@npm:1.2.1"
   checksum: 10c0/b00d617431e7886c520a6f498a2e14c75ec58f6d93ba48c3b639cf241b54232d90daa05d83a9e9b9fef6baa63cb7e1e4602c2372fea5bc169668401eb127d0cd
+  languageName: node
+  linkType: hard
+
+"prettier@npm:^3.6.2":
+  version: 3.6.2
+  resolution: "prettier@npm:3.6.2"
+  bin:
+    prettier: bin/prettier.cjs
+  checksum: 10c0/488cb2f2b99ec13da1e50074912870217c11edaddedeadc649b1244c749d15ba94e846423d062e2c4c9ae683e2d65f754de28889ba06e697ac4f988d44f45812
   languageName: node
   linkType: hard
 
