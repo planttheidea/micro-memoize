@@ -115,11 +115,6 @@ interface OptionsBase<Fn extends (...args: any[]) => any> {
    */
   async?: boolean;
   /**
-   * The maximum number of entries to store in cache.
-   * @default 1
-   */
-  maxSize?: number;
-  /**
    * Whether the two args are equal in value. This is used to compare
    * specific arguments in order for a cached key versus the key the
    * function is called with to determine whether the cached entry
@@ -142,6 +137,11 @@ interface OptionsBase<Fn extends (...args: any[]) => any> {
    * If provided, the `isArgEqual` option will be ignored.
    */
   isKeyEqual?: (cachedKey: Key, nextKey: Key) => boolean;
+  /**
+   * The maximum number of entries to store in cache.
+   * @default 1
+   */
+  maxSize?: number;
   /**
    * Transform the parameters passed into a custom key for storage in
    * cache.

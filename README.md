@@ -12,16 +12,18 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
     - [Types](#types)
     - [Composition](#composition)
   - [Options](#options)
-    - [isEqual](#isequal)
-    - [isMatchingKey](#ismatchingkey)
-    - [isPromise](#ispromise)
+    - [async](#async)
+    - [isArgEqual](#isargequal)
+    - [isKeyEqual](#iskeyequal)
     - [maxSize](#maxsize)
-    - [onCacheAdd](#oncacheadd)
-    - [onCacheChange](#oncachechange)
-    - [onCacheHit](#oncachehit)
     - [transformKey](#transformkey)
   - [Additional properties](#additional-properties)
     - [memoized.cache](#memoizedcache)
+      - [memoized.cache.on](#memoizedcacheon)
+        - [add](#add)
+        - [delete](#delete)
+        - [hit](#hit)
+        - [update](#update)
       - [memoized.cache.snapshot](#memoizedcachesnapshot)
     - [memoized.fn](#memoizedfn)
     - [memoized.isMemoized](#memoizedismemoized)
@@ -37,35 +39,21 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
 
 ## Summary
 
-As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1.44kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
+As the author of [`moize`](https://github.com/planttheidea/moize), I created a consistently fast memoization library, but `moize` has a lot of features to satisfy a large number of edge cases. `micro-memoize` is a simpler approach, focusing on the core feature set with a much smaller footprint (~1.4kB minified+gzipped). Stripping out these edge cases also allows `micro-memoize` to be faster across the board than `moize`.
 
 ## Importing
 
-ESM in browsers:
+ESM:
 
 ```ts
-import memoize from 'micro-memoize';
+import { memoize } from "micro-memoize";
 ```
 
 CommonJS:
 
 ```ts
-const memoize = require('micro-memoize');
+const { memoize } = require("micro-memoize");
 ```
-
-MJS import:
-
-```ts
-import memoize from 'micro-memoize/mjs';
-```
-
-CJS require:
-
-```ts
-const memoize = require('micro-memoize/cjs');
-```
-
-Note: This is mainly used when `moduleResolution` is set to `Node16` / `NodeNext` in TS projects.
 
 ## Usage
 
@@ -74,8 +62,8 @@ const assembleToObject = (one: string, two: string) => ({ one, two });
 
 const memoized = memoize(assembleToObject);
 
-console.log(memoized('one', 'two')); // {one: 'one', two: 'two'}
-console.log(memoized('one', 'two')); // pulled from cache, {one: 'one', two: 'two'}
+console.log(memoized("one", "two")); // {one: 'one', two: 'two'}
+console.log(memoized("one", "two")); // pulled from cache, {one: 'one', two: 'two'}
 ```
 
 ### Types
@@ -83,7 +71,7 @@ console.log(memoized('one', 'two')); // pulled from cache, {one: 'one', two: 'tw
 If you need them, all types are available under the `MicroMemoize` namespace.
 
 ```ts
-import { MicroMemoize } from 'micro-memoize';
+import { MicroMemoize } from "micro-memoize";
 ```
 
 ### Composition
@@ -100,119 +88,7 @@ const withCustomEquals = memoized(upToFive, { isEqual: deepEqual }); // { maxSiz
 
 ## Options
 
-### isEqual
-
-`function(object1: any, object2: any): boolean`, _defaults to `isSameValueZero`_
-
-Custom method to compare equality of keys, determining whether to pull from cache or not, by comparing each argument in order.
-
-Common use-cases:
-
-- Deep equality comparison
-- Limiting the arguments compared
-
-```ts
-import { deepEqual } from 'fast-equals';
-
-type ContrivedObject = {
-  deep: string;
-};
-
-const deepObject = (object: {
-  foo: ContrivedObject;
-  bar: ContrivedObject;
-}) => ({
-  foo: object.foo,
-  bar: object.bar,
-});
-
-const memoizedDeepObject = memoize(deepObject, { isEqual: deepEqual });
-
-console.log(
-  memoizedDeepObject({
-    foo: {
-      deep: 'foo',
-    },
-    bar: {
-      deep: 'bar',
-    },
-    baz: {
-      deep: 'baz',
-    },
-  }),
-); // {foo: {deep: 'foo'}, bar: {deep: 'bar'}}
-
-console.log(
-  memoizedDeepObject({
-    foo: {
-      deep: 'foo',
-    },
-    bar: {
-      deep: 'bar',
-    },
-    baz: {
-      deep: 'baz',
-    },
-  }),
-); // pulled from cache
-```
-
-**NOTE**: The default method tests for [SameValueZero](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero) equality, which is summarized as strictly equal while also considering `NaN` equal to `NaN`.
-
-### isMatchingKey
-
-`function(object1: any[], object2: any[]): boolean`
-
-Custom method to compare equality of keys, determining whether to pull from cache or not, by comparing the entire key.
-
-Common use-cases:
-
-- Comparing the shape of the key
-- Matching on values regardless of order
-- Serialization of arguments
-
-```ts
-import { deepEqual } from 'fast-equals';
-
-type ContrivedObject = { foo: string; bar: number };
-
-const deepObject = (object: ContrivedObject) => ({
-  foo: object.foo,
-  bar: object.bar,
-});
-
-const memoizedShape = memoize(deepObject, {
-  // receives the full key in cache and the full key of the most recent call
-  isMatchingKey(key1, key2) {
-    const object1 = key1[0];
-    const object2 = key2[0];
-
-    return (
-      object1.hasOwnProperty('foo') &&
-      object2.hasOwnProperty('foo') &&
-      object1.bar === object2.bar
-    );
-  },
-});
-
-console.log(
-  memoizedShape({
-    foo: 'foo',
-    bar: 123,
-    baz: 'baz',
-  }),
-); // {foo: {deep: 'foo'}, bar: {deep: 'bar'}}
-
-console.log(
-  memoizedShape({
-    foo: 'not foo',
-    bar: 123,
-    baz: 'baz',
-  }),
-); // pulled from cache
-```
-
-### isPromise
+### async
 
 `boolean`, _defaults to `false`_
 
@@ -232,7 +108,7 @@ const fn = async (one: string, two: string) => {
 
 const memoized = memoize(fn, { isPromise: true });
 
-memoized('one', 'two');
+memoized("one", "two");
 
 console.log(memoized.cache.snapshot.keys); // [['one', 'two']]
 console.log(memoized.cache.snapshot.values); // [Promise]
@@ -245,6 +121,118 @@ setTimeout(() => {
 
 **NOTE**: If you don't want rejections to auto-remove the entry from cache, set `isPromise` to `false` (or simply do not set it), but be aware this will also remove the cache listeners that fire on successful resolution.
 
+### isArgEqual
+
+`function(object1: any, object2: any): boolean`, _defaults to `isSameValueZero`_
+
+Custom method to compare equality of keys, determining whether to pull from cache or not, by comparing each argument in order.
+
+Common use-cases:
+
+- Deep equality comparison
+- Limiting the arguments compared
+
+```ts
+import { deepEqual } from "fast-equals";
+
+type ContrivedObject = {
+  deep: string;
+};
+
+const deepObject = (object: {
+  foo: ContrivedObject;
+  bar: ContrivedObject;
+}) => ({
+  foo: object.foo,
+  bar: object.bar,
+});
+
+const memoizedDeepObject = memoize(deepObject, { isEqual: deepEqual });
+
+console.log(
+  memoizedDeepObject({
+    foo: {
+      deep: "foo",
+    },
+    bar: {
+      deep: "bar",
+    },
+    baz: {
+      deep: "baz",
+    },
+  })
+); // {foo: {deep: 'foo'}, bar: {deep: 'bar'}}
+
+console.log(
+  memoizedDeepObject({
+    foo: {
+      deep: "foo",
+    },
+    bar: {
+      deep: "bar",
+    },
+    baz: {
+      deep: "baz",
+    },
+  })
+); // pulled from cache
+```
+
+**NOTE**: The default method tests for [SameValueZero](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero) equality, which is summarized as strictly equal while also considering `NaN` equal to `NaN`.
+
+### isKeyEqual
+
+`function(object1: any[], object2: any[]): boolean`
+
+Custom method to compare equality of keys, determining whether to pull from cache or not, by comparing the entire key.
+
+Common use-cases:
+
+- Comparing the shape of the key
+- Matching on values regardless of order
+- Serialization of arguments
+
+```ts
+import { deepEqual } from "fast-equals";
+
+type ContrivedObject = { foo: string; bar: number };
+
+const deepObject = (object: ContrivedObject) => ({
+  foo: object.foo,
+  bar: object.bar,
+});
+
+const memoizedShape = memoize(deepObject, {
+  // receives the full key in cache and the full key of the most recent call
+  isMatchingKey(key1, key2) {
+    const object1 = key1[0];
+    const object2 = key2[0];
+
+    return (
+      object1.hasOwnProperty("foo") &&
+      object2.hasOwnProperty("foo") &&
+      object1.bar === object2.bar
+    );
+  },
+});
+
+console.log(
+  memoizedShape({
+    foo: "foo",
+    bar: 123,
+    baz: "baz",
+  })
+); // {foo: {deep: 'foo'}, bar: {deep: 'bar'}}
+
+console.log(
+  memoizedShape({
+    foo: "not foo",
+    bar: 123,
+    baz: "baz",
+  })
+); // pulled from cache
+```
+
 ### maxSize
 
 `number`, _defaults to `1`_
@@ -256,112 +244,16 @@ const manyPossibleArgs = (one: string, two: string) => [one, two];
 
 const memoized = memoize(manyPossibleArgs, { maxSize: 3 });
 
-console.log(memoized('one', 'two')); // ['one', 'two']
-console.log(memoized('two', 'three')); // ['two', 'three']
-console.log(memoized('three', 'four')); // ['three', 'four']
+console.log(memoized("one", "two")); // ['one', 'two']
+console.log(memoized("two", "three")); // ['two', 'three']
+console.log(memoized("three", "four")); // ['three', 'four']
 
-console.log(memoized('one', 'two')); // pulled from cache
-console.log(memoized('two', 'three')); // pulled from cache
-console.log(memoized('three', 'four')); // pulled from cache
+console.log(memoized("one", "two")); // pulled from cache
+console.log(memoized("two", "three")); // pulled from cache
+console.log(memoized("three", "four")); // pulled from cache
 
-console.log(memoized('four', 'five')); // ['four', 'five'], drops ['one', 'two'] from cache
+console.log(memoized("four", "five")); // ['four', 'five'], drops ['one', 'two'] from cache
 ```
-
-### onCacheAdd
-
-`function(cache: Cache, options: Options): void`
-
-Callback method that executes whenever the cache is added to. This is mainly to allow for higher-order caching managers that use `micro-memoize` to perform superset functionality on the `cache` object.
-
-```ts
-const fn = (one: string, two: string) => [one, two];
-
-const memoized = memoize(fn, {
-  maxSize: 2,
-  onCacheAdd(cache, options) {
-    console.log('cache has been added to: ', cache);
-    console.log('memoized method has the following options applied: ', options);
-  },
-});
-
-memoized('foo', 'bar'); // cache has been added to
-memoized('foo', 'bar');
-memoized('foo', 'bar');
-
-memoized('bar', 'foo'); // cache has been added to
-memoized('bar', 'foo');
-memoized('bar', 'foo');
-
-memoized('foo', 'bar');
-memoized('foo', 'bar');
-memoized('foo', 'bar');
-```
-
-**NOTE**: This method is not executed when the `cache` is manually manipulated, only when changed via calling the memoized method.
-
-### onCacheChange
-
-`function(cache: Cache, options: Options): void`
-
-Callback method that executes whenever the cache is added to or the order is updated. This is mainly to allow for higher-order caching managers that use `micro-memoize` to perform superset functionality on the `cache` object.
-
-```ts
-const fn = (one: string, two: string) => [one, two];
-
-const memoized = memoize(fn, {
-  maxSize: 2,
-  onCacheChange(cache, options) {
-    console.log('cache has changed: ', cache);
-    console.log('memoized method has the following options applied: ', options);
-  },
-});
-
-memoized('foo', 'bar'); // cache has changed
-memoized('foo', 'bar');
-memoized('foo', 'bar');
-
-memoized('bar', 'foo'); // cache has changed
-memoized('bar', 'foo');
-memoized('bar', 'foo');
-
-memoized('foo', 'bar'); // cache has changed
-memoized('foo', 'bar');
-memoized('foo', 'bar');
-```
-
-**NOTE**: This method is not executed when the `cache` is manually manipulated, only when changed via calling the memoized method. When the execution of other cache listeners (`onCacheAdd`, `onCacheHit`) is applicable, this method will execute after those methods.
-
-### onCacheHit
-
-`function(cache: Cache, options: Options): void`
-
-Callback method that executes whenever the cache is hit, whether the order is updated or not. This is mainly to allow for higher-order caching managers that use `micro-memoize` to perform superset functionality on the `cache` object.
-
-```ts
-const fn = (one: string, two: string) => [one, two];
-
-const memoized = memoize(fn, {
-  maxSize: 2,
-  onCacheHit(cache, options) {
-    console.log('cache was hit: ', cache);
-    console.log('memoized method has the following options applied: ', options);
-  },
-});
-
-memoized('foo', 'bar');
-memoized('foo', 'bar'); // cache was hit
-memoized('foo', 'bar'); // cache was hit
-
-memoized('bar', 'foo');
-memoized('bar', 'foo'); // cache was hit
-memoized('bar', 'foo'); // cache was hit
-
-memoized('foo', 'bar'); // cache was hit
-memoized('foo', 'bar'); // cache was hit
-memoized('foo', 'bar'); // cache was hit
-```
-
-**NOTE**: This method is not executed when the `cache` is manually manipulated, only when changed via calling the memoized method.
 
 ### transformKey
 
@@ -376,8 +268,8 @@ const memoized = memoize(ignoreFunctionArgs, {
   transformKey: (args) => [JSON.stringify(args[0])],
 });
 
-console.log(memoized('one', () => {})); // ['one', () => {}]
-console.log(memoized('one', () => {})); // pulled from cache, ['one', () => {}]
+console.log(memoized("one", () => {})); // ['one', () => {}]
+console.log(memoized("one", () => {})); // pulled from cache, ['one', () => {}]
 ```
 
 If your transformed keys require something other than `SameValueZero` equality, you can combine `transformKey` with [`isEqual`](#isequal) for completely custom key creation and comparison.
@@ -391,8 +283,8 @@ const memoized = memoize(ignoreFunctionArg, {
   transformKey: (args) => [JSON.stringify(args[0])],
 });
 
-console.log(memoized('one', () => {})); // ['one', () => {}]
-console.log(memoized('one', () => {})); // pulled from cache, ['one', () => {}]
+console.log(memoized("one", () => {})); // ['one', () => {}]
+console.log(memoized("one", () => {})); // pulled from cache, ['one', () => {}]
 ```
 
 ## Additional properties
@@ -417,19 +309,121 @@ const method = (one: string, two: string) => ({ one, two });
 
 const memoized = memoize(method);
 
-memoized.cache.keys.push(['one', 'two']);
-memoized.cache.values.push('cached');
+memoized.cache.keys.push(["one", "two"]);
+memoized.cache.values.push("cached");
 
-console.log(memoized('one', 'two')); // 'cached'
+console.log(memoized("one", "two")); // 'cached'
 ```
 
 **NOTE**: `moize` offers a variety of convenience methods for this manual `cache` manipulation, and while `micro-memoize` allows all the same capabilities by exposing the `cache`, it does not provide any convenience methods.
+
+#### memoized.cache.on
+
+Add listeners to specific cache events, in case you want to perform side-effects.
+
+### add
+
+Executes whenever the cache is added to.
+
+```ts
+const fn = (one: string, two: string) => [one, two];
+
+const memoized = memoize(fn, { maxSize: 2 });
+
+memoized.cache.on("add", (event) => {
+  console.log("cache has been added to: ", JSON.stringify(event));
+});
+
+memoized("foo", "bar"); // cache has been added to
+memoized("foo", "bar");
+memoized("foo", "bar");
+memoized("bar", "foo"); // cache has been added to
+memoized("bar", "foo");
+memoized("bar", "foo");
+memoized("foo", "bar");
+memoized("foo", "bar");
+memoized("foo", "bar");
+```
+
+### delete
+
+Executes whenever the cache has an entry removed.
+
+```ts
+const fn = (one: string, two: string) => [one, two];
+
+const memoized = memoize(fn);
+
+memoized.cache.on("delete", (event) => {
+  console.log("cache has changed: ", JSON.stringify(event));
+});
+
+memoized("foo", "bar");
+memoized("foo", "bar");
+memoized("foo", "bar");
+memoized("bar", "foo"); // cache has changed
+memoized("bar", "foo");
+memoized("bar", "foo");
+memoized("foo", "bar"); // cache has changed
+memoized("foo", "bar");
+memoized("foo", "bar");
+```
+
+**NOTE**: This method is not executed when the `cache` is manually manipulated, only when changed via calling the memoized method. When the execution of other cache listeners (`onCacheAdd`, `onCacheHit`) is applicable, this method will execute after those methods.
+
+### hit
+
+Executes whenever the cache is hit, whether the order is updated or not.
+
+```ts
+const fn = (one: string, two: string) => [one, two];
+
+const memoized = memoize(fn, { maxSize: 2 });
+
+memoized.cache.on("update", (event) => {
+  console.log("cache entry found: ", JSON.stringify(event));
+});
+
+memoized("foo", "bar");
+memoized("foo", "bar"); // cache entry was found
+memoized("foo", "bar"); // cache entry was found
+memoized("bar", "foo");
+memoized("bar", "foo"); // cache entry was found
+memoized("bar", "foo"); // cache entry was found
+memoized("foo", "bar"); // cache entry was found
+memoized("foo", "bar"); // cache entry was found
+memoized("foo", "bar"); // cache entry was found
+```
+
+### update
+
+Executes whenever the cache has the order of entries change due to an older entry being accessed more recently.
+
+```ts
+const fn = (one: string, two: string) => [one, two];
+
+const memoized = memoize(fn, { maxSize: 2 });
+
+memoized.cache.on("update", (event) => {
+  console.log("cache has changed: ", JSON.stringify(event));
+});
+
+memoized("foo", "bar");
+memoized("bar", "foo"); // cache has changed
+memoized("bar", "foo");
+memoized("bar", "foo");
+memoized("foo", "bar"); // cache has changed
+memoized("foo", "bar");
+memoized("foo", "bar");
+```
+
+**NOTE**: This method is not executed when the `cache` is manually manipulated, only when changed via calling the memoized method.
 
 #### memoized.cache.snapshot
 
 `Object`
 
-This is identical to the `cache` object referenced above, but it is a deep clone created at request, which will provide a persistent snapshot of the values at that time. This is useful when tracking the cache changes over time, as the `cache` object is mutated internally for performance reasons.
+Provide a persistent snapshot of the values at that time. This is useful when tracking the cache changes over time, as the `cache` object is mutated internally for performance reasons.
 
 ### memoized.fn
 
@@ -453,7 +447,7 @@ The [`options`](#options) passed when creating the memoized method.
 
 All values provided are the number of operations per second (ops/sec) calculated by the [Benchmark suite](https://benchmarkjs.com/). Note that `underscore`, `lodash`, and `ramda` do not support mulitple-parameter memoization (which is where `micro-memoize` really shines), so they are not included in those benchmarks.
 
-Benchmarks was performed on an i7 8-core Arch Linux laptop with 16GB of memory using NodeJS version `10.15.0`. The default configuration of each library was tested with a fibonacci calculation based on the following parameters:
+Benchmarks was performed on an i9 16-core Linux laptop with 64GB of memory using NodeJS version `24.11.0`. The default configuration of each library was tested with a fibonacci calculation based on the following parameters:
 
 - Single primitive = `35`
 - Single object = `{number: 35}`
