@@ -6,7 +6,7 @@ export type * from './internalTypes.ts';
 
 export { Cache };
 
-const memoize: Memoize = function memoize<
+export const memoize: Memoize = function memoize<
   Fn extends (...args: any[]) => any,
   Opts extends Options<Fn>,
 >(
@@ -58,5 +58,3 @@ const memoize: Memoize = function memoize<
 
   return memoized;
 };
-
-export default memoize;

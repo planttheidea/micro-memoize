@@ -1,14 +1,14 @@
-import lodash from 'lodash/memoize';
+import lodash from 'lodash/memoize.js';
 import { createSuite } from 'benchee';
 import Table from 'cli-table2';
 
 import { addOsmaniMemoize } from './addy-osmani.js';
 import fastMemoize from 'fast-memoize';
-import lruMemoize from 'lru-memoize';
+import lru from 'lru-memoize';
 import mem from 'mem';
 import memoizee from 'memoizee';
 import memoizerific from 'memoizerific';
-// OURS
+import { memoize } from '../dist/esm/micro-memoize.mjs';
 import { memoizeWith } from 'ramda';
 import { memoize as underscore } from 'underscore';
 
@@ -20,6 +20,7 @@ const resolveArguments = function () {
     : arguments[0];
 };
 
+const lruMemoize = lru.default;
 const ramda = memoizeWith(resolveArguments);
 
 const getResults = (results) => {
@@ -33,17 +34,6 @@ const getResults = (results) => {
 
   return table.toString();
 };
-
-// const addyOsmani = require('./addy-osmani.cjs');
-// const fastMemoize = require('fast-memoize');
-// const lodash = _.memoize;
-// const lruMemoize = require('lru-memoize').default;
-// const mem = require('mem').default;
-// const memoizee = require('memoizee');
-// const memoizerific = require('memoizerific');
-// const memoize = require('../dist/micro-memoize.cjs.js');
-// const ramda = require('ramda').memoizeWith(resolveArguments);
-// const underscore = require('underscore').memoize;
 
 /************* tests *************/
 

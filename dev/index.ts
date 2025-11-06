@@ -5,7 +5,7 @@
 import Bluebird from 'bluebird';
 import { deepEqual } from 'fast-equals';
 
-import memoize from '../src/index.js';
+import { memoize } from '../src/index.js';
 import type { Key } from '../src/internalTypes.ts';
 
 // import '../benchmarks';

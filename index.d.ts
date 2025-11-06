@@ -126,7 +126,7 @@ export declare namespace MicroMemoize {
   };
 }
 
-export default function memoize<Fn extends AnyFn>(
+export function memoize<Fn extends AnyFn>(
   fn: Fn | Memoized<Fn>,
   options?: Options<Fn>,
 ): Memoized<Fn>;

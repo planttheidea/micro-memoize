@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
+
 import { deepEqual } from 'fast-equals';
 import { describe, expect, it, test, vi } from 'vitest';
-import memoize from '../index.js';
+import { memoize } from '../index.js';
 
 const has = (object: any, property: string) =>
   Object.prototype.hasOwnProperty.call(object, property);
