@@ -1,7 +1,6 @@
 {
-  "extends": "./declarations.json",
+  "extends": "./base.json",
   "compilerOptions": {
-    "declarationDir": "../../dist/min/types",
     "outDir": "../../dist/min"
   }
 }

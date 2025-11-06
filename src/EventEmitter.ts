@@ -37,12 +37,10 @@ export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
   ): void {
     const listeners = this.l[type];
 
-    if (listeners) {
-      if (!listeners.includes(listener)) {
-        listeners.push(listener);
-      }
-    } else {
+    if (!listeners) {
       this.l[type] = [listener];
+    } else if (!listeners.includes(listener)) {
+      listeners.push(listener);
     }
   }
 
