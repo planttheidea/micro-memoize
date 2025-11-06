@@ -1,4 +1,4 @@
-import { CacheEventEmitter } from "./EventEmitter.js";
+import { CacheEventEmitter } from "./CacheEventEmitter.js";
 import type {
   Arg,
   CacheEntry,
@@ -14,15 +14,14 @@ import { getDefault, isSameValueZero } from "./utils.js";
 
 export class Cache<Fn extends (...args: any[]) => any> {
   /**
-   * The current size of the populated cache.
-   */
-  size = 0;
-
-  /**
    * Whether the individual [a]rgument passed is equal to the same argument in order
    * for a key in cache.
    */
   a: (a: Arg, b: Arg) => boolean;
+  /**
+   * The current [c]ount of entries in the cache.
+   */
+  c = 0;
   /**
    * The [h]ead of the cache linked list.
    */
@@ -97,7 +96,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
    * Clear the cache.
    */
   clear(): void {
-    if (!this.size) {
+    if (!this.h) {
       return;
     }
 
@@ -108,7 +107,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
     if (emitter) {
       nodes = [];
 
-      let node = this.h;
+      let node: CacheNode<Fn> | undefined = this.h;
 
       while (node != null) {
         nodes.push(node);
@@ -117,7 +116,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
     }
 
     this.h = this.t = undefined;
-    this.size = 0;
+    this.c = 0;
 
     if (emitter && nodes) {
       for (let index = 0; index < nodes.length; ++index) {
@@ -175,23 +174,25 @@ export class Cache<Fn extends (...args: any[]) => any> {
   /**
    * Add the given `listener` for the given `type` of cache event.
    */
-  on<
-    Type extends CacheEventType,
-    Listener extends CacheEventListener<Type, Fn>
-  >(type: Type, listener: Listener): Listener {
+  on<Type extends CacheEventType>(
+    type: Type,
+    listener: CacheEventListener<Type, Fn>
+  ): () => void {
     if (!this.o) {
       this.o = new CacheEventEmitter<Fn>(this);
     }
 
     this.o.a(type, listener);
 
-    return listener;
+    return () => {
+      this.off(type, listener);
+    };
   }
 
   /**
    * Add or update the cache entry for the given `key`.
    */
-  set(key: Parameters<Fn>, value: ReturnType<Fn>): CacheNode<Fn> {
+  set(key: Parameters<Fn>, value: ReturnType<Fn>): ReturnType<Fn> {
     const normalizedKey = this.k ? this.k(key) : key;
 
     let node = this.g(normalizedKey);
@@ -206,7 +207,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
       this.o && this.o.n("add", node);
     }
 
-    return node;
+    return node.v;
   }
 
   /**
@@ -228,7 +229,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
       this.h = next;
     }
 
-    --this.size;
+    --this.c;
   }
 
   /**
@@ -326,7 +327,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
       this.t = node;
     }
 
-    if (++this.size > this.s && prevTail) {
+    if (++this.c > this.s && prevTail) {
       this.d(prevTail);
       this.o && this.o.n("delete", prevTail, "evicted");
     }

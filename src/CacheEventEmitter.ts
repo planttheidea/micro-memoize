@@ -1,9 +1,13 @@
-import type { Cache } from "./Cache.ts";
+import type { Cache } from "./Cache.js";
 import type {
   CacheEventListener,
   CacheEventType,
   CacheNode,
-} from "./internalTypes.ts";
+} from "./internalTypes.js";
+
+type ListenerMap<Fn extends (...args: any[]) => any> = Partial<
+  Record<string, Array<CacheEventListener<CacheEventType, Fn>>>
+>;
 
 export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
   /**
@@ -13,9 +17,7 @@ export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
   /**
    * The list of [l]isteners for the given [t]ype.
    */
-  private l: Partial<
-    Record<string, Array<CacheEventListener<CacheEventType, Fn>>>
-  > = {};
+  private l: ListenerMap<Fn> = {};
 
   constructor(cache: Cache<Fn>) {
     this.c = cache;
@@ -24,7 +26,7 @@ export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
   /**
    * Expose the listeners for testing only.
    */
-  get listeners() {
+  get listeners(): ListenerMap<Fn> {
     return this.l;
   }
 
