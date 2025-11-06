@@ -1,15 +1,15 @@
-import { CacheEventEmitter } from './EventEmitter.js';
+import { CacheEventEmitter } from "./EventEmitter.js";
 import type {
   Arg,
-  CacheEntries,
   CacheEntry,
   CacheEventType,
   CacheEventListener,
   CacheNode,
   Key,
   Options,
-} from './internalTypes.ts';
-import { cloneKey, getDefault, getEntry, isSameValueZero } from './utils.js';
+  CacheSnapshot,
+} from "./internalTypes.ts";
+import { cloneKey, getDefault, isSameValueZero } from "./utils.js";
 
 export class Cache<Fn extends (...args: any[]) => any> {
   /**
@@ -35,21 +35,9 @@ export class Cache<Fn extends (...args: any[]) => any> {
    */
   m: (a: Key, b: Key) => boolean;
   /**
-   * Event emitter for [o]n [a]dd events.
+   * Event emitter for `[o]`n events.
    */
-  oa: CacheEventEmitter<'add', Fn> | undefined;
-  /**
-   * Event emitter for [o]n [d]elete events.
-   */
-  od: CacheEventEmitter<'delete', Fn> | undefined;
-  /**
-   * Event emitter for [o]n [h]it events.
-   */
-  oh: CacheEventEmitter<'hit', Fn> | undefined;
-  /**
-   * Event emitter for [o]n [u]pdate events.
-   */
-  ou: CacheEventEmitter<'update', Fn> | undefined;
+  o: CacheEventEmitter<Fn> | undefined;
   /**
    * Whether to await the [p]romise returned by the function.
    */
@@ -64,12 +52,12 @@ export class Cache<Fn extends (...args: any[]) => any> {
   t: CacheNode<Fn> | undefined;
 
   constructor(options: Options<Fn>) {
-    const transformKey = getDefault('function', options.transformKey);
+    const transformKey = getDefault("function", options.transformKey);
 
-    this.a = getDefault('function', options.isArgEqual, isSameValueZero);
-    this.m = getDefault('function', options.isKeyEqual, this.e);
-    this.p = getDefault('boolean', options.async, false);
-    this.s = getDefault('number', options.maxSize, 1);
+    this.a = getDefault("function", options.isArgEqual, isSameValueZero);
+    this.m = getDefault("function", options.isKeyEqual, this.e.bind(this));
+    this.p = getDefault("boolean", options.async, false);
+    this.s = getDefault("number", options.maxSize, 1);
 
     if (transformKey || options.isKeyEqual === this.m) {
       this.k = transformKey
@@ -81,25 +69,57 @@ export class Cache<Fn extends (...args: any[]) => any> {
   /**
    * The [key, value] pairs for the existing entries in cache.
    */
-  get snapshot(): CacheEntries<Fn> {
+  get snapshot(): CacheSnapshot<Fn> {
     const entries: Array<CacheEntry<Fn>> = [];
+    const keys: Key[] = [];
+    const values: Array<ReturnType<Fn>> = [];
 
     let node = this.h;
+    let size = 0;
 
     while (node != null) {
-      entries.push(getEntry(node));
+      keys.push(node.k);
+      values.push(node.v);
+      entries.push([node.k, node.v]);
+      ++size;
+
       node = node.n;
     }
 
-    return entries;
+    return { entries, keys, size, values };
   }
 
   /**
    * Clear the cache.
    */
   clear(): void {
+    if (!this.size) {
+      return;
+    }
+
+    const emitter = this.o;
+
+    let nodes: Array<CacheNode<Fn>> | undefined;
+
+    if (emitter) {
+      nodes = [];
+
+      let node = this.h;
+
+      while (node != null) {
+        nodes.push(node);
+        node = node.n;
+      }
+    }
+
     this.h = this.t = undefined;
     this.size = 0;
+
+    if (emitter && nodes) {
+      for (let index = 0; index < nodes.length; ++index) {
+        emitter.n("delete", nodes[index]);
+      }
+    }
   }
 
   /**
@@ -110,7 +130,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
 
     if (node) {
       this.d(node);
-      this.od?.n(node);
+      this.o && this.o.n("delete", node);
 
       return true;
     }
@@ -145,21 +165,9 @@ export class Cache<Fn extends (...args: any[]) => any> {
    */
   off<Type extends CacheEventType>(
     type: Type,
-    listener: CacheEventListener<Type, Fn>,
+    listener: CacheEventListener<Type, Fn>
   ): void {
-    const emitter = this.go(type);
-
-    if (emitter && !emitter.r(listener)) {
-      if (type === 'add') {
-        this.oa = undefined;
-      } else if (type === 'delete') {
-        this.od = undefined;
-      } else if (type === 'hit') {
-        this.oh = undefined;
-      } else if (type === 'update') {
-        this.ou = undefined;
-      }
-    }
+    this.o && this.o.r(type, listener);
   }
 
   /**
@@ -167,25 +175,13 @@ export class Cache<Fn extends (...args: any[]) => any> {
    */
   on<
     Type extends CacheEventType,
-    Listener extends CacheEventListener<Type, Fn>,
+    Listener extends CacheEventListener<Type, Fn>
   >(type: Type, listener: Listener): Listener {
-    let emitter = this.go(type);
-
-    if (!emitter) {
-      emitter = new CacheEventEmitter(type, this);
-
-      if (type === 'add') {
-        this.oa = emitter as CacheEventEmitter<'add', Fn>;
-      } else if (type === 'delete') {
-        this.od = emitter as CacheEventEmitter<'delete', Fn>;
-      } else if (type === 'hit') {
-        this.oh = emitter as CacheEventEmitter<'hit', Fn>;
-      } else if (type === 'update') {
-        this.ou = emitter as CacheEventEmitter<'update', Fn>;
-      }
+    if (!this.o) {
+      this.o = new CacheEventEmitter<Fn>(this);
     }
 
-    emitter.a(listener);
+    this.o.a(type, listener);
 
     return listener;
   }
@@ -205,11 +201,11 @@ export class Cache<Fn extends (...args: any[]) => any> {
         this.u(node);
       }
 
-      this.ou?.n(node);
+      this.o && this.o.n("update", node);
     } else {
       node = this.n(normalizedKey, value);
 
-      this.oa?.n(node);
+      this.o && this.o.n("add", node);
     }
 
     return node;
@@ -290,28 +286,6 @@ export class Cache<Fn extends (...args: any[]) => any> {
   }
 
   /**
-   * Method to [g]et the [o]n event emitter for the given `type`.
-   */
-  go(type: CacheEventType): CacheEventEmitter<CacheEventType, Fn> | undefined {
-    if (type === 'add') {
-      return this.oa;
-    }
-
-    if (type === 'delete') {
-      return this.od;
-    }
-
-    if (type === 'hit') {
-      return this.oh;
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (type === 'update') {
-      return this.ou;
-    }
-  }
-
-  /**
    * Method to [g]et an existing node from cache based on the [t]ransformed `key`.
    */
   gt(key: Parameters<Fn>): CacheNode<Fn> | undefined {
@@ -329,8 +303,8 @@ export class Cache<Fn extends (...args: any[]) => any> {
     if (this.p) {
       node.v = value.then(
         (value: any) => {
-          if (this.ou && this.g(key)) {
-            this.ou.n(node, 'resolved')
+          if (this.o && this.g(key)) {
+            this.o.n("update", node, "resolved");
           }
 
           return value;
@@ -338,12 +312,11 @@ export class Cache<Fn extends (...args: any[]) => any> {
         (error: Error) => {
           if (this.g(key)) {
             this.d(node);
-
-            this.od?.n(node, 'rejected');
+            this.o && this.o.n("delete", node, "rejected");
           }
 
           throw error;
-        },
+        }
       );
     }
 
@@ -357,7 +330,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
 
     if (++this.size > this.s && prevTail) {
       this.d(prevTail);
-      this.od?.n(prevTail, 'evicted');
+      this.o && this.o.n("delete", prevTail, "evicted");
     }
 
     return node;

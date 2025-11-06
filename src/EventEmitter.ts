@@ -1,22 +1,11 @@
-import type { Cache } from './Cache.ts';
+import type { Cache } from "./Cache.ts";
 import type {
-  CacheEntry,
-  CacheEvent,
   CacheEventListener,
   CacheEventType,
   CacheNode,
-} from './internalTypes.ts';
-import { getEntry } from './utils.js';
+} from "./internalTypes.ts";
 
-export class CacheEventEmitter<
-  Type extends CacheEventType,
-  Fn extends (...args: any[]) => any,
-> {
-  /**
-   * The [s]ize of the cache of listeners active for the emitter.
-   */
-  s = 0;
-
+export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
   /**
    * The [c]ache the emitter is associated with.
    */
@@ -24,54 +13,81 @@ export class CacheEventEmitter<
   /**
    * The list of [l]isteners for the given [t]ype.
    */
-  private l: Array<CacheEventListener<Type, Fn>> = [];
-  /**
-   * The [t]ype of event the emitter is associated with.
-   */
-  private t: Type;
+  private l: Partial<
+    Record<string, Array<CacheEventListener<CacheEventType, Fn>>>
+  > = {};
 
-  constructor(type: Type, cache: Cache<Fn>) {
+  constructor(cache: Cache<Fn>) {
     this.c = cache;
-    this.t = type;
+  }
+
+  /**
+   * Expose the listeners for testing only.
+   */
+  get listeners() {
+    return this.l;
   }
 
   /**
    * Method to [a]dd a listener for the given cache change event.
    */
-  a(listener: CacheEventListener<Type, Fn>): void {
-    if (!this.l.includes(listener)) {
-      this.l.push(listener);
-      ++this.s;
+  a<Type extends CacheEventType>(
+    type: Type,
+    listener: CacheEventListener<Type, Fn>
+  ): void {
+    const listeners = this.l[type];
+
+    if (listeners) {
+      if (!listeners.includes(listener)) {
+        listeners.push(listener);
+      }
+    } else {
+      this.l[type] = [listener];
     }
   }
 
   /**
    * Method to [n]otify all listeners for the given cache change event.
    */
-  n(node: CacheNode<Fn>, reason?: any): void {
-    const entry: CacheEntry<Fn> = getEntry(node);
+  n(type: CacheEventType, node: CacheNode<Fn>, reason?: any): void {
+    const listeners = this.l[type];
 
-    for (let index = 0; index < this.s; ++index) {
-      this.l[index]({
+    if (!listeners) {
+      return;
+    }
+
+    for (let index = 0; index < listeners.length; ++index) {
+      listeners[index]({
         cache: this.c,
-        entry,
+        key: node.k,
         reason,
-        type: this.t,
-      } as CacheEvent<Type, Fn>);
+        value: node.v,
+        type,
+      });
     }
   }
 
   /**
    * Method to [r]emove a listener for the given cache change event.
    */
-  r(listener: CacheEventListener<Type, Fn>): boolean {
-    const index = this.l.indexOf(listener);
+  r<Type extends CacheEventType>(
+    type: Type,
+    listener: CacheEventListener<Type, Fn>
+  ): void {
+    const listeners = this.l[type];
 
-    if (index !== -1) {
-      this.l.splice(index, 1);
-      --this.s;
+    if (!listeners) {
+      return;
     }
 
-    return this.s > 0;
+    const index = listeners.indexOf(listener);
+
+    if (index !== -1) {
+      listeners.splice(index, 1);
+    }
+
+    if (!listeners.length) {
+      this.l[type] = undefined;
+    }
   }
 }
