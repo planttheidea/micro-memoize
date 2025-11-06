@@ -8,7 +8,7 @@ import lru from "lru-memoize";
 import mem from "mem";
 import memoizee from "memoizee";
 import memoizerific from "memoizerific";
-import { memoize } from "../dist/esm/micro-memoize.mjs";
+import { memoize } from "../dist/esm/index.mjs";
 import { memoizeWith } from "ramda";
 import { memoize as underscore } from "underscore";
 

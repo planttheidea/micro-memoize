@@ -1,6 +1,6 @@
 {
   "author": "tony.quetano@planttheidea.com",
-  "browser": "dist/umd/micro-memoize.js",
+  "browser": "dist/umd/index.js",
   "browserslist": [
     "defaults",
     "Explorer >= 9",
@@ -46,6 +46,22 @@
     "vite": "^7.2.1",
     "vitest": "^4.0.7"
   },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/types/index.d.mts",
+        "default": "./dist/esm/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/types/index.d.cts",
+        "default": "./dist/cjs/index.cjs"
+      },
+      "default": {
+        "types": "./dist/umd/types/index.d.ts",
+        "default": "./dist/umd/index.js"
+      }
+    }
+  },
   "files": [
     "dist",
     "CHANGELOG.md",
@@ -71,8 +87,8 @@
     "expire"
   ],
   "license": "MIT",
-  "main": "dist/cjs/micro-memoize.cjs",
-  "module": "dist/esm/micro-memoize.mjs",
+  "main": "dist/cjs/index.cjs",
+  "module": "dist/esm/index.mjs",
   "name": "micro-memoize",
   "repository": {
     "type": "git",
