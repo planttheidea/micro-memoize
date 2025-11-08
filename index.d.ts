@@ -45,17 +45,17 @@ export class Cache<Fn extends (...args: any[]) => any> {
   /**
    * Clear the cache.
    */
-  clear(): void;
+  clear(reason?: string): void;
 
   /**
    * Delete the entry for the given `key` in cache.
    */
-  delete(key: Parameters<Fn>): boolean;
+  delete(key: Parameters<Fn>, reason?: string): boolean;
 
   /**
    * Get the value in cache based on the given `key`.
    */
-  get(key: Parameters<Fn>): ReturnType<Fn> | undefined;
+  get(key: Parameters<Fn>, reason?: string): ReturnType<Fn> | undefined;
 
   /**
    * Determine whether the given `key` has a related entry in the cache.
@@ -81,7 +81,11 @@ export class Cache<Fn extends (...args: any[]) => any> {
   /**
    * Add or update the cache entry for the given `key`.
    */
-  set(key: Parameters<Fn>, value: ReturnType<Fn>): ReturnType<Fn>;
+  set(
+    key: Parameters<Fn>,
+    value: ReturnType<Fn>,
+    reason?: string,
+  ): ReturnType<Fn>;
 
   /**
    * Method to [d]elete the given `node` from the cache.
