@@ -4,6 +4,10 @@ import type { Cache } from './Cache.ts';
  * Key used for cache entries.
  */
 export type Key = any[];
+/**
+ * A single argument in a cache key.
+ */
+export type Arg = Key[number];
 
 /**
  * The internal cache node used in the cache's linked list.
@@ -132,7 +136,7 @@ interface OptionsBase<Fn extends (...args: any[]) => any> {
    * @note
    * This option will be ignored if the `isKeyEqual` option is provided.
    */
-  isKeyItemEqual?: (cachedKeyItem: any, nextKeyItem: any) => boolean;
+  isKeyItemEqual?: (cachedKeyItem: Arg, nextKeyItem: Arg) => boolean;
   /**
    * The maximum number of entries to store in cache.
    * @default 1
@@ -160,7 +164,7 @@ export interface OptionsKeyEqual<Fn extends (...args: any[]) => any>
 export interface OptionsKeyItemEqual<Fn extends (...args: any[]) => any>
   extends OptionsBase<Fn> {
   isKeyEqual?: never;
-  isKeyItemEqual: (cachedKeyItem: any, nextKeyItem: any) => boolean;
+  isKeyItemEqual: (cachedKeyItem: Arg, nextKeyItem: Arg) => boolean;
 }
 
 export type Options<Fn extends (...args: any[]) => any> =

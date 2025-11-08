@@ -329,7 +329,7 @@ export interface OptionsKeyEqual<Fn extends (...args: any[]) => any>
 export interface OptionsKeyItemEqual<Fn extends (...args: any[]) => any>
   extends OptionsBase<Fn> {
   isKeyEqual?: never;
-  isKeyItemEqual: (cachedKeyItem: any, nextKeyItem: any) => boolean;
+  isKeyItemEqual: (cachedKeyItem: Arg, nextKeyItem: Arg) => boolean;
 }
 
 export type Options<Fn extends (...args: any[]) => any> =
