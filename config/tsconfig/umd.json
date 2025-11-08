@@ -4,6 +4,6 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "outDir": "../../dist/umd",
-    "target": "ES5"
+    "target": "ES2015"
   }
 }
