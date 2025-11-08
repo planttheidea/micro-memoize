@@ -151,22 +151,22 @@ export interface OptionsNoCustomEqual<Fn extends (...args: any[]) => any>
   isKeyItemEqual?: never;
 }
 
-export interface OptionsArgEqual<Fn extends (...args: any[]) => any>
-  extends OptionsBase<Fn> {
-  isKeyEqual?: never;
-  isKeyItemEqual: (cachedKeyItem: any, nextKeyItem: any) => boolean;
-}
-
 export interface OptionsKeyEqual<Fn extends (...args: any[]) => any>
   extends OptionsBase<Fn> {
   isKeyEqual: (cachedKey: Key, nextKey: Key) => boolean;
   isKeyItemEqual?: never;
 }
 
+export interface OptionsKeyItemEqual<Fn extends (...args: any[]) => any>
+  extends OptionsBase<Fn> {
+  isKeyEqual?: never;
+  isKeyItemEqual: (cachedKeyItem: any, nextKeyItem: any) => boolean;
+}
+
 export type Options<Fn extends (...args: any[]) => any> =
   | OptionsNoCustomEqual<Fn>
-  | OptionsArgEqual<Fn>
-  | OptionsKeyEqual<Fn>;
+  | OptionsKeyEqual<Fn>
+  | OptionsKeyItemEqual<Fn>;
 
 export type CacheEntry<Fn extends (...args: any[]) => any> = [
   Key,
