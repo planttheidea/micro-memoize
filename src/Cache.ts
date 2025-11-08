@@ -152,6 +152,8 @@ export class Cache<Fn extends (...args: any[]) => any> {
     if (node) {
       if (node !== this.h) {
         this.u(node);
+
+        this.o && this.o.n('hit', node, reason);
         this.o && this.o.n('update', node, reason);
       } else if (this.o) {
         this.o.n('hit', node, reason);
@@ -207,6 +209,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
     if (node) {
       node.v = this.p && value !== node.v ? this.w(value) : value;
       node !== this.h && this.u(node);
+
       this.o && this.o.n('update', node, reason);
     } else {
       node = this.n(normalizedKey, value);
