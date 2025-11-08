@@ -4,10 +4,6 @@ import type { Cache } from './Cache.ts';
  * Key used for cache entries.
  */
 export type Key = any[];
-/**
- * A single argument in a cache key.
- */
-export type Arg = Key[number];
 
 /**
  * The internal cache node used in the cache's linked list.
@@ -103,7 +99,7 @@ export type CacheEventListener<
  * Method that transforms the arguments passed to the function into
  * a custom cache key.
  */
-export type KeyTransformer<Fn extends (...args: any[]) => any> = (
+export type TransformKey<Fn extends (...args: any[]) => any> = (
   args: Parameters<Fn>,
 ) => Key;
 
@@ -114,18 +110,6 @@ interface OptionsBase<Fn extends (...args: any[]) => any> {
    * rejected to avoid caching error states.
    */
   async?: boolean;
-  /**
-   * Whether the two args are equal in value. This is used to compare
-   * specific arguments in order for a cached key versus the key the
-   * function is called with to determine whether the cached entry
-   * can be used.
-   *
-   * @default isSameValueZero
-   *
-   * @note
-   * This option will be ignored if the `isKeyEqual` option is provided.
-   */
-  isArgEqual?: (cachedKeyArg: Arg, nextKeyArg: Arg) => boolean;
   /**
    * Whether the two keys are equal in value. This is used to compare
    * the key the function is called with against a given cache key to
@@ -138,6 +122,18 @@ interface OptionsBase<Fn extends (...args: any[]) => any> {
    */
   isKeyEqual?: (cachedKey: Key, nextKey: Key) => boolean;
   /**
+   * Whether the two args are equal in value. This is used to compare
+   * specific arguments in order for a cached key versus the key the
+   * function is called with to determine whether the cached entry
+   * can be used.
+   *
+   * @default isSameValueZero
+   *
+   * @note
+   * This option will be ignored if the `isKeyEqual` option is provided.
+   */
+  isKeyItemEqual?: (cachedKeyItem: any, nextKeyItem: any) => boolean;
+  /**
    * The maximum number of entries to store in cache.
    * @default 1
    */
@@ -146,44 +142,29 @@ interface OptionsBase<Fn extends (...args: any[]) => any> {
    * Transform the parameters passed into a custom key for storage in
    * cache.
    */
-  transformKey?: KeyTransformer<Fn>;
+  transformKey?: TransformKey<Fn>;
+}
+
+export interface OptionsNoCustomEqual<Fn extends (...args: any[]) => any>
+  extends OptionsBase<Fn> {
+  isKeyEqual?: never;
+  isKeyItemEqual?: never;
 }
 
 export interface OptionsArgEqual<Fn extends (...args: any[]) => any>
   extends OptionsBase<Fn> {
-  /**
-   * Whether the two args are equal in value. This is used to compare
-   * specific arguments in order for a cached key versus the key the
-   * function is called with to determine whether the cached entry
-   * can be used.
-   *
-   * @default isSameValueZero
-   *
-   * @note
-   * This option will be ignored if the `isKeyEqual` option is provided.
-   */
-  isArgEqual?: (cachedKeyArg: Arg, nextKeyArg: Arg) => boolean;
   isKeyEqual?: never;
+  isKeyItemEqual: (cachedKeyItem: any, nextKeyItem: any) => boolean;
 }
 
 export interface OptionsKeyEqual<Fn extends (...args: any[]) => any>
   extends OptionsBase<Fn> {
-  /**
-   * Whether the two args are equal in value. This is used to compare
-   * specific arguments in order for a cached key versus the key the
-   * function is called with to determine whether the cached entry
-   * can be used.
-   *
-   * @default isSameValueZero
-   *
-   * @note
-   * This option will be ignored if the `isKeyEqual` option is provided.
-   */
-  isArgEqual?: never;
-  isKeyEqual?: (cachedKey: Key, nextKey: Key) => boolean;
+  isKeyEqual: (cachedKey: Key, nextKey: Key) => boolean;
+  isKeyItemEqual?: never;
 }
 
 export type Options<Fn extends (...args: any[]) => any> =
+  | OptionsNoCustomEqual<Fn>
   | OptionsArgEqual<Fn>
   | OptionsKeyEqual<Fn>;
 

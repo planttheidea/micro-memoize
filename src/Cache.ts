@@ -1,23 +1,17 @@
 import { CacheEventEmitter } from './CacheEventEmitter.js';
 import type {
-  Arg,
   CacheEntry,
   CacheEventType,
   CacheEventListener,
   CacheNode,
   CacheSnapshot,
   Key,
-  KeyTransformer,
   Options,
+  TransformKey,
 } from './internalTypes.ts';
 import { getDefault, isSameValueZero } from './utils.js';
 
 export class Cache<Fn extends (...args: any[]) => any> {
-  /**
-   * Whether the individual [a]rgument passed is equal to the same argument in order
-   * for a key in cache.
-   */
-  a: (a: Arg, b: Arg) => boolean;
   /**
    * The current [c]ount of entries in the cache.
    */
@@ -27,9 +21,14 @@ export class Cache<Fn extends (...args: any[]) => any> {
    */
   h: CacheNode<Fn> | undefined;
   /**
+   * Whether the individual [a]rgument passed is equal to the same argument in order
+   * for a key in cache.
+   */
+  i: (a: any, b: any) => boolean;
+  /**
    * The transformer for the [k]ey stored in cache.
    */
-  k: KeyTransformer<Fn> | undefined;
+  k: TransformKey<Fn> | undefined;
   /**
    * Whether the entire key [m]atches an existing key in cache.
    */
@@ -54,7 +53,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
   constructor(options: Options<Fn>) {
     const transformKey = getDefault('function', options.transformKey);
 
-    this.a = getDefault('function', options.isArgEqual, isSameValueZero);
+    this.i = getDefault('function', options.isKeyItemEqual, isSameValueZero);
     this.m = getDefault(
       'function',
       options.isKeyEqual,
@@ -95,7 +94,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
   /**
    * Clear the cache.
    */
-  clear(): void {
+  clear(reason = 'explicit clear'): void {
     if (!this.h) {
       return;
     }
@@ -120,7 +119,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
 
     if (emitter && nodes) {
       for (let index = 0; index < nodes.length; ++index) {
-        emitter.n('delete', nodes[index], 'clear');
+        emitter.n('delete', nodes[index], reason);
       }
     }
   }
@@ -128,12 +127,12 @@ export class Cache<Fn extends (...args: any[]) => any> {
   /**
    * Delete the entry for the given `key` in cache.
    */
-  delete(key: Parameters<Fn>): boolean {
+  delete(key: Parameters<Fn>, reason = 'explicit delete'): boolean {
     const node = this.k ? this.gt(key) : this.g(key);
 
     if (node) {
       this.d(node);
-      this.o && this.o.n('delete', node);
+      this.o && this.o.n('delete', node, reason);
 
       return true;
     }
@@ -249,11 +248,11 @@ export class Cache<Fn extends (...args: any[]) => any> {
     }
 
     if (length === 1) {
-      return this.a(prevKey[0], nextKey[0]);
+      return this.i(prevKey[0], nextKey[0]);
     }
 
     for (let index = 0; index < length; ++index) {
-      if (!this.a(prevKey[index], nextKey[index])) {
+      if (!this.i(prevKey[index], nextKey[index])) {
         return false;
       }
     }

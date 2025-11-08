@@ -105,7 +105,7 @@ const deepEqualMethod = ({
 };
 
 const deepEqualMemoized = memoize(deepEqualMethod, {
-  isArgEqual: deepEqual,
+  isKeyItemEqual: deepEqual,
 });
 
 deepEqualMemoized({ one: 1, two: 2 });
