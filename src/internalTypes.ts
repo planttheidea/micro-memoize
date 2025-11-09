@@ -24,15 +24,10 @@ export interface CacheNode<Fn extends (...args: any[]) => any> {
  */
 export type CacheEventType = 'add' | 'delete' | 'hit' | 'update';
 
-/**
- * The reason for the given cache event type (optional).
- */
-export type CacheEventReason = 'evicted' | 'rejected' | 'resolved';
-
 interface CacheEventBase<Fn extends (...args: any[]) => any> {
   cache: Cache<Fn>;
   key: Key;
-  reason?: CacheEventReason;
+  reason?: string;
   value: ReturnType<Fn>;
   type: CacheEventType;
 }
@@ -42,7 +37,6 @@ interface CacheEventBase<Fn extends (...args: any[]) => any> {
  */
 export interface OnAddEvent<Fn extends (...args: any[]) => any>
   extends CacheEventBase<Fn> {
-  reason?: undefined;
   type: 'add';
 }
 
@@ -51,7 +45,6 @@ export interface OnAddEvent<Fn extends (...args: any[]) => any>
  */
 export interface OnDeleteEvent<Fn extends (...args: any[]) => any>
   extends CacheEventBase<Fn> {
-  reason?: 'evicted' | 'rejected';
   type: 'delete';
 }
 
@@ -60,7 +53,6 @@ export interface OnDeleteEvent<Fn extends (...args: any[]) => any>
  */
 export interface OnHitEvent<Fn extends (...args: any[]) => any>
   extends CacheEventBase<Fn> {
-  reason?: undefined;
   type: 'hit';
 }
 
@@ -71,7 +63,6 @@ export interface OnHitEvent<Fn extends (...args: any[]) => any>
  */
 export interface OnUpdateEvent<Fn extends (...args: any[]) => any>
   extends CacheEventBase<Fn> {
-  reason?: 'resolved';
   type: 'update';
 }
 
