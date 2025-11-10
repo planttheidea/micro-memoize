@@ -71,7 +71,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
   /**
    * The size of the populated cache.
    */
-  get size() {
+  get size(): number {
     return this.c;
   }
 

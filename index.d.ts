@@ -1,5 +1,9 @@
 export class Cache<Fn extends (...args: any[]) => any> {
   /**
+   * The size of the populated cache.
+   */
+  get size(): number;
+  /**
    * The current [c]ount of entries in the cache.
    */
   c: number;
