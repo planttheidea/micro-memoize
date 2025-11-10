@@ -214,7 +214,14 @@ export class Cache<Fn extends (...args: any[]) => any> {
     let node = this.g(normalizedKey);
 
     if (node) {
-      node.v = this.p && value !== node.v ? this.w(value) : value;
+      const prevValue = node.v;
+
+      node.v = value;
+
+      if (this.p && value !== prevValue) {
+        node.v = this.w(node);
+      }
+
       node !== this.h && this.u(node);
 
       this.o && this.o.n('update', node, reason);
@@ -369,6 +376,12 @@ export class Cache<Fn extends (...args: any[]) => any> {
    */
   w(node: CacheNode<Fn>): ReturnType<Fn> {
     const { k: key, v: value } = node;
+
+    // If the method does not return a promise for some reason, just keep the
+    // original value.
+    if (value == null || typeof value.then !== 'function') {
+      return value;
+    }
 
     return value.then(
       (value: any) => {
