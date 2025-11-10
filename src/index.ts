@@ -4,8 +4,6 @@ import { isMemoized } from './utils.js';
 
 export type * from './internalTypes.ts';
 
-export { Cache };
-
 export const memoize: Memoize = function memoize<
   Fn extends (...args: any[]) => any,
   Opts extends Options<Fn>,
