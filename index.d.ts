@@ -1,4 +1,4 @@
-export class Cache<Fn extends (...args: any[]) => any> {
+declare class Cache<Fn extends (...args: any[]) => any> {
   /**
    * The size of the populated cache.
    */
@@ -127,6 +127,8 @@ export class Cache<Fn extends (...args: any[]) => any> {
    */
   w(node: CacheNode<Fn>): ReturnType<Fn>;
 }
+
+export type { Cache };
 
 type ListenerMap<Fn extends (...args: any[]) => any> = Partial<
   Record<string, Array<CacheEventListener<CacheEventType, Fn>>>

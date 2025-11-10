@@ -3,6 +3,7 @@ import { Cache } from './Cache.js';
 import { isMemoized } from './utils.js';
 
 export type * from './internalTypes.ts';
+export type { Cache };
 
 export const memoize: Memoize = function memoize<
   Fn extends (...args: any[]) => any,
