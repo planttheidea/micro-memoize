@@ -69,6 +69,13 @@ export class Cache<Fn extends (...args: any[]) => any> {
   }
 
   /**
+   * The size of the populated cache.
+   */
+  get size() {
+    return this.c;
+  }
+
+  /**
    * The [key, value] pairs for the existing entries in cache.
    */
   get snapshot(): CacheSnapshot<Fn> {
