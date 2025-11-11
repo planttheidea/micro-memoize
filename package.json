@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "fast-equals": "^5.3.3-beta.1",
-    "fast-stringify": "^4.0.0-beta.0"
+    "fast-stringify": "^4.0.0"
   },
   "description": "A tiny, crazy fast memoization library for the 95% use-case",
   "devDependencies": {
