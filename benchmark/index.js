@@ -1,23 +1,24 @@
-import lodash from "lodash/memoize.js";
-import { createSuite } from "benchee";
-import Table from "cli-table2";
+import lodash from 'lodash/memoize.js';
+import orderBy from 'lodash/orderBy.js';
+import { Bench } from 'tinybench';
+import Table from 'cli-table2';
 
-import { addOsmaniMemoize } from "./addy-osmani.js";
-import fastMemoize from "fast-memoize";
-import lru from "lru-memoize";
-import mem from "mem";
-import memoizee from "memoizee";
-import memoizerific from "memoizerific";
-import { memoize } from "../dist/esm/index.mjs";
-import { memoizeWith } from "ramda";
-import { memoize as underscore } from "underscore";
+import { addOsmaniMemoize } from './addy-osmani.js';
+import fastMemoize from 'fast-memoize';
+import lru from 'lru-memoize';
+import mem from 'mem';
+import memoizee from 'memoizee';
+import memoizerific from 'memoizerific';
+import { memoize } from '../dist/esm/index.mjs';
+import { memoizeWith } from 'ramda';
+import { memoize as underscore } from 'underscore';
 
 const resolveArguments = function () {
   return arguments.length > 1
     ? JSON.stringify(arguments)
-    : typeof arguments[0] === "object"
-    ? JSON.stringify(arguments[0])
-    : arguments[0];
+    : typeof arguments[0] === 'object'
+      ? JSON.stringify(arguments[0])
+      : arguments[0];
 };
 
 const lruMemoize = lru.default;
@@ -25,7 +26,7 @@ const ramda = memoizeWith(resolveArguments);
 
 const getResults = (results) => {
   const table = new Table({
-    head: ["Name", "Ops / sec"],
+    head: ['Name', 'Ops / sec'],
   });
 
   results.forEach(({ name, stats }) => {
@@ -94,11 +95,11 @@ const fibonacciMultipleObject = (object, check) => {
   return (
     fibonacciMultipleObject(
       { number: firstValue },
-      { isComplete: firstValue < 2 }
+      { isComplete: firstValue < 2 },
     ) +
     fibonacciMultipleObject(
       { number: secondValue },
-      { isComplete: secondValue < 2 }
+      { isComplete: secondValue < 2 },
     )
   );
 };
@@ -106,79 +107,79 @@ const fibonacciMultipleObject = (object, check) => {
 /************* benchmarks *************/
 
 const singularPrimitive = {
-  "addy osmani": addOsmaniMemoize(fibonacciSinglePrimitive),
-  "fast-memoize": fastMemoize(fibonacciSinglePrimitive),
+  'addy osmani': addOsmaniMemoize(fibonacciSinglePrimitive),
+  'fast-memoize': fastMemoize(fibonacciSinglePrimitive),
   lodash: lodash(fibonacciSinglePrimitive),
-  "lru-memoize": lruMemoize(1)(fibonacciSinglePrimitive),
+  'lru-memoize': lruMemoize(1)(fibonacciSinglePrimitive),
   mem: mem(fibonacciSinglePrimitive),
   memoizee: memoizee(fibonacciSinglePrimitive),
   memoizerific: memoizerific(1)(fibonacciSinglePrimitive),
-  "micro-memoize": memoize(fibonacciSinglePrimitive),
+  'micro-memoize': memoize(fibonacciSinglePrimitive),
   ramda: ramda(fibonacciSinglePrimitive),
   underscore: underscore(fibonacciSinglePrimitive),
 };
 
 const singularArray = {
-  "addy osmani": addOsmaniMemoize(fibonacciSingleArray),
-  "fast-memoize": fastMemoize(fibonacciSingleArray),
+  'addy osmani': addOsmaniMemoize(fibonacciSingleArray),
+  'fast-memoize': fastMemoize(fibonacciSingleArray),
   lodash: lodash(fibonacciSingleArray),
-  "lru-memoize": lruMemoize(1)(fibonacciSingleArray),
+  'lru-memoize': lruMemoize(1)(fibonacciSingleArray),
   mem: mem(fibonacciSingleArray, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciSingleArray),
   memoizerific: memoizerific(1)(fibonacciSingleArray),
-  "micro-memoize": memoize(fibonacciSingleArray),
+  'micro-memoize': memoize(fibonacciSingleArray),
   ramda: ramda(fibonacciSingleArray),
   underscore: underscore(fibonacciSingleArray, resolveArguments),
 };
 
 const singularObject = {
-  "addy osmani": addOsmaniMemoize(fibonacciSingleObject),
-  "fast-memoize": fastMemoize(fibonacciSingleObject),
+  'addy osmani': addOsmaniMemoize(fibonacciSingleObject),
+  'fast-memoize': fastMemoize(fibonacciSingleObject),
   lodash: lodash(fibonacciSingleObject),
-  "lru-memoize": lruMemoize(1)(fibonacciSingleObject),
+  'lru-memoize': lruMemoize(1)(fibonacciSingleObject),
   mem: mem(fibonacciSingleObject, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciSingleObject),
   memoizerific: memoizerific(1)(fibonacciSingleObject),
-  "micro-memoize": memoize(fibonacciSingleObject),
+  'micro-memoize': memoize(fibonacciSingleObject),
   ramda: ramda(fibonacciSingleObject),
   underscore: underscore(fibonacciSingleObject, resolveArguments),
 };
 
 const multiplePrimitive = {
-  "addy osmani": addOsmaniMemoize(fibonacciMultiplePrimitive),
-  "fast-memoize": fastMemoize(fibonacciMultiplePrimitive),
+  'addy osmani': addOsmaniMemoize(fibonacciMultiplePrimitive),
+  'fast-memoize': fastMemoize(fibonacciMultiplePrimitive),
   lodash: lodash(fibonacciMultiplePrimitive, resolveArguments),
-  "lru-memoize": lruMemoize(1)(fibonacciMultiplePrimitive),
+  'lru-memoize': lruMemoize(1)(fibonacciMultiplePrimitive),
   mem: mem(fibonacciMultiplePrimitive, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciMultiplePrimitive),
   memoizerific: memoizerific(1)(fibonacciMultiplePrimitive),
-  "micro-memoize": memoize(fibonacciMultiplePrimitive),
+  'micro-memoize': memoize(fibonacciMultiplePrimitive),
   ramda: ramda(fibonacciMultiplePrimitive),
   underscore: underscore(fibonacciMultiplePrimitive, resolveArguments),
 };
 
 const multipleArray = {
-  "addy osmani": addOsmaniMemoize(fibonacciMultipleArray),
-  "fast-memoize": fastMemoize(fibonacciMultipleArray),
+  'addy osmani': addOsmaniMemoize(fibonacciMultipleArray),
+  'fast-memoize': fastMemoize(fibonacciMultipleArray),
   lodash: lodash(fibonacciMultipleArray, resolveArguments),
-  "lru-memoize": lruMemoize(1)(fibonacciMultipleArray),
+  'lru-memoize': lruMemoize(1)(fibonacciMultipleArray),
   mem: mem(fibonacciMultipleArray, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciMultipleArray),
   memoizerific: memoizerific(1)(fibonacciMultipleArray),
-  "micro-memoize": memoize(fibonacciMultipleArray),
+  'micro-memoize': memoize(fibonacciMultipleArray),
   ramda: ramda(fibonacciMultipleArray),
   underscore: underscore(fibonacciMultipleArray, resolveArguments),
 };
 
 const multipleObject = {
-  "addy osmani": addOsmaniMemoize(fibonacciMultipleObject),
-  "fast-memoize": fastMemoize(fibonacciMultipleObject),
+  'addy osmani': addOsmaniMemoize(fibonacciMultipleObject),
+  'fast-memoize': fastMemoize(fibonacciMultipleObject),
   lodash: lodash(fibonacciMultipleObject, resolveArguments),
-  "lru-memoize": lruMemoize(1)(fibonacciMultipleObject),
+  'lru-memoize': lruMemoize(1)(fibonacciMultipleObject),
   mem: mem(fibonacciMultipleObject, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciMultipleObject),
   memoizerific: memoizerific(1)(fibonacciMultipleObject),
-  "micro-memoize": memoize(fibonacciMultipleObject),
+  'micro-memoize': memoize(fibonacciMultipleObject),
   ramda: ramda(fibonacciMultipleObject),
   underscore: underscore(fibonacciMultipleObject, resolveArguments),
 };
@@ -191,131 +192,53 @@ const isComplete = false;
 const arrayIsComplete = [isComplete];
 const objectIsComplete = { isComplete };
 
-const suite = createSuite({
-  minTime: 1000,
-  onComplete(results) {
-    const combinedResults = Object.keys(results)
-      .reduce((combined, group) => {
-        const groupResults = results[group];
-
-        return groupResults.map(({ name, stats }) => {
-          const existingRowIndex = combined.findIndex(
-            ({ name: rowName }) => name === rowName
-          );
-
-          return ~existingRowIndex
-            ? {
-                ...combined[existingRowIndex],
-                stats: {
-                  elapsed: (combined[existingRowIndex].stats.elapsed +=
-                    stats.elapsed),
-                  iterations: (combined[existingRowIndex].stats.iterations +=
-                    stats.iterations),
-                },
-              }
-            : {
-                name,
-                stats: {
-                  elapsed: stats.elapsed,
-                  iterations: stats.iterations,
-                },
-              };
-        });
-      }, [])
-      .map(({ name, stats }) => ({
-        name,
-        stats: {
-          ...stats,
-          ops: (stats.iterations / stats.elapsed) * 1000,
-        },
-      }))
-      .sort((a, b) => {
-        if (a.stats.ops > b.stats.ops) {
-          return -1;
-        }
-
-        if (a.stats.ops < b.stats.ops) {
-          return 1;
-        }
-
-        return 0;
-      });
-
-    console.log("");
-    console.log("Benchmark results complete, overall averages:");
-    console.log("");
-    console.log(getResults(combinedResults));
-    console.log("");
+const benches = {
+  'singular primitive': { methods: singularPrimitive, args: [number] },
+  'singular array': { methods: singularArray, args: [arrayNumber] },
+  'singular object': { methods: singularObject, args: [objectNumber] },
+  'multiple primitive': {
+    methods: multiplePrimitive,
+    args: [number, isComplete],
   },
-  onGroupComplete({ group, results }) {
-    console.log("");
-    console.log(`...finished group ${group}.`);
-    console.log("");
-    console.log(getResults(results));
-    console.log("");
+  'multiple array': {
+    methods: multipleArray,
+    args: [arrayNumber, arrayIsComplete],
   },
-  onGroupStart(group) {
-    console.log("");
-    console.log(`Starting benchmarks for group ${group}...`);
-    console.log("");
+  'multiple object': {
+    methods: multipleObject,
+    args: [objectNumber, objectIsComplete],
   },
-  onResult({ name, stats }) {
-    console.log(
-      `Benchmark completed for ${name}: ${stats.ops.toLocaleString()} ops/sec`
-    );
-  },
-});
+};
 
-Object.keys(singularPrimitive).forEach((name) => {
-  const fn = singularPrimitive[name];
+async function run(name, { args, methods }) {
+  console.log('');
+  console.log(`Testing ${name}...`);
 
-  suite.add(name, "singular primitive", () => {
-    try {
-      fn(number);
-    } catch (error) {
-      console.error(error);
-    }
+  const bench = new Bench({ iterations: 1000, name, time: 100 });
+
+  Object.entries(methods).forEach(([pkgName, fn]) => {
+    bench.add(pkgName, () => {
+      fn.apply(null, args);
+    });
   });
-});
 
-Object.keys(singularArray).forEach((name) => {
-  const fn = singularArray[name];
+  await bench.run();
 
-  suite.add(name, "singular array", () => {
-    fn(arrayNumber);
-  });
-});
+  const tasks = orderBy(
+    bench.tasks.filter(({ result }) => result),
+    ({ result }) => result.throughput.mean,
+    ['desc'],
+  );
 
-Object.keys(singularObject).forEach((name) => {
-  const fn = singularObject[name];
+  console.table(
+    tasks.map(({ name, result }) => ({
+      Package: name.replace(' (passed)', ''),
+      'Ops/sec': +result.throughput.mean.toFixed(6),
+    })),
+  );
+  console.log(`Fastest was "${tasks[0].name}".`);
+}
 
-  suite.add(name, "singular object", () => {
-    fn(objectNumber);
-  });
-});
-
-Object.keys(multiplePrimitive).forEach((name) => {
-  const fn = multiplePrimitive[name];
-
-  suite.add(name, "multiple primitive", () => {
-    fn(number, isComplete);
-  });
-});
-
-Object.keys(multipleArray).forEach((name) => {
-  const fn = multipleArray[name];
-
-  suite.add(name, "multiple array", () => {
-    fn(arrayNumber, arrayIsComplete);
-  });
-});
-
-Object.keys(multipleObject).forEach((name) => {
-  const fn = multipleObject[name];
-
-  suite.add(name, "multiple object", () => {
-    fn(objectNumber, objectIsComplete);
-  });
-});
-
-suite.run();
+for (const type in benches) {
+  await run(type, benches[type]);
+}
