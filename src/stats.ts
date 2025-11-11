@@ -8,7 +8,7 @@ interface ProfileCounts {
 
 const nameToProfile = new Map<string, StatsManager<any>>();
 
-let stats: Stats | undefined;
+let active = false;
 
 export class StatsManager<Fn extends (...args: any[]) => any> {
   /**
@@ -34,7 +34,7 @@ export class StatsManager<Fn extends (...args: any[]) => any> {
 
     nameToProfile.set(profileName, this);
 
-    if (stats) {
+    if (active) {
       this.s();
     }
   }
@@ -82,60 +82,49 @@ export class StatsManager<Fn extends (...args: any[]) => any> {
   }
 }
 
-class Stats {
-  /**
-   * Method to [c]lear the stats, either of the specific profile whose name is passed,
-   * or globally if no name is passed.
-   */
-  c(profileName: string | undefined): void {
-    if (profileName) {
-      const statsManager = nameToProfile.get(profileName);
+function aggregateGlobalStats(): GlobalStats {
+  let calls = 0;
+  let hits = 0;
 
-      if (statsManager) {
-        statsManager.r();
-      }
-    } else {
-      nameToProfile.clear();
-    }
-  }
+  const profiles: Record<string, ProfileStats> = {};
 
-  /**
-   * Method to aggregate the [g]lobal stats.
-   */
-  g(): GlobalStats {
-    let calls = 0;
-    let hits = 0;
+  nameToProfile.forEach((profile, profileName) => {
+    profiles[profileName] = profile.m();
 
-    const profiles: Record<string, ProfileStats> = {};
+    calls += profile.p.c;
+    hits += profile.p.h;
+  });
 
-    nameToProfile.forEach((profile, profileName) => {
-      profiles[profileName] = profile.m();
+  return {
+    calls,
+    hits,
+    profiles,
+    usage: getUsagePercentage(calls, hits),
+  };
+}
 
-      calls += profile.p.c;
-      hits += profile.p.h;
-    });
+function aggregateProfileStats(profileName: string): ProfileStats {
+  const statsManager = nameToProfile.get(profileName);
 
-    return {
-      calls,
-      hits,
-      profiles,
-      usage: getUsagePercentage(calls, hits),
-    };
-  }
-  /**
-   * Method to aggregate a single [p]rofile's stats.
-   */
-  p(profileName: string): ProfileStats {
+  return statsManager?.p.c
+    ? statsManager.m()
+    : {
+        calls: 0,
+        hits: 0,
+        name: profileName,
+        usage: getUsagePercentage(0, 0),
+      };
+}
+
+function clear(profileName: string | undefined): void {
+  if (profileName) {
     const statsManager = nameToProfile.get(profileName);
 
-    return statsManager?.p.c
-      ? statsManager.m()
-      : {
-          calls: 0,
-          hits: 0,
-          name: profileName,
-          usage: getUsagePercentage(0, 0),
-        };
+    if (statsManager) {
+      statsManager.r();
+    }
+  } else {
+    nameToProfile.clear();
   }
 }
 
@@ -144,7 +133,7 @@ class Stats {
  * or globally if no name is passed.
  */
 export function clearStats(profileName?: string) {
-  stats?.c(profileName);
+  active && clear(profileName);
 }
 
 /**
@@ -153,7 +142,7 @@ export function clearStats(profileName?: string) {
 export function getStats<Name extends string | undefined>(
   profileName?: Name,
 ): undefined extends Name ? GlobalStats | undefined : ProfileStats | undefined {
-  if (!stats) {
+  if (!active) {
     console.warn(
       'Stats are not being collected; please run "startCollectingStats()" to collect them.',
     );
@@ -162,9 +151,9 @@ export function getStats<Name extends string | undefined>(
 
   return profileName != null
     ? // @ts-expect-error - Conditional returns can be tricky.
-      stats.p(profileName)
+      aggregateProfileStats(profileName)
     : // @ts-expect-error - Conditional returns can be tricky.
-      stats.g();
+      aggregateGlobalStats();
 }
 
 /**
@@ -190,15 +179,15 @@ function getUsagePercentage(calls: number, hits: number) {
  * Whether stats are currently being collected.
  */
 export function isCollectingStats(): boolean {
-  return Boolean(stats);
+  return active;
 }
 
 /**
  * Start collecting stats.
  */
 export function startCollectingStats(): void {
-  if (!stats) {
-    stats = new Stats();
+  if (!active) {
+    active = true;
 
     nameToProfile.forEach((profile) => {
       profile.s();
@@ -210,11 +199,11 @@ export function startCollectingStats(): void {
  * Stop collecting stats.
  */
 export function stopCollectingStats(): void {
-  if (stats) {
+  if (active) {
     nameToProfile.forEach((profile) => {
       profile.d?.();
     });
 
-    stats = undefined;
+    active = false;
   }
 }
