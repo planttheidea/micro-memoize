@@ -127,7 +127,11 @@ interface OptionsBase<Fn extends (...args: any[]) => any> {
    * @note
    * This option will be ignored if the `isKeyEqual` option is provided.
    */
-  isKeyItemEqual?: (cachedKeyItem: Arg, nextKeyItem: Arg) => boolean;
+  isKeyItemEqual?: (
+    cachedKeyItem: Arg,
+    nextKeyItem: Arg,
+    index: number,
+  ) => boolean;
   /**
    * The maximum number of entries to store in cache.
    * @default 1

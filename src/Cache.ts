@@ -24,7 +24,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
    * Whether the individual [a]rgument passed is equal to the same argument in order
    * for a key in cache.
    */
-  i: (a: any, b: any) => boolean;
+  i: (a: any, b: any, index: number) => boolean;
   /**
    * The transformer for the [k]ey stored in cache.
    */
@@ -265,11 +265,11 @@ export class Cache<Fn extends (...args: any[]) => any> {
     }
 
     if (length === 1) {
-      return this.i(prevKey[0], nextKey[0]);
+      return this.i(prevKey[0], nextKey[0], 0);
     }
 
     for (let index = 0; index < length; ++index) {
-      if (!this.i(prevKey[index], nextKey[index])) {
+      if (!this.i(prevKey[index], nextKey[index], index)) {
         return false;
       }
     }
