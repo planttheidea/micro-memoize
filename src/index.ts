@@ -2,6 +2,7 @@ import type { Key, Memoize, Memoized, Options } from './internalTypes.ts';
 import { Cache } from './Cache.js';
 import { isMemoized } from './utils.js';
 import { getExpirationManager } from './expires.js';
+import { getWrappedForceUpdateMoize } from './forceUpdate.js';
 
 export type * from './internalTypes.ts';
 export type { Cache };
@@ -55,5 +56,5 @@ export const memoize: Memoize = function memoize<
   memoized.isMemoized = true;
   memoized.options = options;
 
-  return memoized;
+  return options.forceUpdate ? getWrappedForceUpdateMoize(memoized) : memoized;
 };

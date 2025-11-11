@@ -91,6 +91,9 @@ export type CacheEventListener<
   Fn extends (...args: any[]) => any,
 > = (event: CacheEvent<Type, Fn>) => void;
 
+export type ForceUpdate<Fn extends (...args: any[]) => any> = (
+  args: Parameters<Fn>,
+) => boolean;
 export type GetExpires<Fn extends (...args: any[]) => any> = (
   key: Key,
   value: ReturnType<Fn>,
@@ -155,6 +158,12 @@ interface OptionsBase<Fn extends (...args: any[]) => any> {
    */
   expires?: number | GetExpires<Fn> | ExpiresConfig<Fn>;
   /**
+   * Create a moized method that will call the underlying (unmemoized) function and update the
+   * cache value with its return. This is mainly used if the function has side-effects, and is
+   * therefore not deterministic.
+   */
+  forceUpdate?: ForceUpdate<Fn>;
+  /**
    * Whether the two keys are equal in value. This is used to compare
    * the key the function is called with against a given cache key to
    * determine whether the cached entry can be used.
@@ -195,17 +204,14 @@ export interface OptionsNoCustomEqual<Fn extends (...args: any[]) => any>
 
 export interface OptionsKeyEqual<Fn extends (...args: any[]) => any>
   extends OptionsBase<Fn> {
-  isKeyEqual: (cachedKey: Key, nextKey: Key) => boolean;
+  isKeyEqual: IsKeyEqual;
   isKeyItemEqual?: never;
 }
 
 export interface OptionsKeyItemEqual<Fn extends (...args: any[]) => any>
   extends OptionsBase<Fn> {
   isKeyEqual?: never;
-  isKeyItemEqual?:
-    | 'deep'
-    | 'shallow'
-    | ((cachedKeyItem: Arg, nextKeyItem: Arg, index: number) => boolean);
+  isKeyItemEqual?: 'deep' | 'shallow' | IsKeyItemEqual;
 }
 
 export type Options<Fn extends (...args: any[]) => any> =
