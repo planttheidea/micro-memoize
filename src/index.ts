@@ -1,6 +1,7 @@
 import type { Key, Memoize, Memoized, Options } from './internalTypes.ts';
 import { Cache } from './Cache.js';
 import { isMemoized } from './utils.js';
+import { getExpirationManager } from './expires.js';
 
 export type * from './internalTypes.ts';
 export type { Cache };
@@ -8,10 +9,7 @@ export type { Cache };
 export const memoize: Memoize = function memoize<
   Fn extends (...args: any[]) => any,
   Opts extends Options<Fn>,
->(
-  fn: Fn | Memoized<Fn, Opts>,
-  passedOptions: Opts = {} as Opts,
-): Memoized<Fn, Opts> {
+>(fn: Fn | Memoized<Fn, Opts>, options: Opts = {} as Opts): Memoized<Fn, Opts> {
   if (typeof fn !== 'function') {
     throw new TypeError(
       `Expected first parameter to be function; received ${typeof fn}`,
@@ -19,7 +17,7 @@ export const memoize: Memoize = function memoize<
   }
 
   if (isMemoized(fn)) {
-    return memoize(fn.fn, Object.assign({}, fn.options, passedOptions));
+    return memoize(fn.fn, Object.assign({}, fn.options, options));
   }
 
   const memoized: Memoized<Fn, Opts> = function memoized(
@@ -49,10 +47,13 @@ export const memoize: Memoize = function memoize<
     return node.v;
   };
 
-  memoized.cache = new Cache(passedOptions);
+  const cache = new Cache(options);
+
+  memoized.cache = cache;
+  memoized.expirationManager = getExpirationManager(cache, options);
   memoized.fn = fn;
   memoized.isMemoized = true;
-  memoized.options = passedOptions;
+  memoized.options = options;
 
   return memoized;
 };

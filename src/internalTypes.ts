@@ -1,4 +1,5 @@
 import type { Cache } from './Cache.ts';
+import type { ExpirationManager } from './expires.js';
 
 /**
  * Key used for cache entries.
@@ -90,13 +91,48 @@ export type CacheEventListener<
   Fn extends (...args: any[]) => any,
 > = (event: CacheEvent<Type, Fn>) => void;
 
+export type GetExpires<Fn extends (...args: any[]) => any> = (
+  key: Key,
+  value: ReturnType<Fn>,
+  cache: Cache<Fn>,
+) => number;
 export type IsKeyEqual = (cachedKey: Key, nextKey: Key) => boolean;
-
 export type IsKeyItemEqual = (
   cachedKeyItem: Arg,
   nextKeyItem: Arg,
   index: number,
 ) => boolean;
+export type ShouldPersist<Fn extends (...args: any[]) => any> = (
+  key: Key,
+  value: ReturnType<Fn>,
+  cache: Cache<Fn>,
+) => boolean;
+export type ShouldRemoveOnExpire<Fn extends (...args: any[]) => any> = (
+  key: Key,
+  value: ReturnType<Fn>,
+  time: number,
+  cache: Cache<Fn>,
+) => boolean;
+
+export interface ExpiresConfig<Fn extends (...args: any[]) => any> {
+  /**
+   * The amount of time before the cache entry is automatically removed.
+   */
+  after: number | GetExpires<Fn>;
+  /**
+   * Determine whether the cache entry should never expire.
+   */
+  shouldPersist?: ShouldPersist<Fn>;
+  /**
+   * Determine whether the cache entry should be removed upon expiration.
+   * If `false` is returned, a new expiration is generated (not persistent).
+   */
+  shouldRemove?: ShouldRemoveOnExpire<Fn>;
+  /**
+   * Whether the cache entry expiration should be reset upon being hit.
+   */
+  update?: boolean;
+}
 
 /**
  * Method that transforms the arguments passed to the function into
@@ -113,6 +149,11 @@ interface OptionsBase<Fn extends (...args: any[]) => any> {
    * rejected to avoid caching error states.
    */
   async?: boolean;
+  /**
+   * Whether the entry in cache should automatically remove itself
+   * after a period of time.
+   */
+  expires?: number | GetExpires<Fn> | ExpiresConfig<Fn>;
   /**
    * Whether the two keys are equal in value. This is used to compare
    * the key the function is called with against a given cache key to
@@ -197,6 +238,11 @@ export interface Memoized<
    * The cache used for the memoized method.
    */
   cache: Cache<Fn>;
+  /**
+   * Manager for the expirations cache. This is only populated when
+   * `options.expires` is set.
+   */
+  expirationManager: ExpirationManager<Fn> | undefined;
   /**
    * The original method that is memoized.
    */

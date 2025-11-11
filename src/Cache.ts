@@ -11,6 +11,7 @@ import type {
   Options,
   IsKeyEqual,
 } from './internalTypes.ts';
+import { isNumericValueValid } from './utils.js';
 
 export class Cache<Fn extends (...args: any[]) => any> {
   /**
@@ -65,16 +66,14 @@ export class Cache<Fn extends (...args: any[]) => any> {
         ? transformKeyFromOptions
         : undefined;
 
-    if (typeof isKeyItemEqual === 'function') {
-      this.i = isKeyItemEqual;
-    } else if (isKeyItemEqual === 'deep') {
-      this.i = deepEqual;
-    } else if (isKeyItemEqual === 'shallow') {
-      this.i = shallowEqual;
-    } else {
-      this.i = Object.is;
-    }
-
+    this.i =
+      typeof isKeyItemEqual === 'function'
+        ? isKeyItemEqual
+        : isKeyItemEqual === 'deep'
+          ? deepEqual
+          : isKeyItemEqual === 'shallow'
+            ? shallowEqual
+            : Object.is;
     this.m =
       typeof isKeyEqual === 'function'
         ? isKeyEqual
@@ -82,7 +81,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
           this.e;
 
     this.p = typeof async === 'boolean' && async;
-    this.s = typeof maxSize === 'number' ? maxSize : 1;
+    this.s = isNumericValueValid(maxSize) ? maxSize : 1;
 
     if (transformKey || options.isKeyEqual === this.m) {
       this.k = transformKey;
