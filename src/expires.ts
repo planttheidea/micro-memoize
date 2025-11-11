@@ -64,14 +64,14 @@ export class ExpirationManager<Fn extends (...args: any[]) => any> {
     });
   }
 
-  get size() {
+  get size(): number {
     return this.e.size;
   }
 
   /**
    * Method to [d]elete the expiration.
    */
-  d(key: Key) {
+  d(key: Key): void {
     const expiration = this.e.get(key);
 
     if (expiration) {
@@ -84,7 +84,7 @@ export class ExpirationManager<Fn extends (...args: any[]) => any> {
    * Method to [s]et the new expiration. If one is present for the given `key`, it will delete
    * the existing expiration before creating the new one.
    */
-  s(key: Key, value: ReturnType<Fn>) {
+  s(key: Key, value: ReturnType<Fn>): void {
     if (this.e.has(key)) {
       this.d(key);
     }

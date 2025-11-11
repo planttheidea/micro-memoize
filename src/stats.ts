@@ -28,11 +28,11 @@ export class StatsManager<Fn extends (...args: any[]) => any> {
    */
   p: ProfileCounts = { c: 0, h: 0 };
 
-  constructor(cache: Cache<Fn>, profileName: string) {
+  constructor(cache: Cache<Fn>, statsName: string) {
     this.c = cache;
-    this.n = profileName;
+    this.n = statsName;
 
-    nameToProfile.set(profileName, this);
+    nameToProfile.set(statsName, this);
 
     if (active) {
       this.s();
@@ -82,43 +82,17 @@ export class StatsManager<Fn extends (...args: any[]) => any> {
   }
 }
 
-function aggregateGlobalStats(): GlobalStats {
-  let calls = 0;
-  let hits = 0;
+/**
+ * Clear all existing stats stored, either of the specific profile whose name is passed,
+ * or globally if no name is passed.
+ */
+export function clearStats(statsName?: string) {
+  if (!active) {
+    return;
+  }
 
-  const profiles: Record<string, ProfileStats> = {};
-
-  nameToProfile.forEach((profile, profileName) => {
-    profiles[profileName] = profile.m();
-
-    calls += profile.p.c;
-    hits += profile.p.h;
-  });
-
-  return {
-    calls,
-    hits,
-    profiles,
-    usage: getUsagePercentage(calls, hits),
-  };
-}
-
-function aggregateProfileStats(profileName: string): ProfileStats {
-  const statsManager = nameToProfile.get(profileName);
-
-  return statsManager?.p.c
-    ? statsManager.m()
-    : {
-        calls: 0,
-        hits: 0,
-        name: profileName,
-        usage: getUsagePercentage(0, 0),
-      };
-}
-
-function clear(profileName: string | undefined): void {
-  if (profileName) {
-    const statsManager = nameToProfile.get(profileName);
+  if (statsName) {
+    const statsManager = nameToProfile.get(statsName);
 
     if (statsManager) {
       statsManager.r();
@@ -129,18 +103,10 @@ function clear(profileName: string | undefined): void {
 }
 
 /**
- * Clear all existing stats stored, either of the specific profile whose name is passed,
- * or globally if no name is passed.
- */
-export function clearStats(profileName?: string) {
-  active && clear(profileName);
-}
-
-/**
- * Get the stats of a given profile, or global stats if no `profileName` is given.
+ * Get the stats of a given profile, or global stats if no `statsName` is given.
  */
 export function getStats<Name extends string | undefined>(
-  profileName?: Name,
+  statsName?: Name,
 ): undefined extends Name ? GlobalStats | undefined : ProfileStats | undefined {
   if (!active) {
     console.warn(
@@ -149,11 +115,42 @@ export function getStats<Name extends string | undefined>(
     return;
   }
 
-  return profileName != null
-    ? // @ts-expect-error - Conditional returns can be tricky.
-      aggregateProfileStats(profileName)
-    : // @ts-expect-error - Conditional returns can be tricky.
-      aggregateGlobalStats();
+  if (statsName != null) {
+    const statsManager = nameToProfile.get(statsName);
+
+    const profileStats: ProfileStats = statsManager?.p.c
+      ? statsManager.m()
+      : {
+          calls: 0,
+          hits: 0,
+          name: statsName,
+          usage: getUsagePercentage(0, 0),
+        };
+    // @ts-expect-error - Conditional returns can be tricky.
+    return profileStats;
+  }
+
+  let calls = 0;
+  let hits = 0;
+
+  const profiles: Record<string, ProfileStats> = {};
+
+  nameToProfile.forEach((profile, statsName) => {
+    profiles[statsName] = profile.m();
+
+    calls += profile.p.c;
+    hits += profile.p.h;
+  });
+
+  const globalStats: GlobalStats = {
+    calls,
+    hits,
+    profiles,
+    usage: getUsagePercentage(calls, hits),
+  };
+
+  // @ts-expect-error - Conditional returns can be tricky.
+  return globalStats;
 }
 
 /**

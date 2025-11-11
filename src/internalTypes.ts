@@ -92,36 +92,65 @@ export type CacheEventListener<
   Fn extends (...args: any[]) => any,
 > = (event: CacheEvent<Type, Fn>) => void;
 
+/**
+ * Method use to trigger a forced update of cache.
+ */
 export type ForceUpdate<Fn extends (...args: any[]) => any> = (
   args: Parameters<Fn>,
 ) => boolean;
+/**
+ * Method to retrieve the expiration duration in milliseconds based on
+ * the values in cache.
+ */
 export type GetExpires<Fn extends (...args: any[]) => any> = (
   key: Key,
   value: ReturnType<Fn>,
   cache: Cache<Fn>,
 ) => number;
+/**
+ * Method to determine if two complete keys are equal.
+ */
 export type IsKeyEqual = (cachedKey: Key, nextKey: Key) => boolean;
+/**
+ * Method to determine if individual key items are equal.
+ */
 export type IsKeyItemEqual = (
   cachedKeyItem: Arg,
   nextKeyItem: Arg,
   index: number,
 ) => boolean;
+/**
+ * Method to serialize the key into a stringified key.
+ */
 export type Serializer = (key: Key) => [string];
+/**
+ * Method to determine whether the cache entry should not expire.
+ */
 export type ShouldPersist<Fn extends (...args: any[]) => any> = (
   key: Key,
   value: ReturnType<Fn>,
   cache: Cache<Fn>,
 ) => boolean;
+/**
+ * Method to determine whether the cache entry should be removed on expire, or
+ * start a new expiration period.
+ */
 export type ShouldRemoveOnExpire<Fn extends (...args: any[]) => any> = (
   key: Key,
   value: ReturnType<Fn>,
   time: number,
   cache: Cache<Fn>,
 ) => boolean;
+/**
+ * Method to transform the arguments passed into a custom key format.
+ */
 export type TransformKey<Fn extends (...args: any[]) => any> = (
   args: Parameters<Fn>,
 ) => Key;
 
+/**
+ * Advanced configuration for the `expires` option.
+ */
 export interface ExpiresConfig<Fn extends (...args: any[]) => any> {
   /**
    * The amount of time before the cache entry is automatically removed.
@@ -142,6 +171,9 @@ export interface ExpiresConfig<Fn extends (...args: any[]) => any> {
   update?: boolean;
 }
 
+/**
+ * Statistics object for a specific `statsName` profile.
+ */
 export interface ProfileStats {
   calls: number;
   hits: number;
@@ -149,6 +181,9 @@ export interface ProfileStats {
   usage: string;
 }
 
+/**
+ * Statistics for all possible profiles who have stats collected.
+ */
 export interface GlobalStats {
   calls: number;
   hits: number;
@@ -245,11 +280,18 @@ export interface OptionsKeyItemEqual<Fn extends (...args: any[]) => any>
   isKeyItemEqual?: 'deep' | 'shallow' | IsKeyItemEqual;
 }
 
+/**
+ * Configuration options to drive how entries are stored, checked for cache breakage,
+ * and evicted from cache.
+ */
 export type Options<Fn extends (...args: any[]) => any> =
   | OptionsNoCustomEqual<Fn>
   | OptionsKeyEqual<Fn>
   | OptionsKeyItemEqual<Fn>;
 
+/**
+ * [key, value] pair for a given entry in cache.
+ */
 export type CacheEntry<Fn extends (...args: any[]) => any> = [
   Key,
   ReturnType<Fn>,
@@ -265,6 +307,9 @@ export interface CacheSnapshot<Fn extends (...args: any[]) => any> {
   values: Array<ReturnType<Fn>>;
 }
 
+/**
+ * Method that has been memoized via `micro-memoize`.
+ */
 export interface Memoized<
   Fn extends (...args: any[]) => any,
   Opts extends Options<Fn>,
@@ -305,23 +350,23 @@ export interface Memoize {
       (...args: any[]) => any,
       Options<(...args: any[]) => any>
     >,
-    Opts extends Options<Fn['fn']>,
   >(
     fn: Fn,
-    passedOptions: Opts,
-  ): Memoized<Fn['fn'], Fn['options'] & Opts>;
+  ): Memoized<Fn, Fn['options']>;
   <
     Fn extends Memoized<
       (...args: any[]) => any,
       Options<(...args: any[]) => any>
     >,
+    Opts extends Options<Fn['fn']>,
   >(
     fn: Fn,
-  ): Memoized<Fn, Fn['options']>;
+    passedOptions: Opts,
+  ): Memoized<Fn['fn'], Fn['options'] & Opts>;
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  <Fn extends (...args: any[]) => any>(fn: Fn): Memoized<Fn, {}>;
   <Fn extends (...args: any[]) => any, Opts extends Options<Fn>>(
     fn: Fn,
     passedOptions: Opts,
   ): Memoized<Fn, Opts>;
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  <Fn extends (...args: any[]) => any>(fn: Fn): Memoized<Fn, {}>;
 }
