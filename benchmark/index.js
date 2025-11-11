@@ -10,31 +10,18 @@ import mem from 'mem';
 import memoizee from 'memoizee';
 import memoizerific from 'memoizerific';
 import { memoize } from '../dist/esm/index.mjs';
-import { memoizeWith } from 'ramda';
-import { memoize as underscore } from 'underscore';
+import { memoizeWith as ramdaMemoize } from 'ramda';
+import { memoize as underscoreMemoize } from 'underscore';
 
-const resolveArguments = function () {
-  return arguments.length > 1
-    ? JSON.stringify(arguments)
-    : typeof arguments[0] === 'object'
-      ? JSON.stringify(arguments[0])
-      : arguments[0];
-};
+function resolveSingleArgument(arg) {
+  return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+}
+
+function resolveMultipleArguments(...args) {
+  return JSON.stringify(args);
+}
 
 const lruMemoize = lru.default;
-const ramda = memoizeWith(resolveArguments);
-
-const getResults = (results) => {
-  const table = new Table({
-    head: ['Name', 'Ops / sec'],
-  });
-
-  results.forEach(({ name, stats }) => {
-    table.push([name, stats.ops.toLocaleString()]);
-  });
-
-  return table.toString();
-};
 
 /************* tests *************/
 
@@ -115,8 +102,11 @@ const singularPrimitive = {
   memoizee: memoizee(fibonacciSinglePrimitive),
   memoizerific: memoizerific(1)(fibonacciSinglePrimitive),
   'micro-memoize': memoize(fibonacciSinglePrimitive),
-  ramda: ramda(fibonacciSinglePrimitive),
-  underscore: underscore(fibonacciSinglePrimitive),
+  ramda: ramdaMemoize(resolveSingleArgument, fibonacciSinglePrimitive),
+  underscore: underscoreMemoize(
+    fibonacciSinglePrimitive,
+    resolveSingleArgument,
+  ),
 };
 
 const singularArray = {
@@ -128,8 +118,8 @@ const singularArray = {
   memoizee: memoizee(fibonacciSingleArray),
   memoizerific: memoizerific(1)(fibonacciSingleArray),
   'micro-memoize': memoize(fibonacciSingleArray),
-  ramda: ramda(fibonacciSingleArray),
-  underscore: underscore(fibonacciSingleArray, resolveArguments),
+  ramda: ramdaMemoize(resolveSingleArgument, fibonacciSingleArray),
+  underscore: underscoreMemoize(fibonacciSingleArray, resolveSingleArgument),
 };
 
 const singularObject = {
@@ -141,47 +131,56 @@ const singularObject = {
   memoizee: memoizee(fibonacciSingleObject),
   memoizerific: memoizerific(1)(fibonacciSingleObject),
   'micro-memoize': memoize(fibonacciSingleObject),
-  ramda: ramda(fibonacciSingleObject),
-  underscore: underscore(fibonacciSingleObject, resolveArguments),
+  ramda: ramdaMemoize(resolveSingleArgument, fibonacciSingleObject),
+  underscore: underscoreMemoize(fibonacciSingleObject, resolveSingleArgument),
 };
 
 const multiplePrimitive = {
   'addy osmani': addOsmaniMemoize(fibonacciMultiplePrimitive),
   'fast-memoize': fastMemoize(fibonacciMultiplePrimitive),
-  lodash: lodash(fibonacciMultiplePrimitive, resolveArguments),
+  lodash: lodash(fibonacciMultiplePrimitive, resolveMultipleArguments),
   'lru-memoize': lruMemoize(1)(fibonacciMultiplePrimitive),
   mem: mem(fibonacciMultiplePrimitive, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciMultiplePrimitive),
   memoizerific: memoizerific(1)(fibonacciMultiplePrimitive),
   'micro-memoize': memoize(fibonacciMultiplePrimitive),
-  ramda: ramda(fibonacciMultiplePrimitive),
-  underscore: underscore(fibonacciMultiplePrimitive, resolveArguments),
+  ramda: ramdaMemoize(resolveMultipleArguments, fibonacciMultiplePrimitive),
+  underscore: underscoreMemoize(
+    fibonacciMultiplePrimitive,
+    resolveMultipleArguments,
+  ),
 };
 
 const multipleArray = {
   'addy osmani': addOsmaniMemoize(fibonacciMultipleArray),
   'fast-memoize': fastMemoize(fibonacciMultipleArray),
-  lodash: lodash(fibonacciMultipleArray, resolveArguments),
+  lodash: lodash(fibonacciMultipleArray, resolveMultipleArguments),
   'lru-memoize': lruMemoize(1)(fibonacciMultipleArray),
   mem: mem(fibonacciMultipleArray, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciMultipleArray),
   memoizerific: memoizerific(1)(fibonacciMultipleArray),
   'micro-memoize': memoize(fibonacciMultipleArray),
-  ramda: ramda(fibonacciMultipleArray),
-  underscore: underscore(fibonacciMultipleArray, resolveArguments),
+  ramda: ramdaMemoize(resolveMultipleArguments, fibonacciMultipleArray),
+  underscore: underscoreMemoize(
+    fibonacciMultipleArray,
+    resolveMultipleArguments,
+  ),
 };
 
 const multipleObject = {
   'addy osmani': addOsmaniMemoize(fibonacciMultipleObject),
   'fast-memoize': fastMemoize(fibonacciMultipleObject),
-  lodash: lodash(fibonacciMultipleObject, resolveArguments),
+  lodash: lodash(fibonacciMultipleObject, resolveMultipleArguments),
   'lru-memoize': lruMemoize(1)(fibonacciMultipleObject),
   mem: mem(fibonacciMultipleObject, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciMultipleObject),
   memoizerific: memoizerific(1)(fibonacciMultipleObject),
   'micro-memoize': memoize(fibonacciMultipleObject),
-  ramda: ramda(fibonacciMultipleObject),
-  underscore: underscore(fibonacciMultipleObject, resolveArguments),
+  ramda: ramdaMemoize(resolveMultipleArguments, fibonacciMultipleObject),
+  underscore: underscoreMemoize(
+    fibonacciMultipleObject,
+    resolveMultipleArguments,
+  ),
 };
 
 const number = 25;
@@ -210,6 +209,18 @@ const benches = {
   },
 };
 
+function getResults(tasks) {
+  const table = new Table({
+    head: ['Name', 'Ops / sec'],
+  });
+
+  tasks.forEach(({ name, result }) => {
+    table.push([name, +result.throughput.mean.toFixed(6)]);
+  });
+
+  return table.toString();
+}
+
 async function run(name, { args, methods }) {
   console.log('');
   console.log(`Testing ${name}...`);
@@ -229,13 +240,9 @@ async function run(name, { args, methods }) {
     ({ result }) => result.throughput.mean,
     ['desc'],
   );
+  const table = getResults(tasks);
 
-  console.table(
-    tasks.map(({ name, result }) => ({
-      Package: name.replace(' (passed)', ''),
-      'Ops/sec': +result.throughput.mean.toFixed(6),
-    })),
-  );
+  console.log(table);
   console.log(`Fastest was "${tasks[0].name}".`);
 }
 
