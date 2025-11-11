@@ -29,10 +29,12 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
     - [memoized.isMemoized](#memoizedismemoized)
     - [memoized.options](#memoizedoptions)
   - [Benchmarks](#benchmarks)
-    - [Single parameter (primitive only)](#single-parameter-primitive-only)
-    - [Single parameter (complex object)](#single-parameter-complex-object)
-    - [Multiple parameters (primitives only)](#multiple-parameters-primitives-only)
-    - [Multiple parameters (complex objects)](#multiple-parameters-complex-objects)
+    - [Single primitive parameter](#single-primitive-parameter)
+    - [Single array parameter](#single-array-parameter)
+    - [Single object parameter](#single-object-parameter)
+    - [Multiple primitive parameters](#multiple-primitive-parameters)
+    - [Multiple array parameters](#multiple-array-parameters)
+    - [Multiple object parameters](#multiple-object-parameters)
   - [Browser support](#browser-support)
   - [Node support](#node-support)
   - [Development](#development)
@@ -46,13 +48,13 @@ As the author of [`moize`](https://github.com/planttheidea/moize), I created a c
 ESM:
 
 ```ts
-import { memoize } from "micro-memoize";
+import { memoize } from 'micro-memoize';
 ```
 
 CommonJS:
 
 ```ts
-const { memoize } = require("micro-memoize");
+const { memoize } = require('micro-memoize');
 ```
 
 ## Usage
@@ -62,8 +64,8 @@ const assembleToObject = (one: string, two: string) => ({ one, two });
 
 const memoized = memoize(assembleToObject);
 
-console.log(memoized("one", "two")); // {one: 'one', two: 'two'}
-console.log(memoized("one", "two")); // pulled from cache, {one: 'one', two: 'two'}
+console.log(memoized('one', 'two')); // {one: 'one', two: 'two'}
+console.log(memoized('one', 'two')); // pulled from cache, {one: 'one', two: 'two'}
 ```
 
 ### Composition
@@ -100,7 +102,7 @@ const fn = async (one: string, two: string) => {
 
 const memoized = memoize(fn, { isPromise: true });
 
-memoized("one", "two");
+memoized('one', 'two');
 
 console.log(memoized.cache.snapshot.keys); // [['one', 'two']]
 console.log(memoized.cache.snapshot.values); // [Promise]
@@ -125,7 +127,7 @@ Common use-cases:
 - Limiting the arguments compared
 
 ```ts
-import { deepEqual } from "fast-equals";
+import { deepEqual } from 'fast-equals';
 
 type ContrivedObject = {
   deep: string;
@@ -144,29 +146,29 @@ const memoizedDeepObject = memoize(deepObject, { isEqual: deepEqual });
 console.log(
   memoizedDeepObject({
     foo: {
-      deep: "foo",
+      deep: 'foo',
     },
     bar: {
-      deep: "bar",
+      deep: 'bar',
     },
     baz: {
-      deep: "baz",
+      deep: 'baz',
     },
-  })
+  }),
 ); // {foo: {deep: 'foo'}, bar: {deep: 'bar'}}
 
 console.log(
   memoizedDeepObject({
     foo: {
-      deep: "foo",
+      deep: 'foo',
     },
     bar: {
-      deep: "bar",
+      deep: 'bar',
     },
     baz: {
-      deep: "baz",
+      deep: 'baz',
     },
-  })
+  }),
 ); // pulled from cache
 ```
 
@@ -185,7 +187,7 @@ Common use-cases:
 - Serialization of arguments
 
 ```ts
-import { deepEqual } from "fast-equals";
+import { deepEqual } from 'fast-equals';
 
 type ContrivedObject = { foo: string; bar: number };
 
@@ -201,8 +203,8 @@ const memoizedShape = memoize(deepObject, {
     const object2 = key2[0];
 
     return (
-      object1.hasOwnProperty("foo") &&
-      object2.hasOwnProperty("foo") &&
+      object1.hasOwnProperty('foo') &&
+      object2.hasOwnProperty('foo') &&
       object1.bar === object2.bar
     );
   },
@@ -210,18 +212,18 @@ const memoizedShape = memoize(deepObject, {
 
 console.log(
   memoizedShape({
-    foo: "foo",
+    foo: 'foo',
     bar: 123,
-    baz: "baz",
-  })
+    baz: 'baz',
+  }),
 ); // {foo: {deep: 'foo'}, bar: {deep: 'bar'}}
 
 console.log(
   memoizedShape({
-    foo: "not foo",
+    foo: 'not foo',
     bar: 123,
-    baz: "baz",
-  })
+    baz: 'baz',
+  }),
 ); // pulled from cache
 ```
 
@@ -236,15 +238,15 @@ const manyPossibleArgs = (one: string, two: string) => [one, two];
 
 const memoized = memoize(manyPossibleArgs, { maxSize: 3 });
 
-console.log(memoized("one", "two")); // ['one', 'two']
-console.log(memoized("two", "three")); // ['two', 'three']
-console.log(memoized("three", "four")); // ['three', 'four']
+console.log(memoized('one', 'two')); // ['one', 'two']
+console.log(memoized('two', 'three')); // ['two', 'three']
+console.log(memoized('three', 'four')); // ['three', 'four']
 
-console.log(memoized("one", "two")); // pulled from cache
-console.log(memoized("two", "three")); // pulled from cache
-console.log(memoized("three", "four")); // pulled from cache
+console.log(memoized('one', 'two')); // pulled from cache
+console.log(memoized('two', 'three')); // pulled from cache
+console.log(memoized('three', 'four')); // pulled from cache
 
-console.log(memoized("four", "five")); // ['four', 'five'], drops ['one', 'two'] from cache
+console.log(memoized('four', 'five')); // ['four', 'five'], drops ['one', 'two'] from cache
 ```
 
 ### transformKey
@@ -260,8 +262,8 @@ const memoized = memoize(ignoreFunctionArgs, {
   transformKey: (args) => [JSON.stringify(args[0])],
 });
 
-console.log(memoized("one", () => {})); // ['one', () => {}]
-console.log(memoized("one", () => {})); // pulled from cache, ['one', () => {}]
+console.log(memoized('one', () => {})); // ['one', () => {}]
+console.log(memoized('one', () => {})); // pulled from cache, ['one', () => {}]
 ```
 
 If your transformed keys require something other than `SameValueZero` equality, you can combine `transformKey` with [`isEqual`](#isequal) for completely custom key creation and comparison.
@@ -275,8 +277,8 @@ const memoized = memoize(ignoreFunctionArg, {
   transformKey: (args) => [JSON.stringify(args[0])],
 });
 
-console.log(memoized("one", () => {})); // ['one', () => {}]
-console.log(memoized("one", () => {})); // pulled from cache, ['one', () => {}]
+console.log(memoized('one', () => {})); // ['one', () => {}]
+console.log(memoized('one', () => {})); // pulled from cache, ['one', () => {}]
 ```
 
 ## Additional properties
@@ -301,10 +303,10 @@ const method = (one: string, two: string) => ({ one, two });
 
 const memoized = memoize(method);
 
-memoized.cache.keys.push(["one", "two"]);
-memoized.cache.values.push("cached");
+memoized.cache.keys.push(['one', 'two']);
+memoized.cache.values.push('cached');
 
-console.log(memoized("one", "two")); // 'cached'
+console.log(memoized('one', 'two')); // 'cached'
 ```
 
 **NOTE**: `moize` offers a variety of convenience methods for this manual `cache` manipulation, and while `micro-memoize` allows all the same capabilities by exposing the `cache`, it does not provide any convenience methods.
@@ -322,19 +324,19 @@ const fn = (one: string, two: string) => [one, two];
 
 const memoized = memoize(fn, { maxSize: 2 });
 
-memoized.cache.on("add", (event) => {
-  console.log("cache has been added to: ", JSON.stringify(event));
+memoized.cache.on('add', (event) => {
+  console.log('cache has been added to: ', JSON.stringify(event));
 });
 
-memoized("foo", "bar"); // cache has been added to
-memoized("foo", "bar");
-memoized("foo", "bar");
-memoized("bar", "foo"); // cache has been added to
-memoized("bar", "foo");
-memoized("bar", "foo");
-memoized("foo", "bar");
-memoized("foo", "bar");
-memoized("foo", "bar");
+memoized('foo', 'bar'); // cache has been added to
+memoized('foo', 'bar');
+memoized('foo', 'bar');
+memoized('bar', 'foo'); // cache has been added to
+memoized('bar', 'foo');
+memoized('bar', 'foo');
+memoized('foo', 'bar');
+memoized('foo', 'bar');
+memoized('foo', 'bar');
 ```
 
 ### delete
@@ -346,19 +348,19 @@ const fn = (one: string, two: string) => [one, two];
 
 const memoized = memoize(fn);
 
-memoized.cache.on("delete", (event) => {
-  console.log("cache has changed: ", JSON.stringify(event));
+memoized.cache.on('delete', (event) => {
+  console.log('cache has changed: ', JSON.stringify(event));
 });
 
-memoized("foo", "bar");
-memoized("foo", "bar");
-memoized("foo", "bar");
-memoized("bar", "foo"); // cache has changed
-memoized("bar", "foo");
-memoized("bar", "foo");
-memoized("foo", "bar"); // cache has changed
-memoized("foo", "bar");
-memoized("foo", "bar");
+memoized('foo', 'bar');
+memoized('foo', 'bar');
+memoized('foo', 'bar');
+memoized('bar', 'foo'); // cache has changed
+memoized('bar', 'foo');
+memoized('bar', 'foo');
+memoized('foo', 'bar'); // cache has changed
+memoized('foo', 'bar');
+memoized('foo', 'bar');
 ```
 
 **NOTE**: This method is not executed when the `cache` is manually manipulated, only when changed via calling the memoized method. When the execution of other cache listeners (`onCacheAdd`, `onCacheHit`) is applicable, this method will execute after those methods.
@@ -372,19 +374,19 @@ const fn = (one: string, two: string) => [one, two];
 
 const memoized = memoize(fn, { maxSize: 2 });
 
-memoized.cache.on("update", (event) => {
-  console.log("cache entry found: ", JSON.stringify(event));
+memoized.cache.on('update', (event) => {
+  console.log('cache entry found: ', JSON.stringify(event));
 });
 
-memoized("foo", "bar");
-memoized("foo", "bar"); // cache entry was found
-memoized("foo", "bar"); // cache entry was found
-memoized("bar", "foo");
-memoized("bar", "foo"); // cache entry was found
-memoized("bar", "foo"); // cache entry was found
-memoized("foo", "bar"); // cache entry was found
-memoized("foo", "bar"); // cache entry was found
-memoized("foo", "bar"); // cache entry was found
+memoized('foo', 'bar');
+memoized('foo', 'bar'); // cache entry was found
+memoized('foo', 'bar'); // cache entry was found
+memoized('bar', 'foo');
+memoized('bar', 'foo'); // cache entry was found
+memoized('bar', 'foo'); // cache entry was found
+memoized('foo', 'bar'); // cache entry was found
+memoized('foo', 'bar'); // cache entry was found
+memoized('foo', 'bar'); // cache entry was found
 ```
 
 ### update
@@ -396,17 +398,17 @@ const fn = (one: string, two: string) => [one, two];
 
 const memoized = memoize(fn, { maxSize: 2 });
 
-memoized.cache.on("update", (event) => {
-  console.log("cache has changed: ", JSON.stringify(event));
+memoized.cache.on('update', (event) => {
+  console.log('cache has changed: ', JSON.stringify(event));
 });
 
-memoized("foo", "bar");
-memoized("bar", "foo"); // cache has changed
-memoized("bar", "foo");
-memoized("bar", "foo");
-memoized("foo", "bar"); // cache has changed
-memoized("foo", "bar");
-memoized("foo", "bar");
+memoized('foo', 'bar');
+memoized('bar', 'foo'); // cache has changed
+memoized('bar', 'foo');
+memoized('bar', 'foo');
+memoized('foo', 'bar'); // cache has changed
+memoized('foo', 'bar');
+memoized('foo', 'bar');
 ```
 
 **NOTE**: This method is not executed when the `cache` is manually manipulated, only when changed via calling the memoized method.
@@ -448,124 +450,124 @@ Benchmarks was performed on an i9 16-core Linux laptop with 64GB of memory using
 
 **NOTE**: Not all libraries tested support multiple parameters out of the box, but support the ability to pass a custom `resolver`. Because these often need to resolve to a string value, [a common suggestion](https://github.com/lodash/lodash/issues/2115) is to just `JSON.stringify` the arguments, so that is what is used when needed.
 
-### Single parameter (primitive only)
-
-This is usually what benchmarks target for ... its the least-likely use-case, but the easiest to optimize, often at the expense of more common use-cases.
+### Single primitive parameter
 
 ```bash
-┌───────────────┬─────────────┐
-│ Name          │ Ops / sec   │
-├───────────────┼─────────────┤
-│ micro-memoize │ 144,299,591 │
-├───────────────┼─────────────┤
-│ fast-memoize  │ 104,602,763 │
-├───────────────┼─────────────┤
-│ mem           │ 93,733,592  │
-├───────────────┼─────────────┤
-│ lru-memoize   │ 89,878,902  │
-├───────────────┼─────────────┤
-│ lodash        │ 84,528,119  │
-├───────────────┼─────────────┤
-│ underscore    │ 58,725,437  │
-├───────────────┼─────────────┤
-│ addy osmani   │ 56,327,017  │
-├───────────────┼─────────────┤
-│ ramda         │ 50,592,946  │
-├───────────────┼─────────────┤
-│ memoizee      │ 42,364,855  │
-├───────────────┼─────────────┤
-│ memoizerific  │ 18,929,830  │
-└───────────────┴─────────────┘
+┌─────────┬─────────────────┬─────────────────┐
+│ (index) │ Package         │ Ops/sec         │
+├─────────┼─────────────────┼─────────────────┤
+│ 0       │ 'micro-memoize' │ 22339461.050674 │
+│ 1       │ 'fast-memoize'  │ 20131998.08349  │
+│ 2       │ 'lru-memoize'   │ 19648848.50776  │
+│ 3       │ 'mem'           │ 19628813.236273 │
+│ 4       │ 'lodash'        │ 17815347.32094  │
+│ 5       │ 'underscore'    │ 17277107.636731 │
+│ 6       │ 'ramda'         │ 16146863.169399 │
+│ 7       │ 'addy osmani'   │ 15677020.310172 │
+│ 8       │ 'memoizee'      │ 15025344.685345 │
+│ 9       │ 'memoizerific'  │ 9416638.862002  │
+└─────────┴─────────────────┴─────────────────┘
+Fastest was "micro-memoize".
 ```
 
-### Single parameter (complex object)
-
-This is what most memoization libraries target as the primary use-case, as it removes the complexities of multiple arguments but allows for usage with one to many values.
+### Single array parameter
 
 ```bash
-┌───────────────┬────────────┐
-│ Name          │ Ops / sec  │
-├───────────────┼────────────┤
-│ micro-memoize │ 54,531,490 │
-├───────────────┼────────────┤
-│ lodash        │ 53,275,536 │
-├───────────────┼────────────┤
-│ lru-memoize   │ 51,352,280 │
-├───────────────┼────────────┤
-│ memoizee      │ 25,313,982 │
-├───────────────┼────────────┤
-│ memoizerific  │ 15,547,722 │
-├───────────────┼────────────┤
-│ mem           │ 6,143,526  │
-├───────────────┼────────────┤
-│ ramda         │ 5,431,818  │
-├───────────────┼────────────┤
-│ underscore    │ 5,004,560  │
-├───────────────┼────────────┤
-│ addy osmani   │ 4,334,210  │
-├───────────────┼────────────┤
-│ fast-memoize  │ 2,854,318  │
-└───────────────┴────────────┘
+┌─────────┬─────────────────┬─────────────────┐
+│ (index) │ Package         │ Ops/sec         │
+├─────────┼─────────────────┼─────────────────┤
+│ 0       │ 'micro-memoize' │ 18107869.305642 │
+│ 1       │ 'lodash'        │ 16013767.234523 │
+│ 2       │ 'lru-memoize'   │ 15813274.251587 │
+│ 3       │ 'memoizee'      │ 12648234.359664 │
+│ 4       │ 'memoizerific'  │ 8830490.418083  │
+│ 5       │ 'mem'           │ 5315469.999401  │
+│ 6       │ 'ramda'         │ 4970058.738857  │
+│ 7       │ 'underscore'    │ 4634034.220672  │
+│ 8       │ 'addy osmani'   │ 4211267.675523  │
+│ 9       │ 'fast-memoize'  │ 2582107.271755  │
+└─────────┴─────────────────┴─────────────────┘
+Fastest was "micro-memoize".
 ```
 
-### Multiple parameters (primitives only)
-
-This is a very common use-case for function calls, but can be more difficult to optimize because you need to account for multiple possibilities ... did the number of arguments change, are there default arguments, etc.
+### Single object parameter
 
 ```bash
-┌───────────────┬────────────┐
-│ Name          │ Ops / sec  │
-├───────────────┼────────────┤
-│ micro-memoize │ 45,689,364 │
-├───────────────┼────────────┤
-│ lru-memoize   │ 44,492,539 │
-├───────────────┼────────────┤
-│ memoizee      │ 16,292,139 │
-├───────────────┼────────────┤
-│ memoizerific  │ 11,978,541 │
-├───────────────┼────────────┤
-│ addy osmani   │ 8,799,269  │
-├───────────────┼────────────┤
-│ mem           │ 8,195,197  │
-├───────────────┼────────────┤
-│ ramda         │ 2,700,776  │
-├───────────────┼────────────┤
-│ fast-memoize  │ 2,688,259  │
-├───────────────┼────────────┤
-│ underscore    │ 2,625,435  │
-├───────────────┼────────────┤
-│ lodash        │ 2,483,844  │
-└───────────────┴────────────┘
+┌─────────┬─────────────────┬─────────────────┐
+│ (index) │ Package         │ Ops/sec         │
+├─────────┼─────────────────┼─────────────────┤
+│ 0       │ 'micro-memoize' │ 18146820.870404 │
+│ 1       │ 'lodash'        │ 16474684.838111 │
+│ 2       │ 'lru-memoize'   │ 15009638.772225 │
+│ 3       │ 'memoizee'      │ 12421246.214537 │
+│ 4       │ 'memoizerific'  │ 8953238.444208  │
+│ 5       │ 'mem'           │ 4188000.599823  │
+│ 6       │ 'ramda'         │ 3901543.841238  │
+│ 7       │ 'underscore'    │ 3663290.473278  │
+│ 8       │ 'addy osmani'   │ 3206201.128022  │
+│ 9       │ 'fast-memoize'  │ 2281321.7395    │
+└─────────┴─────────────────┴─────────────────┘
+Fastest was "micro-memoize".
 ```
 
-### Multiple parameters (complex objects)
-
-This is the most robust use-case, with the same complexities as multiple primitives but managing bulkier objects with additional edge scenarios (destructured with defaults, for example).
+### Multiple primitive parameters
 
 ```bash
-┌───────────────┬────────────┐
-│ Name          │ Ops / sec  │
-├───────────────┼────────────┤
-│ micro-memoize │ 44,239,079 │
-├───────────────┼────────────┤
-│ lru-memoize   │ 44,124,175 │
-├───────────────┼────────────┤
-│ memoizee      │ 16,776,829 │
-├───────────────┼────────────┤
-│ memoizerific  │ 12,959,257 │
-├───────────────┼────────────┤
-│ mem           │ 6,460,517  │
-├───────────────┼────────────┤
-│ addy osmani   │ 3,528,575  │
-├───────────────┼────────────┤
-│ ramda         │ 2,325,753  │
-├───────────────┼────────────┤
-│ fast-memoize  │ 2,298,835  │
-├───────────────┼────────────┤
-│ underscore    │ 2,260,145  │
-├───────────────┼────────────┤
-│ lodash        │ 2,170,409  │
-└───────────────┴────────────┘
+┌─────────┬─────────────────┬─────────────────┐
+│ (index) │ Package         │ Ops/sec         │
+├─────────┼─────────────────┼─────────────────┤
+│ 0       │ 'micro-memoize' │ 16819457.04594  │
+│ 1       │ 'lru-memoize'   │ 16566652.504496 │
+│ 2       │ 'memoizee'      │ 9314567.770051  │
+│ 3       │ 'memoizerific'  │ 6919904.142539  │
+│ 4       │ 'addy osmani'   │ 5432062.608103  │
+│ 5       │ 'mem'           │ 5098045.189683  │
+│ 6       │ 'ramda'         │ 2175465.788265  │
+│ 7       │ 'lodash'        │ 2057530.677261  │
+│ 8       │ 'fast-memoize'  │ 1979279.071327  │
+│ 9       │ 'underscore'    │ 1979124.876948  │
+└─────────┴─────────────────┴─────────────────┘
+Fastest was "micro-memoize".
+```
+
+### Multiple array parameters
+
+```bash
+┌─────────┬─────────────────┬─────────────────┐
+│ (index) │ Package         │ Ops/sec         │
+├─────────┼─────────────────┼─────────────────┤
+│ 0       │ 'micro-memoize' │ 16093289.293139 │
+│ 1       │ 'lru-memoize'   │ 15739671.222008 │
+│ 2       │ 'memoizee'      │ 9256283.775659  │
+│ 3       │ 'memoizerific'  │ 7503036.231682  │
+│ 4       │ 'mem'           │ 4339662.731408  │
+│ 5       │ 'addy osmani'   │ 2659719.638446  │
+│ 6       │ 'ramda'         │ 2005015.031479  │
+│ 7       │ 'lodash'        │ 1800600.567902  │
+│ 8       │ 'underscore'    │ 1751301.686092  │
+│ 9       │ 'fast-memoize'  │ 1736208.519866  │
+└─────────┴─────────────────┴─────────────────┘
+Fastest was "micro-memoize".
+```
+
+### Multiple object parameters
+
+```bash
+┌─────────┬─────────────────┬─────────────────┐
+│ (index) │ Package         │ Ops/sec         │
+├─────────┼─────────────────┼─────────────────┤
+│ 0       │ 'micro-memoize' │ 16479039.098427 │
+│ 1       │ 'lru-memoize'   │ 16402826.829361 │
+│ 2       │ 'memoizee'      │ 9339148.585288  │
+│ 3       │ 'memoizerific'  │ 7496273.774758  │
+│ 4       │ 'mem'           │ 3072611.80029   │
+│ 5       │ 'addy osmani'   │ 2064427.477477  │
+│ 6       │ 'ramda'         │ 1655977.714224  │
+│ 7       │ 'lodash'        │ 1527122.351717  │
+│ 8       │ 'underscore'    │ 1486597.083487  │
+│ 9       │ 'fast-memoize'  │ 1475414.89725   │
+└─────────┴─────────────────┴─────────────────┘
+Fastest was "micro-memoize".
 ```
 
 ## Browser support
