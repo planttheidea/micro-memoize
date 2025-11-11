@@ -1,3 +1,4 @@
+import { deepEqual, shallowEqual } from 'fast-equals';
 import { CacheEventEmitter } from './CacheEventEmitter.js';
 import type {
   CacheEntry,
@@ -5,11 +6,11 @@ import type {
   CacheEventListener,
   CacheNode,
   CacheSnapshot,
+  IsKeyItemEqual,
   Key,
   Options,
-  TransformKey,
+  IsKeyEqual,
 } from './internalTypes.ts';
-import { getDefault } from './utils.js';
 
 export class Cache<Fn extends (...args: any[]) => any> {
   /**
@@ -21,18 +22,18 @@ export class Cache<Fn extends (...args: any[]) => any> {
    */
   h: CacheNode<Fn> | undefined;
   /**
-   * Whether the individual [a]rgument passed is equal to the same argument in order
+   * Whether the individual argument passed [i]s equal to the same argument in order
    * for a key in cache.
    */
-  i: (a: any, b: any, index: number) => boolean;
+  i: IsKeyItemEqual;
   /**
    * The transformer for the [k]ey stored in cache.
    */
-  k: TransformKey<Fn> | undefined;
+  k: Options<Fn>['transformKey'] | undefined;
   /**
    * Whether the entire key [m]atches an existing key in cache.
    */
-  m: (a: Key, b: Key) => boolean;
+  m: IsKeyEqual;
   /**
    * Event emitter for `[o]`n events.
    */
@@ -40,7 +41,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
   /**
    * Whether to await the [p]romise returned by the function.
    */
-  p: boolean;
+  p: Options<Fn>['async'];
   /**
    * The maximum [s]ize of the cache.
    */
@@ -51,17 +52,37 @@ export class Cache<Fn extends (...args: any[]) => any> {
   t: CacheNode<Fn> | undefined;
 
   constructor(options: Options<Fn>) {
-    const transformKey = getDefault('function', options.transformKey);
+    const {
+      async,
+      isKeyEqual,
+      isKeyItemEqual,
+      maxSize,
+      transformKey: transformKeyFromOptions,
+    } = options;
 
-    this.i = getDefault('function', options.isKeyItemEqual, Object.is);
-    this.m = getDefault(
-      'function',
-      options.isKeyEqual,
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      this.e,
-    );
-    this.p = getDefault('boolean', options.async, false);
-    this.s = getDefault('number', options.maxSize, 1);
+    const transformKey =
+      typeof transformKeyFromOptions === 'function'
+        ? transformKeyFromOptions
+        : undefined;
+
+    if (typeof isKeyItemEqual === 'function') {
+      this.i = isKeyItemEqual;
+    } else if (isKeyItemEqual === 'deep') {
+      this.i = deepEqual;
+    } else if (isKeyItemEqual === 'shallow') {
+      this.i = shallowEqual;
+    } else {
+      this.i = Object.is;
+    }
+
+    this.m =
+      typeof isKeyEqual === 'function'
+        ? isKeyEqual
+        : // eslint-disable-next-line @typescript-eslint/unbound-method
+          this.e;
+
+    this.p = typeof async === 'boolean' && async;
+    this.s = typeof maxSize === 'number' ? maxSize : 1;
 
     if (transformKey || options.isKeyEqual === this.m) {
       this.k = transformKey;

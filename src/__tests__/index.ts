@@ -797,6 +797,47 @@ describe('memoize', () => {
       expect(result2).toBe(result1);
     });
 
+    it('uses deep equality check for option `isKeyItemEqual` of `deep`', () => {
+      interface ContrivedObject {
+        foo: string;
+        bar: { baz: number };
+      }
+
+      const deepObject = (object: ContrivedObject) => ({
+        foo: object.foo,
+        bar: object.bar.baz,
+      });
+
+      const memoizedShape = memoize(deepObject, { isKeyItemEqual: 'deep' });
+
+      const result1 = memoizedShape({ foo: 'foo', bar: { baz: 123 } });
+      const result2 = memoizedShape({ foo: 'foo', bar: { baz: 123 } });
+
+      expect(result1).toEqual({ foo: 'foo', bar: 123 });
+      expect(result2).toBe(result1);
+    });
+
+    it('uses shallow equality check for option `isKeyItemEqual` of `shallow`', () => {
+      interface ContrivedObject {
+        foo: string;
+        bar: number;
+        baz: string;
+      }
+
+      const deepObject = (object: ContrivedObject) => ({
+        foo: object.foo,
+        bar: object.bar,
+      });
+
+      const memoizedShape = memoize(deepObject, { isKeyItemEqual: 'shallow' });
+
+      const result1 = memoizedShape({ foo: 'foo', bar: 123, baz: 'baz' });
+      const result2 = memoizedShape({ foo: 'foo', bar: 123, baz: 'baz' });
+
+      expect(result1).toEqual({ foo: 'foo', bar: 123 });
+      expect(result2).toBe(result1);
+    });
+
     it('matches for option `isKeyEqual`', () => {
       interface ContrivedObject {
         foo: string;

@@ -12,6 +12,9 @@
   "bugs": {
     "url": "https://github.com/planttheidea/micro-memoize/issues"
   },
+  "dependencies": {
+    "fast-equals": "^5.3.3-beta.1"
+  },
   "description": "A tiny, crazy fast memoization library for the 95% use-case",
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^16.0.3",
@@ -28,7 +31,6 @@
     "eslint": "^9.39.1",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react": "^7.37.5",
-    "fast-equals": "^5.3.2",
     "fast-memoize": "^2.5.2",
     "lodash": "^4.17.21",
     "lru-memoize": "^1.1.0",

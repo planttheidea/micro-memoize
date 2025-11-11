@@ -2877,10 +2877,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-equals@npm:^5.3.2":
-  version: 5.3.2
-  resolution: "fast-equals@npm:5.3.2"
-  checksum: 10c0/babadb98fb93c693ee3c8eecbc980ed52fa7be7508eca9b68d8c899bc48e2e47af6d30160187358f7987e54440b6fd21ecd3c6e48ebeb15e1875d6a2ac7e1421
+"fast-equals@npm:^5.3.3-beta.1":
+  version: 5.3.3-beta.1
+  resolution: "fast-equals@npm:5.3.3-beta.1"
+  checksum: 10c0/f6d2e33b4ff5f2434edd113823efe6e75532dfeb82f85089486c558d84fcc89f5b67ce69bdbb3e15c691bdfc91fdf3610d9fe583a5ac01a3f5ba3f06004ab484
   languageName: node
   linkType: hard
 
@@ -4201,7 +4201,7 @@ __metadata:
     eslint: "npm:^9.39.1"
     eslint-plugin-import: "npm:^2.32.0"
     eslint-plugin-react: "npm:^7.37.5"
-    fast-equals: "npm:^5.3.2"
+    fast-equals: "npm:^5.3.3-beta.1"
     fast-memoize: "npm:^2.5.2"
     lodash: "npm:^4.17.21"
     lru-memoize: "npm:^1.1.0"
