@@ -12,6 +12,7 @@ import type {
   IsKeyEqual,
 } from './internalTypes.ts';
 import { isNumericValueValid } from './utils.js';
+import { isSerializedKeyEqual, transformKeySerialized } from './serialize.js';
 
 export class Cache<Fn extends (...args: any[]) => any> {
   /**
@@ -58,13 +59,9 @@ export class Cache<Fn extends (...args: any[]) => any> {
       isKeyEqual,
       isKeyItemEqual,
       maxSize,
-      transformKey: transformKeyFromOptions,
+      serialize,
+      transformKey,
     } = options;
-
-    const transformKey =
-      typeof transformKeyFromOptions === 'function'
-        ? transformKeyFromOptions
-        : undefined;
 
     this.i =
       typeof isKeyItemEqual === 'function'
@@ -77,14 +74,19 @@ export class Cache<Fn extends (...args: any[]) => any> {
     this.m =
       typeof isKeyEqual === 'function'
         ? isKeyEqual
-        : // eslint-disable-next-line @typescript-eslint/unbound-method
-          this.e;
+        : serialize
+          ? isSerializedKeyEqual
+          : // eslint-disable-next-line @typescript-eslint/unbound-method
+            this.e;
 
     this.p = typeof async === 'boolean' && async;
     this.s = isNumericValueValid(maxSize) ? maxSize : 1;
 
-    if (transformKey || options.isKeyEqual === this.m) {
+    if (typeof transformKey === 'function') {
       this.k = transformKey;
+    } else if (serialize) {
+      this.k =
+        typeof serialize === 'function' ? serialize : transformKeySerialized;
     }
   }
 

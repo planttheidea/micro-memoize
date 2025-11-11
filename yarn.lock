@@ -1172,6 +1172,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/lodash@npm:^4.17.20":
+  version: 4.17.20
+  resolution: "@types/lodash@npm:4.17.20"
+  checksum: 10c0/98cdd0faae22cbb8079a01a3bb65aa8f8c41143367486c1cbf5adc83f16c9272a2a5d2c1f541f61d0d73da543c16ee1d21cf2ef86cb93cd0cc0ac3bced6dd88f
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^24.10.0":
   version: 24.10.0
   resolution: "@types/node@npm:24.10.0"
@@ -2870,6 +2877,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fast-copy@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "fast-copy@npm:4.0.0"
+  checksum: 10c0/581e5709806f02c1168b677fa1cf01a321e212c10f32785de0c94d8978fb6c6c2ef94616b9638f6bb108fdc71115101d11a52aa17e23c2834fdd43f2fcf640d7
+  languageName: node
+  linkType: hard
+
 "fast-deep-equal@npm:^3.1.1, fast-deep-equal@npm:^3.1.3":
   version: 3.1.3
   resolution: "fast-deep-equal@npm:3.1.3"
@@ -2915,6 +2929,13 @@ __metadata:
   version: 2.5.2
   resolution: "fast-memoize@npm:2.5.2"
   checksum: 10c0/6f658f182f6eaf25a8ecdaf49affee4cac20df4e61e7ef3f04145fb86e887e7a0bd9975740ce88a9015da99459d7386eaf1342ac15be820f72f4be1ecf934d95
+  languageName: node
+  linkType: hard
+
+"fast-stringify@npm:^4.0.0-beta.0":
+  version: 4.0.0-beta.0
+  resolution: "fast-stringify@npm:4.0.0-beta.0"
+  checksum: 10c0/7e7582a9f469d9878337cb01f55f247dad25762b4677bc1c3777937d9d51d44d6c2ed77dcca844587410669b0d5792a62170cf4356f7831ee45be2fad55395c5
   languageName: node
   linkType: hard
 
@@ -4191,6 +4212,7 @@ __metadata:
     "@rollup/plugin-terser": "npm:^0.4.4"
     "@rollup/plugin-typescript": "npm:^12.3.0"
     "@types/bluebird": "npm:^3.5.42"
+    "@types/lodash": "npm:^4.17.20"
     "@types/node": "npm:^24.10.0"
     "@types/react": "npm:^19.2.2"
     "@typescript-eslint/eslint-plugin": "npm:^8.46.4"
@@ -4201,8 +4223,10 @@ __metadata:
     eslint: "npm:^9.39.1"
     eslint-plugin-import: "npm:^2.32.0"
     eslint-plugin-react: "npm:^7.37.5"
+    fast-copy: "npm:^4.0.0"
     fast-equals: "npm:^5.3.3-beta.1"
     fast-memoize: "npm:^2.5.2"
+    fast-stringify: "npm:^4.0.0-beta.0"
     lodash: "npm:^4.17.21"
     lru-memoize: "npm:^1.1.0"
     mem: "npm:^10.0.0"

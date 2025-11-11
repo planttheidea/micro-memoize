@@ -125,29 +125,26 @@ describe('success', () => {
     expect(cachedItem).toEqual(Promise.resolve(16));
   });
 
-  test.fails(
-    'will refresh the cache when used with custom key transformers',
-    () => {
-      interface ConditionalIncrement {
-        force?: boolean;
-      }
+  test('will refresh the cache when used with custom key transformers', () => {
+    interface ConditionalIncrement {
+      force?: boolean;
+    }
 
-      let count = 0;
+    let count = 0;
 
-      const increment = (_?: ConditionalIncrement) => ++count;
+    const increment = (_?: ConditionalIncrement) => ++count;
 
-      const memoized = memoize(increment, {
-        forceUpdate: (args) => args[0]?.force === true,
-        maxSize: 2,
-        serialize: () => ['always same'],
-      });
+    const memoized = memoize(increment, {
+      forceUpdate: (args) => args[0]?.force === true,
+      maxSize: 2,
+      serialize: () => ['always same'],
+    });
 
-      expect(memoized()).toBe(1);
-      expect(memoized()).toBe(1);
-      expect(memoized({ force: true })).toBe(2);
-      expect(memoized()).toBe(2);
-    },
-  );
+    expect(memoized()).toBe(1);
+    expect(memoized()).toBe(1);
+    expect(memoized({ force: true })).toBe(2);
+    expect(memoized()).toBe(2);
+  });
 });
 
 describe('fail', () => {

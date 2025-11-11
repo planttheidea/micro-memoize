@@ -105,6 +105,7 @@ export type IsKeyItemEqual = (
   nextKeyItem: Arg,
   index: number,
 ) => boolean;
+export type Serializer = (key: Key) => [string];
 export type ShouldPersist<Fn extends (...args: any[]) => any> = (
   key: Key,
   value: ReturnType<Fn>,
@@ -189,6 +190,16 @@ interface OptionsBase<Fn extends (...args: any[]) => any> {
    * @default 1
    */
   maxSize?: number;
+  /**
+   * Whether to serialize the arguments into a string value for cache
+   * purposes. A custom serializer can also be provided, if the default
+   * one is insufficient.
+   *
+   * This can potentially be faster than `isKeyItemEqual: 'deep'` in rare
+   * cases, but can also be used to provide a deep equal check that handles
+   * circular references.
+   */
+  serialize?: boolean | Serializer;
   /**
    * Transform the parameters passed into a custom key for storage in
    * cache.
