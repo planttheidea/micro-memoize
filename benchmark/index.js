@@ -1,4 +1,5 @@
-import lodash from 'lodash/memoize.js';
+import lodashDeepEqual from 'lodash/isEqual.js';
+import lodashMemoize from 'lodash/memoize.js';
 import orderBy from 'lodash/orderBy.js';
 import { Bench } from 'tinybench';
 import Table from 'cli-table2';
@@ -91,12 +92,19 @@ const fibonacciMultipleObject = (object, check) => {
   );
 };
 
+const fibonacciMultipleDeepEqual = ({ number }) => {
+  return number < 2
+    ? number
+    : fibonacciMultipleDeepEqual({ number: number - 1 }) +
+        fibonacciMultipleDeepEqual({ number: number - 2 });
+};
+
 /************* benchmarks *************/
 
 const singularPrimitive = {
   'addy osmani': addOsmaniMemoize(fibonacciSinglePrimitive),
   'fast-memoize': fastMemoize(fibonacciSinglePrimitive),
-  lodash: lodash(fibonacciSinglePrimitive),
+  lodashMemoize: lodashMemoize(fibonacciSinglePrimitive),
   'lru-memoize': lruMemoize(1)(fibonacciSinglePrimitive),
   mem: mem(fibonacciSinglePrimitive),
   memoizee: memoizee(fibonacciSinglePrimitive),
@@ -112,7 +120,7 @@ const singularPrimitive = {
 const singularArray = {
   'addy osmani': addOsmaniMemoize(fibonacciSingleArray),
   'fast-memoize': fastMemoize(fibonacciSingleArray),
-  lodash: lodash(fibonacciSingleArray),
+  lodashMemoize: lodashMemoize(fibonacciSingleArray),
   'lru-memoize': lruMemoize(1)(fibonacciSingleArray),
   mem: mem(fibonacciSingleArray, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciSingleArray),
@@ -125,7 +133,7 @@ const singularArray = {
 const singularObject = {
   'addy osmani': addOsmaniMemoize(fibonacciSingleObject),
   'fast-memoize': fastMemoize(fibonacciSingleObject),
-  lodash: lodash(fibonacciSingleObject),
+  lodashMemoize: lodashMemoize(fibonacciSingleObject),
   'lru-memoize': lruMemoize(1)(fibonacciSingleObject),
   mem: mem(fibonacciSingleObject, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciSingleObject),
@@ -138,7 +146,10 @@ const singularObject = {
 const multiplePrimitive = {
   'addy osmani': addOsmaniMemoize(fibonacciMultiplePrimitive),
   'fast-memoize': fastMemoize(fibonacciMultiplePrimitive),
-  lodash: lodash(fibonacciMultiplePrimitive, resolveMultipleArguments),
+  lodashMemoize: lodashMemoize(
+    fibonacciMultiplePrimitive,
+    resolveMultipleArguments,
+  ),
   'lru-memoize': lruMemoize(1)(fibonacciMultiplePrimitive),
   mem: mem(fibonacciMultiplePrimitive, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciMultiplePrimitive),
@@ -154,7 +165,10 @@ const multiplePrimitive = {
 const multipleArray = {
   'addy osmani': addOsmaniMemoize(fibonacciMultipleArray),
   'fast-memoize': fastMemoize(fibonacciMultipleArray),
-  lodash: lodash(fibonacciMultipleArray, resolveMultipleArguments),
+  lodashMemoize: lodashMemoize(
+    fibonacciMultipleArray,
+    resolveMultipleArguments,
+  ),
   'lru-memoize': lruMemoize(1)(fibonacciMultipleArray),
   mem: mem(fibonacciMultipleArray, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciMultipleArray),
@@ -170,7 +184,10 @@ const multipleArray = {
 const multipleObject = {
   'addy osmani': addOsmaniMemoize(fibonacciMultipleObject),
   'fast-memoize': fastMemoize(fibonacciMultipleObject),
-  lodash: lodash(fibonacciMultipleObject, resolveMultipleArguments),
+  lodashMemoize: lodashMemoize(
+    fibonacciMultipleObject,
+    resolveMultipleArguments,
+  ),
   'lru-memoize': lruMemoize(1)(fibonacciMultipleObject),
   mem: mem(fibonacciMultipleObject, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciMultipleObject),
@@ -246,6 +263,72 @@ async function run(name, { args, methods }) {
   console.log(`Fastest was "${tasks[0].name}".`);
 }
 
+async function runAlternativeOptions() {
+  console.log('');
+  console.log('Testing alternative options...');
+
+  const bench = new Bench({
+    iterations: 1000,
+    name: 'alternative options',
+    time: 100,
+  });
+
+  const memoizedDeep = memoize(fibonacciMultipleDeepEqual, {
+    isKeyItemEqual: 'deep',
+  });
+  const memoizedDeepLodash = memoize(fibonacciMultipleDeepEqual, {
+    isKeyItemEqual: lodashDeepEqual,
+  });
+  const memoizedSerialized = memoize(fibonacciMultipleDeepEqual, {
+    serialize: true,
+  });
+  const memoizedTransformKey = memoize((foo, _bar, baz) => [foo, baz], {
+    transformKey: (args) => {
+      const newKey = [];
+      let index = args.length;
+
+      while (--index) {
+        newKey[index - 1] = args[index];
+      }
+
+      return newKey;
+    },
+  });
+  const memoizedMaxArgs = memoize((one, two, three) => [one, two, three], {
+    maxArgs: 2,
+  });
+
+  bench.add('serialized', () => {
+    memoizedSerialized({ number: 35 });
+  });
+  bench.add('deep equals (native)', () => {
+    memoizedDeep({ number: 35 });
+  });
+  bench.add('custom equals (lodash isEqual)', () => {
+    memoizedDeepLodash({ number: 35 });
+  });
+  bench.add('transform key', () => {
+    memoizedTransformKey('foo', { foo: 'bar' }, ['baz']);
+  });
+  bench.add('max args', () => {
+    memoizedMaxArgs('foo', { foo: 'bar' }, ['baz']);
+  });
+
+  await bench.run();
+
+  const tasks = orderBy(
+    bench.tasks.filter(({ result }) => result),
+    ({ result }) => result.throughput.mean,
+    ['desc'],
+  );
+  const table = getResults(tasks);
+
+  console.log(table);
+  console.log(`Fastest was "${tasks[0].name}".`);
+}
+
 for (const type in benches) {
   await run(type, benches[type]);
 }
+
+await runAlternativeOptions();
