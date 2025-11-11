@@ -9,7 +9,7 @@ import type {
   Options,
   TransformKey,
 } from './internalTypes.ts';
-import { getDefault, isSameValueZero } from './utils.js';
+import { getDefault } from './utils.js';
 
 export class Cache<Fn extends (...args: any[]) => any> {
   /**
@@ -53,7 +53,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
   constructor(options: Options<Fn>) {
     const transformKey = getDefault('function', options.transformKey);
 
-    this.i = getDefault('function', options.isKeyItemEqual, isSameValueZero);
+    this.i = getDefault('function', options.isKeyItemEqual, Object.is);
     this.m = getDefault(
       'function',
       options.isKeyEqual,

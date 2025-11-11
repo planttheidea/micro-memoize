@@ -31,7 +31,3 @@ export function getDefault<Value, DefaultValue>(
 export function isMemoized(fn: any): fn is Memoized<any, any> {
   return typeof fn === 'function' && fn.isMemoized;
 }
-
-export function isSameValueZero(a: any, b: any) {
-  return a === b || (a !== a && b !== b);
-}
