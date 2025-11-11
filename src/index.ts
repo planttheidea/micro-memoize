@@ -3,6 +3,7 @@ import { Cache } from './Cache.js';
 import { isMemoized } from './utils.js';
 import { getExpirationManager } from './expires.js';
 import { getWrappedForceUpdateMoize } from './forceUpdate.js';
+import { getStatsManager } from './stats.js';
 
 export type * from './internalTypes.ts';
 export type { Cache };
@@ -55,6 +56,15 @@ export const memoize: Memoize = function memoize<
   memoized.fn = fn;
   memoized.isMemoized = true;
   memoized.options = options;
+  memoized.statsManager = getStatsManager(cache, options);
 
   return options.forceUpdate ? getWrappedForceUpdateMoize(memoized) : memoized;
 };
+
+export {
+  clearStats,
+  isCollectingStats,
+  getStats,
+  startCollectingStats,
+  stopCollectingStats,
+} from './stats.js';

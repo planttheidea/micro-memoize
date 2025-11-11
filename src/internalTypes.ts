@@ -1,5 +1,6 @@
 import type { Cache } from './Cache.ts';
 import type { ExpirationManager } from './expires.js';
+import type { StatsManager } from './stats.js';
 
 /**
  * Key used for cache entries.
@@ -117,6 +118,9 @@ export type ShouldRemoveOnExpire<Fn extends (...args: any[]) => any> = (
   time: number,
   cache: Cache<Fn>,
 ) => boolean;
+export type TransformKey<Fn extends (...args: any[]) => any> = (
+  args: Parameters<Fn>,
+) => Key;
 
 export interface ExpiresConfig<Fn extends (...args: any[]) => any> {
   /**
@@ -138,13 +142,19 @@ export interface ExpiresConfig<Fn extends (...args: any[]) => any> {
   update?: boolean;
 }
 
-/**
- * Method that transforms the arguments passed to the function into
- * a custom cache key.
- */
-export type TransformKey<Fn extends (...args: any[]) => any> = (
-  args: Parameters<Fn>,
-) => Key;
+export interface ProfileStats {
+  calls: number;
+  hits: number;
+  name: string;
+  usage: string;
+}
+
+export interface GlobalStats {
+  calls: number;
+  hits: number;
+  profiles: Record<string, ProfileStats>;
+  usage: string;
+}
 
 interface OptionsBase<Fn extends (...args: any[]) => any> {
   /**
@@ -200,6 +210,10 @@ interface OptionsBase<Fn extends (...args: any[]) => any> {
    * circular references.
    */
   serialize?: boolean | Serializer;
+  /**
+   * The name to give this method when recording profiling stats.
+   */
+  statsName?: string;
   /**
    * Transform the parameters passed into a custom key for storage in
    * cache.
@@ -272,6 +286,11 @@ export interface Memoized<
    * Options passed for the memoized method.
    */
   options: Opts;
+  /**
+   * Manager for the stats cache. This is only populated when `options.statsName`
+   * is set.
+   */
+  statsManager: StatsManager<Fn> | undefined;
 }
 
 export interface Memoize {
