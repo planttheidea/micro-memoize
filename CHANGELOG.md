@@ -1,5 +1,34 @@
 # micro-memoize CHANGELOG
 
+## 5.0.0
+
+This was a rewrite from the ground up, and this increased speed while also allowing for easier augmentation of feature sets. The feature set augmentation was made so easy, that I was able to deprecate the separate [`moize`](https://www.npmjs.com/package/moize) library and absorb those features into `micro-memoize` while still keeping bundle size very small (~2.62KB gzipped).
+
+### Enhancements
+
+- Added a bunch of new options:
+  - `expires` (auto-expiration of cache entries, with customizable handling of expirations)
+  - `forceUpdate` (allow forcible updates when called for methods with side-effects)
+  - `maxArgs` (limit the args used for cache key purposes)
+  - `serialize` (serialize the args for cache key purposes)
+  - `statsName` (statistics collection)
+- Added support for manual cache manipulation via ergonomic methods
+- Replaced clunky `onCache*` listeners with more ergonomic `cache.on()` event listeners, which can handle any number of listeners
+- Linked list storage for faster deletes and updates in caches larger than 1
+
+### Breaking changes
+
+- Renamed several existing options for clarity
+  - `isPromise` => `async`
+  - `isMatchingKey` => `isKeyEqual`
+  - `isEqual` => `isKeyItemEqual`
+- Removed cache callback handlers:
+  - `onCacheAdd` (replaced with `fn.cache.on('add', handler`))
+  - `onCacheHit` (replaced with `fn.cache.on('hit', handler`))
+  - `onCacheUpdate` (replaced with `fn.cache.on('delete', handler)` for deletes, `fn.cache.on('update', handler)` for updates)
+- Package is now ESM primary (but CommonJS should still be supported)
+- Browser / Node support has updated (requires ES2016+)
+
 ## 4.2.0
 
 - [#122](https://github.com/planttheidea/micro-memoize/pull/122) - Add CJS import for CommonJS requires
@@ -18,11 +47,11 @@
 
 ## 4.1.0
 
-#### Enhancements
+### Enhancements
 
 - Types now have direct exports instead of requiring the `MicroMemoize` namespace. That namespace has been labeled as deprecated, and will be removed in the next major version change in favor of the direct type exports.
 
-#### Bugfixes
+### Bugfixes
 
 - [#97](https://github.com/planttheidea/micro-memoize/issues/97) - `src` files included in publish, and referenced from `*.d.ts` files
 - `mjs/*d.ts` files renamed to `mjs/*.d.mts` to align with NodeJS standard
@@ -91,16 +120,15 @@
 
 ## 4.0.0
 
+### Enhancements
+
+- You can now compose memoized functions with their options (see [Composition](README.md#composition))
 - Update to use `Cache` class instead of plain object (~10% performance improvement)
 
-#### Breaking changes
+### Breaking changes
 
 - `memoized.cacheSnapshot` has been deprecated in favor of `memoized.cache.snapshot`
 - Memoizing an already-memoized function no longer returns the function passed (now composes, see [Composition](README.md#composition))
-
-#### Enhancements
-
-- You can now compose memoized functions with their options (see [Composition](README.md#composition))
 
 ## 3.0.2
 
@@ -116,7 +144,7 @@
 - Rewrite in TypeScript
 - Use `rollup` for builds of all packages
 
-#### BREAKING CHANGES
+### Breaking changes
 
 - CommonJS `require`s no longer require `.default`
 - Types contract is much stricter
@@ -158,14 +186,14 @@
 
 - Add [`isMatchingKey`](#ismatchingkey) method to provide match test on entire key vs iterative equality
 
-**BREAKING CHANGES**
-
-- The return value from `transformKey` must be an `Array` (would previously coalesce it for you)
-
-**NEW FEATURES**
+### Enhancements
 
 - `isMatchingKey` will matching on entire key vs `isEqual`, which does an iterative comparison of arguments in order
 - Add `size` property to `cache`
+
+### Breaking changes
+
+- The return value from `transformKey` must be an `Array` (would previously coalesce it for you)
 
 ## 1.8.1
 
