@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 
 import { deepEqual } from 'fast-equals';
-import { describe, expect, it, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { memoize } from '../index.js';
 
 const has = (object: any, property: string) =>
   Object.prototype.hasOwnProperty.call(object, property);
 
 describe('memoize', () => {
-  it('will return the memoized function', () => {
+  test('will return the memoized function', () => {
     let callCount = 0;
 
     const fn = (one: any, two: any) => {
@@ -22,6 +22,7 @@ describe('memoize', () => {
 
     const memoized = memoize(fn);
 
+    expect(memoized.cache.size).toBe(0);
     expect(memoized.cache.snapshot).toEqual({
       entries: [],
       keys: [],
@@ -44,6 +45,7 @@ describe('memoize', () => {
 
     expect(callCount).toEqual(1);
 
+    expect(memoized.cache.size).toBe(1);
     expect(memoized.cache.snapshot).toEqual({
       entries: [[['one', 'two'], { one: 'one', two: 'two' }]],
       keys: [['one', 'two']],
@@ -52,7 +54,7 @@ describe('memoize', () => {
     });
   });
 
-  it('will return the memoized function that handles variable keys', () => {
+  test('will return the memoized function that handles variable keys', () => {
     let callCount = 0;
 
     const fn = (one: any, two?: any) => {
@@ -100,7 +102,7 @@ describe('memoize', () => {
     ]);
   });
 
-  it('will return the memoized function that can have multiple cached key => value pairs', () => {
+  test('will return the memoized function that can have multiple cached key => value pairs', () => {
     let callCount = 0;
 
     const fn = (one: any, two: any) => {
@@ -156,7 +158,7 @@ describe('memoize', () => {
     ]);
   });
 
-  it('will return the memoized function that can have multiple cached key => value pairs with cache eviction', () => {
+  test('will return the memoized function that can have multiple cached key => value pairs with cache eviction', () => {
     let callCount = 0;
 
     const fn = (one: any, two: any) => {
@@ -211,7 +213,7 @@ describe('memoize', () => {
     ]);
   });
 
-  it('will return the memoized function that will use the custom isKeyItemEqual method', () => {
+  test('will return the memoized function that will use the custom isKeyItemEqual method', () => {
     let callCount = 0;
 
     const fn = (one: any, two: any) => {
@@ -260,7 +262,7 @@ describe('memoize', () => {
     ]);
   });
 
-  it('will return the memoized function that will use the transformKey method', () => {
+  test('will return the memoized function that will use the transformKey method', () => {
     let callCount = 0;
 
     const fn = (one: any, two: any) => {
@@ -303,7 +305,7 @@ describe('memoize', () => {
     ]);
   });
 
-  it('will return the memoized function that will use the transformKey method with a custom isKeyItemEqual', () => {
+  test('will return the memoized function that will use the transformKey method with a custom isKeyItemEqual', () => {
     let callCount = 0;
 
     const fn = (one: any, two: any) => {
@@ -360,7 +362,7 @@ describe('memoize', () => {
     ]);
   });
 
-  it('will notify of resolved when async is true and resolves', async () => {
+  test('will notify of resolved when async is true and resolves', async () => {
     const timeout = 200;
 
     const fn = (value: string) =>
@@ -392,7 +394,7 @@ describe('memoize', () => {
     });
   });
 
-  it('will notify of rejected when async is true and rejects', async () => {
+  test('will notify of rejected when async is true and rejects', async () => {
     const timeout = 200;
 
     const error = new Error('boom');
@@ -437,7 +439,7 @@ describe('memoize', () => {
     expect(memoized.cache.o?.listeners.delete).toBeUndefined();
   });
 
-  it('will return a memoized method that will auto-remove the key from cache if async is true and the async is rejected', async () => {
+  test('will return a memoized method that will auto-remove the key from cache if async is true and the async is rejected', async () => {
     const timeout = 200;
 
     const error = new Error('boom');
@@ -467,7 +469,7 @@ describe('memoize', () => {
     expect(catchSpy).toHaveBeenCalledWith(error);
   });
 
-  it('will notify when the manually-set value in cache resolves', async () => {
+  test('will notify when the manually-set value in cache resolves', async () => {
     const timeout = 200;
 
     const fn = (value: string) =>
@@ -496,7 +498,7 @@ describe('memoize', () => {
     expect(onUpdate).toHaveBeenCalled();
   });
 
-  it('will notify when the manually-set value in cache rejects', async () => {
+  test('will notify when the manually-set value in cache rejects', async () => {
     const timeout = 200;
 
     const fn = (value: string) =>
@@ -532,7 +534,7 @@ describe('memoize', () => {
     }
   });
 
-  it('will fire the cache event method passed with the cache when it is added, hit, and updated', () => {
+  test('will fire the cache event method passed with the cache when it is added, hit, and updated', () => {
     const fn = (one: string, two: string) => ({ one, two });
 
     const onAdd = vi.fn();
@@ -716,7 +718,7 @@ describe('memoize', () => {
     expect(result1).toEqual(result2);
   });
 
-  it('will re-memoize the function with merged options if already memoized', () => {
+  test('will re-memoize the function with merged options if already memoized', () => {
     const fn = () => {};
 
     const maxSize = 5;
@@ -730,14 +732,14 @@ describe('memoize', () => {
     expect(reMemoized.options.isKeyItemEqual).toBe(isKeyItemEqual);
   });
 
-  it('will throw an error if not a function', () => {
+  test('will throw an error if not a function', () => {
     const fn = 123;
 
     expect(() => memoize(fn as any)).toThrow();
   });
 
   describe('documentation examples', () => {
-    it('matches simple usage', () => {
+    test('matches simple usage', () => {
       const assembleToObject = (one: string, two: string) => ({ one, two });
 
       const memoized = memoize(assembleToObject);
@@ -749,7 +751,7 @@ describe('memoize', () => {
       expect(result2).toBe(result1);
     });
 
-    it('matches for option `isKeyItemEqual`', () => {
+    test('matches for option `isKeyItemEqual`', () => {
       interface ContrivedObject {
         deep: string;
       }
@@ -797,7 +799,7 @@ describe('memoize', () => {
       expect(result2).toBe(result1);
     });
 
-    it('uses deep equality check for option `isKeyItemEqual` of `deep`', () => {
+    test('uses deep equality check for option `isKeyItemEqual` of `deep`', () => {
       interface ContrivedObject {
         foo: string;
         bar: { baz: number };
@@ -817,7 +819,7 @@ describe('memoize', () => {
       expect(result2).toBe(result1);
     });
 
-    it('uses shallow equality check for option `isKeyItemEqual` of `shallow`', () => {
+    test('uses shallow equality check for option `isKeyItemEqual` of `shallow`', () => {
       interface ContrivedObject {
         foo: string;
         bar: number;
@@ -838,7 +840,7 @@ describe('memoize', () => {
       expect(result2).toBe(result1);
     });
 
-    it('matches for option `isKeyEqual`', () => {
+    test('matches for option `isKeyEqual`', () => {
       interface ContrivedObject {
         foo: string;
         bar: number;
@@ -871,7 +873,7 @@ describe('memoize', () => {
       expect(result2).toBe(result1);
     });
 
-    it('matches for option `async`', async () => {
+    test('matches for option `async`', async () => {
       const fn = (one: string, two: string) => {
         return new Promise((_resolve, reject) => {
           setTimeout(() => {
@@ -899,7 +901,7 @@ describe('memoize', () => {
       );
     });
 
-    it('matches for option `maxSize`', () => {
+    test('matches for option `maxSize`', () => {
       const manyPossibleArgs = vi.fn((one: string, two: string) => [one, two]);
 
       const memoized = memoize(manyPossibleArgs, { maxSize: 3 });
@@ -938,7 +940,7 @@ describe('memoize', () => {
       expect(manyPossibleArgs).toHaveBeenCalled();
     });
 
-    it('matches for event listeners', () => {
+    test('matches for event listeners', () => {
       const fn = (one: string, two: string) => ({ one, two });
       const options = { maxSize: 2 };
 
@@ -1065,9 +1067,15 @@ describe('memoize', () => {
       expect(onAdd).not.toHaveBeenCalled();
       expect(onHit).not.toHaveBeenCalled();
       expect(onUpdate).not.toHaveBeenCalled();
+
+      expect(() => {
+        memoized.cache.off('add', onAdd);
+        memoized.cache.off('hit', onHit);
+        memoized.cache.off('update', onUpdate);
+      }).not.toThrow();
     });
 
-    it('matches for option `transformKey`', () => {
+    test('matches for option `transformKey`', () => {
       const ignoreFunctionArg = vi.fn((one: string, two: () => void) => ({
         one,
         two,
@@ -1098,20 +1106,54 @@ describe('memoize', () => {
         two: expect.any(Function),
       });
     });
+
+    test('handles combined transformers', () => {
+      const fn = (one: string, two: string, three: string) => [one, two, three];
+      const memoized = memoize(fn, {
+        maxArgs: 1,
+        serialize: true,
+        transformKey: (args) => args.slice(1),
+      });
+
+      const result = memoized('foo', 'bar', 'baz');
+
+      expect(result).toEqual(['foo', 'bar', 'baz']);
+      expect(memoized.cache.snapshot.keys).toEqual([['["bar"]']]);
+    });
   });
 
   describe('cache mutation methods', () => {
-    it('should allow getting values in cache', () => {
+    test('should allow getting values in cache', () => {
       const fn = vi.fn((one: string, two: string) => one + two);
-      const memoized = memoize(fn);
+      const memoized = memoize(fn, { maxSize: 2 });
+
+      const onHitSpy = vi.fn();
+      const onUpdateSpy = vi.fn();
+
+      memoized.cache.on('hit', onHitSpy);
+      memoized.cache.on('update', onUpdateSpy);
 
       memoized('foo', 'bar');
 
       expect(memoized.cache.get(['foo', 'bar'])).toBe('foobar');
       expect(memoized.cache.get(['bar', 'baz'])).toBe(undefined);
+
+      expect(onHitSpy).toHaveBeenCalledTimes(1);
+      expect(onUpdateSpy).not.toHaveBeenCalled();
+
+      memoized('bar', 'baz');
+
+      onHitSpy.mockClear();
+      onUpdateSpy.mockClear();
+
+      expect(memoized.cache.get(['foo', 'bar'])).toBe('foobar');
+      expect(memoized.cache.get(['bar', 'baz'])).toBe('barbaz');
+
+      expect(onHitSpy).toHaveBeenCalledTimes(2);
+      expect(onUpdateSpy).toHaveBeenCalledTimes(2);
     });
 
-    it('should correctly identify entries in cache', () => {
+    test('should correctly identify entries in cache', () => {
       const fn = vi.fn((one: string, two: string) => one + two);
       const memoized = memoize(fn);
 
@@ -1121,7 +1163,7 @@ describe('memoize', () => {
       expect(memoized.cache.has(['bar', 'baz'])).toBe(false);
     });
 
-    it('should allow adding values to cache', () => {
+    test('should allow adding values to cache', () => {
       const fn = vi.fn((one: string, two: string) => one + two);
       const memoized = memoize(fn);
 
@@ -1140,7 +1182,7 @@ describe('memoize', () => {
       expect(fn).not.toHaveBeenCalled();
     });
 
-    it('should allow updating values in cache', () => {
+    test('should allow updating values in cache', () => {
       const fn = vi.fn((one: string, two: string) => one + two);
       const memoized = memoize(fn);
 
@@ -1165,7 +1207,7 @@ describe('memoize', () => {
       expect(fn).not.toHaveBeenCalled();
     });
 
-    it('should allow updating older values in cache', () => {
+    test('should allow updating older values in cache', () => {
       const fn = vi.fn((one: string, two: string) => one + two);
       const memoized = memoize(fn, { maxSize: 2 });
 
@@ -1193,7 +1235,7 @@ describe('memoize', () => {
       expect(fn).not.toHaveBeenCalled();
     });
 
-    it('allows deleting values in cache', () => {
+    test('allows deleting values in cache', () => {
       const fn = vi.fn((one: string, two: string) => one + two);
       const memoized = memoize(fn);
 
@@ -1210,7 +1252,7 @@ describe('memoize', () => {
       expect(memoized.cache.snapshot.entries).toEqual([]);
     });
 
-    it('allows deleting older values in cache', () => {
+    test('allows deleting older values in cache', () => {
       const fn = vi.fn((one: string, two: string) => one + two);
       const memoized = memoize(fn, { maxSize: 3 });
 
@@ -1234,7 +1276,7 @@ describe('memoize', () => {
       ]);
     });
 
-    it('returns false when deleting an item that does not exist', () => {
+    test('returns false when deleting an item that does not exist', () => {
       const fn = vi.fn((one: string, two: string) => one + two);
       const memoized = memoize(fn);
 
@@ -1249,7 +1291,7 @@ describe('memoize', () => {
       expect(memoized.cache.delete(['foo', 'bar'])).toBe(false);
     });
 
-    it('allows clearing cache', () => {
+    test('allows clearing cache', () => {
       const fn = vi.fn((one: string, two: string) => one + two);
       const memoized = memoize(fn, { maxSize: 3 });
 
@@ -1273,7 +1315,7 @@ describe('memoize', () => {
       expect(deleteSpy).toHaveBeenCalledTimes(3);
     });
 
-    it('does nothing when clearing an empty cache', () => {
+    test('does nothing when clearing an empty cache', () => {
       const fn = vi.fn((one: string, two: string) => one + two);
       const memoized = memoize(fn, { maxSize: 3 });
 

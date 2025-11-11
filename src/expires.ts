@@ -95,7 +95,7 @@ export class ExpirationManager<Fn extends (...args: any[]) => any> {
 
     if (!isNumericValueValid(time)) {
       throw new TypeError(
-        'The expiration time must be a finite, non-negative number.',
+        `The expiration time must be a finite, non-negative number; received ${time as string}`,
       );
     }
 

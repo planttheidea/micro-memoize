@@ -145,7 +145,7 @@ test('allows the expiration to be re-established if `shouldRemove returns false'
   expect(shouldRemove).toHaveBeenCalledTimes(2);
 });
 
-test('notifies of cache change when expiration re-established if onCacheChange', async () => {
+test('notifies of cache update when expiration re-established if update listener', async () => {
   const shouldRemove = vi.fn().mockReturnValueOnce(false).mockReturnValue(true);
   const withShouldRemove = memoize(method, {
     expires: { after: 100, shouldRemove },
@@ -187,4 +187,36 @@ test('notifies of cache change when expiration re-established if onCacheChange',
     type: 'update',
     value: [foo, bar],
   });
+});
+
+test('throws an error when invalid time is passed', () => {
+  const throws = memoize(method, {
+    expires: Infinity,
+  });
+
+  expect(() => throws('foo', 'bar')).toThrow(
+    'The expiration time must be a finite, non-negative number; received Infinity',
+  );
+});
+
+test('does nothing on timeout if the node cannot be found in cache', async () => {
+  const memoized = memoize(method, { expires: 100 });
+  const onExpire = vi.fn();
+
+  memoized.cache.on('delete', onExpire);
+
+  memoized(foo, bar);
+
+  expect(memoized.cache.has([foo, bar])).toBe(true);
+  expect(memoized.expirationManager?.size).toBe(1);
+
+  // Forcibly clear the cache in a terrible hacky way
+  memoized.cache.h = memoized.cache.t = undefined;
+
+  expect(memoized.cache.has([foo, bar])).toBe(false);
+
+  await new Promise((resolve) => setTimeout(resolve, 150));
+
+  expect(memoized.cache.has([foo, bar])).toBe(false);
+  expect(onExpire).not.toHaveBeenCalled();
 });

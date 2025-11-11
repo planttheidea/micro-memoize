@@ -58,7 +58,9 @@ export const memoize: Memoize = function memoize<
   memoized.options = options;
   memoized.statsManager = getStatsManager(cache, options);
 
-  return options.forceUpdate ? getWrappedForceUpdateMoize(memoized) : memoized;
+  return typeof options.forceUpdate === 'function'
+    ? getWrappedForceUpdateMoize(memoized, options.forceUpdate)
+    : memoized;
 };
 
 export {

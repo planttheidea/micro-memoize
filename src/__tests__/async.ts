@@ -166,3 +166,12 @@ describe.for([
     }
   });
 });
+
+test('non-promise values are handled safely', () => {
+  const fn = (one: string, two: string) => [one, two];
+  const memoized = memoize(fn, { async: true });
+
+  const result = memoized('foo', 'bar');
+
+  expect(result).toEqual(['foo', 'bar']);
+});

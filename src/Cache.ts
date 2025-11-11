@@ -429,16 +429,16 @@ export function getTransformKey<Fn extends (...args: any[]) => any>(
     transformers.push(transformer);
   }
 
-  if (typeof transformKey === 'function') {
-    transformers.push(transformKey);
-  }
-
   if (isNumericValueValid(maxArgs)) {
     const transformer = getMaxArgsTransformKey(maxArgs);
 
     if (transformer) {
       transformers.push(transformer);
     }
+  }
+
+  if (typeof transformKey === 'function') {
+    transformers.push(transformKey);
   }
 
   return transformers.length
