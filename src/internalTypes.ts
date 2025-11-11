@@ -1,4 +1,4 @@
-import type { Cache } from './Cache.ts';
+import type { Cache } from './Cache.js';
 import type { ExpirationManager } from './expires.js';
 import type { StatsManager } from './stats.js';
 

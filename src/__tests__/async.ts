@@ -1,7 +1,7 @@
 import Bluebird from 'bluebird';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { memoize } from '../index.js';
-import type { Memoized, Options } from '../internalTypes.ts';
+import type { Memoized, Options } from '../internalTypes.js';
 
 function createMethod(
   type: string,

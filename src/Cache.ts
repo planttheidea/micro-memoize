@@ -11,10 +11,10 @@ import type {
   Options,
   IsKeyEqual,
   TransformKey,
-} from './internalTypes.ts';
-import { isNumericValueValid } from './utils.js';
-import { isSerializedKeyEqual, transformKeySerialized } from './serialize.js';
+} from './internalTypes.js';
 import { getMaxArgsTransformKey } from './maxArgs.js';
+import { isSerializedKeyEqual, transformKeySerialized } from './serialize.js';
+import { isNumericValueValid } from './utils.js';
 
 export class Cache<Fn extends (...args: any[]) => any> {
   /**

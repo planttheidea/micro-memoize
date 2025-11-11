@@ -1,4 +1,4 @@
-import type { Memoized } from './internalTypes.ts';
+import type { Memoized } from './internalTypes.js';
 
 /**
  * Whether the value passed is a memoized function via `micro-memoize`.

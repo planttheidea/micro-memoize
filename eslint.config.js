@@ -5,8 +5,8 @@ import eslintImportPlugin from 'eslint-plugin-import';
 
 export default defineConfig([
   globalIgnores([
-    '**/!(src|dev)/**/*', // Ignore everything in all directories except src
-    '**/!(src|dev)', // Ignore all directories except src
+    '**/!(src|dev)/**/*', // Ignore everything in all directories except those specified
+    '**/!(src|dev)', // Ignore all directories except those specified
     '!src/**/*', // Don't ignore anything in src directory
     '!dev/**/*', // Don't ignore anything in dev directory
   ]),
@@ -24,7 +24,29 @@ export default defineConfig([
     rules: {
       'prefer-rest-params': 'off',
 
+      'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
+      'import/enforce-node-protocol-usage': ['error', 'always'],
+      'import/export': 'error',
+      'import/first': 'error',
+      'import/newline-after-import': 'error',
+      'import/no-commonjs': 'error',
+      'import/no-cycle': 'error',
+      'import/no-default-export': 'error',
+      'import/no-empty-named-blocks': 'error',
+      'import/no-self-import': 'off',
       'import/no-unresolved': 'off',
+      'import/order': [
+        'error',
+        {
+          alphabetize: {
+            order: 'asc',
+            orderImportKind: 'asc',
+          },
+          'newlines-between': 'never',
+        },
+      ],
+      'import/no-absolute-path': 'error',
+      'import/no-self-import': 'error',
 
       '@typescript-eslint/array-type': ['error', { default: 'array-simple' }],
       '@typescript-eslint/no-explicit-any': 'off',
@@ -41,11 +63,6 @@ export default defineConfig([
       '@typescript-eslint/prefer-nullish-coalescing': 'off',
       '@typescript-eslint/prefer-optional-chain': 'off',
       '@typescript-eslint/restrict-plus-operands': 'off',
-    },
-    settings: {
-      react: {
-        version: 'detect',
-      },
     },
   },
 ]);

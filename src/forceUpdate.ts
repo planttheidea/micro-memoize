@@ -1,4 +1,4 @@
-import type { ForceUpdate, Memoized, Options } from './internalTypes.ts';
+import type { ForceUpdate, Memoized, Options } from './internalTypes.js';
 
 /**
  * Create a wrapped memoized method that will conditionally update the cache based on

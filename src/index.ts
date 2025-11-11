@@ -1,11 +1,11 @@
-import type { Key, Memoize, Memoized, Options } from './internalTypes.ts';
 import { Cache } from './Cache.js';
-import { isMemoized } from './utils.js';
 import { getExpirationManager } from './expires.js';
 import { getWrappedForceUpdateMoize } from './forceUpdate.js';
+import type { Key, Memoize, Memoized, Options } from './internalTypes.js';
 import { getStatsManager } from './stats.js';
+import { isMemoized } from './utils.js';
 
-export type * from './internalTypes.ts';
+export type * from './internalTypes.js';
 export type { Cache };
 
 export const memoize: Memoize = function memoize<
