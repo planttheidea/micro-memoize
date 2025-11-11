@@ -13,8 +13,8 @@ A tiny, crazy [fast](#benchmarks) memoization library for the 95% use-case
     - [Composition](#composition)
   - [Options](#options)
     - [async](#async)
-    - [isArgEqual](#isargequal)
     - [isKeyEqual](#iskeyequal)
+    - [isKeyItemEqual](#iskeyitemequal)
     - [maxSize](#maxsize)
     - [transformKey](#transformkey)
   - [Additional properties](#additional-properties)
@@ -115,9 +115,62 @@ setTimeout(() => {
 
 **NOTE**: If you don't want rejections to auto-remove the entry from cache, set `isPromise` to `false` (or simply do not set it), but be aware this will also remove the cache listeners that fire on successful resolution.
 
-### isArgEqual
+### isKeyEqual
 
-`function(object1: any, object2: any): boolean`, _defaults to `isSameValueZero`_
+`function(object1: any[], object2: any[]): boolean`
+
+Custom method to compare equality of keys, determining whether to pull from cache or not, by comparing the entire key.
+
+Common use-cases:
+
+- Comparing the shape of the key
+- Matching on values regardless of order
+- Serialization of arguments
+
+```ts
+import { deepEqual } from 'fast-equals';
+
+type ContrivedObject = { foo: string; bar: number };
+
+const deepObject = (object: ContrivedObject) => ({
+  foo: object.foo,
+  bar: object.bar,
+});
+
+const memoizedShape = memoize(deepObject, {
+  // receives the full key in cache and the full key of the most recent call
+  isMatchingKey(key1, key2) {
+    const object1 = key1[0];
+    const object2 = key2[0];
+
+    return (
+      object1.hasOwnProperty('foo') &&
+      object2.hasOwnProperty('foo') &&
+      object1.bar === object2.bar
+    );
+  },
+});
+
+console.log(
+  memoizedShape({
+    foo: 'foo',
+    bar: 123,
+    baz: 'baz',
+  }),
+); // {foo: {deep: 'foo'}, bar: {deep: 'bar'}}
+
+console.log(
+  memoizedShape({
+    foo: 'not foo',
+    bar: 123,
+    baz: 'baz',
+  }),
+); // pulled from cache
+```
+
+### isKeyItemEqual
+
+`function(object1: any, object2: any): boolean`, _defaults to `Object.is`_
 
 Custom method to compare equality of keys, determining whether to pull from cache or not, by comparing each argument in order.
 
@@ -173,59 +226,6 @@ console.log(
 ```
 
 **NOTE**: The default method tests for [SameValueZero](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero) equality, which is summarized as strictly equal while also considering `NaN` equal to `NaN`.
-
-### isKeyEqual
-
-`function(object1: any[], object2: any[]): boolean`
-
-Custom method to compare equality of keys, determining whether to pull from cache or not, by comparing the entire key.
-
-Common use-cases:
-
-- Comparing the shape of the key
-- Matching on values regardless of order
-- Serialization of arguments
-
-```ts
-import { deepEqual } from 'fast-equals';
-
-type ContrivedObject = { foo: string; bar: number };
-
-const deepObject = (object: ContrivedObject) => ({
-  foo: object.foo,
-  bar: object.bar,
-});
-
-const memoizedShape = memoize(deepObject, {
-  // receives the full key in cache and the full key of the most recent call
-  isMatchingKey(key1, key2) {
-    const object1 = key1[0];
-    const object2 = key2[0];
-
-    return (
-      object1.hasOwnProperty('foo') &&
-      object2.hasOwnProperty('foo') &&
-      object1.bar === object2.bar
-    );
-  },
-});
-
-console.log(
-  memoizedShape({
-    foo: 'foo',
-    bar: 123,
-    baz: 'baz',
-  }),
-); // {foo: {deep: 'foo'}, bar: {deep: 'bar'}}
-
-console.log(
-  memoizedShape({
-    foo: 'not foo',
-    bar: 123,
-    baz: 'baz',
-  }),
-); // pulled from cache
-```
 
 ### maxSize
 
