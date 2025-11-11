@@ -10,9 +10,11 @@ import type {
   Key,
   Options,
   IsKeyEqual,
+  TransformKey,
 } from './internalTypes.ts';
 import { isNumericValueValid } from './utils.js';
 import { isSerializedKeyEqual, transformKeySerialized } from './serialize.js';
+import { getMaxArgsTransformKey } from './maxArgs.js';
 
 export class Cache<Fn extends (...args: any[]) => any> {
   /**
@@ -54,14 +56,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
   t: CacheNode<Fn> | undefined;
 
   constructor(options: Options<Fn>) {
-    const {
-      async,
-      isKeyEqual,
-      isKeyItemEqual,
-      maxSize,
-      serialize,
-      transformKey,
-    } = options;
+    const { async, isKeyEqual, isKeyItemEqual, maxSize, serialize } = options;
 
     this.i =
       typeof isKeyItemEqual === 'function'
@@ -82,12 +77,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
     this.p = typeof async === 'boolean' && async;
     this.s = isNumericValueValid(maxSize) ? maxSize : 1;
 
-    if (typeof transformKey === 'function') {
-      this.k = transformKey;
-    } else if (serialize) {
-      this.k =
-        typeof serialize === 'function' ? serialize : transformKeySerialized;
-    }
+    this.k = getTransformKey(options);
   }
 
   /**
@@ -423,4 +413,40 @@ export class Cache<Fn extends (...args: any[]) => any> {
       },
     );
   }
+}
+
+export function getTransformKey<Fn extends (...args: any[]) => any>(
+  options: Options<Fn>,
+): TransformKey<Fn> | undefined {
+  const { maxArgs, serialize, transformKey } = options;
+
+  const transformers: Array<(...args: any[]) => any> = [];
+
+  if (serialize) {
+    const transformer =
+      typeof serialize === 'function' ? serialize : transformKeySerialized;
+
+    transformers.push(transformer);
+  }
+
+  if (typeof transformKey === 'function') {
+    transformers.push(transformKey);
+  }
+
+  if (isNumericValueValid(maxArgs)) {
+    const transformer = getMaxArgsTransformKey(maxArgs);
+
+    if (transformer) {
+      transformers.push(transformer);
+    }
+  }
+
+  return transformers.length
+    ? transformers.reduce(
+        (f, g) =>
+          (...args) =>
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            f(g(...args)),
+      )
+    : undefined;
 }

@@ -169,9 +169,11 @@ interface OptionsBase<Fn extends (...args: any[]) => any> {
    */
   expires?: number | GetExpires<Fn> | ExpiresConfig<Fn>;
   /**
-   * Create a moized method that will call the underlying (unmemoized) function and update the
-   * cache value with its return. This is mainly used if the function has side-effects, and is
-   * therefore not deterministic.
+   * Method to determine whether to bypass the cache to force an update
+   * of the underlying entry based on new results.
+   *
+   * This should only be necessary if the memoized function is not
+   * deterministic due to side-effects.
    */
   forceUpdate?: ForceUpdate<Fn>;
   /**
@@ -195,6 +197,10 @@ interface OptionsBase<Fn extends (...args: any[]) => any> {
    * This option will be ignored if the `isKeyEqual` option is provided.
    */
   isKeyItemEqual?: 'deep' | 'shallow' | IsKeyItemEqual;
+  /**
+   * The maximum number of args to consider for caching.
+   */
+  maxArgs?: number;
   /**
    * The maximum number of entries to store in cache.
    * @default 1
