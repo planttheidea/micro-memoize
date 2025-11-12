@@ -13,7 +13,7 @@
     "url": "https://github.com/planttheidea/micro-memoize/issues"
   },
   "dependencies": {
-    "fast-equals": "^5.3.3-beta.1",
+    "fast-equals": "^5.3.3",
     "fast-stringify": "^4.0.0"
   },
   "description": "A tiny, crazy fast memoization library for the 95% use-case",
