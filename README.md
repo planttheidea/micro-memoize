@@ -39,7 +39,7 @@ A [blazing fast](#benchmarks) memoization library that is tiny but feature-rich.
     - [memoized.options](#memoizedoptions)
   - [Statistics](#statistics)
     - [clearStats](#clearstats)
-    - [getStats([profileName])](#getstatsprofilename)
+    - [getStats([statsName])](#getstatsstatsname)
     - [isCollectingStats](#iscollectingstats)
     - [startCollectingStats](#startcollectingstats)
     - [stopCollectingStats](#stopcollectingstats)
@@ -70,22 +70,19 @@ const { memoize } = require('micro-memoize');
 ## Usage
 
 ```ts
-const assembleToObject = (one: string, two: string) => ({ one, two });
+const toObject = (one: string, two: string) => ({ one, two });
 
-const memoized = memoize(assembleToObject);
+const memoized = memoize(toObject);
 
 console.log(memoized('one', 'two'));
 console.log(memoized('one', 'two')); // pulled from cache
-```
 
-### Composition
+// Starting in `4.0.0`, you can compose memoized functions if you want to have multiple types of memoized
+// versions based on different options.
 
-Starting in `4.0.0`, you can compose memoized functions if you want to have multiple types of memoized versions based on different options.
-
-```ts
-const simple = memoized(fn); // { maxSize: 1 }
-const upToFive = memoized(simple, { maxSize: 5 }); // { maxSize: 5 }
-const withCustomEquals = memoized(upToFive, { isEqual: deepEqual }); // { maxSize: 5, isEqual: deepEqual }
+const withUpToFive = memoize(memoized, { maxSize: 5 }); // { maxSize: 5 }
+const withAsync = memoize(withUpToFive, { async: true }); // { async: true, maxSize: 5 }
+const withCustomEquals = memoize(withAsync, { isEqual: deepEqual }); // { async: true, maxSize: 5, isEqual: deepEqual }
 ```
 
 **NOTE**: The original function is the function used in the composition, the composition only applies to the options. In the example above, `upToFive` does not call `simple`, it calls `fn`.
@@ -96,8 +93,8 @@ const withCustomEquals = memoized(upToFive, { isEqual: deepEqual }); // { maxSiz
 
 Identifies the value returned from the method as a `Promise`, which will result in one of two possible scenarios:
 
-- If the promise is resolved, it will fire the `onCacheHit` and `onCacheChange` options
-- If the promise is rejected, it will trigger auto-removal from cache
+- If the promise is resolved, it will fire the [hit](#hit) and [update](#update) cache events.
+- If the promise is rejected, it will trigger auto-removal from cache as fire the [delete](#delete) cache event.
 
 ```ts
 const fn = async (one: string, two: string) => {
@@ -125,7 +122,7 @@ setTimeout(() => {
 
 ### expires
 
-The maximum amount of time in milliseconds that you want a computed value to be stored in cache for this method. You can also pass a custom configuration to handle conditional expiration.
+The amount of time in milliseconds that you want a computed value to be stored in cache for this method.
 
 ```ts
 const fn = (item: Record<string, any>) => item;
@@ -133,11 +130,16 @@ const fn = (item: Record<string, any>) => item;
 const MAX_AGE = 1000 * 60 * 5; // five minutes;
 
 const expiringMemoized = memoize(fn, { maxAge: MAX_AGE });
+```
+
+You can also pass a custom configuration to handle conditional expiration.
+
+```ts
 const conditionalExpiringMemoized = memoize(fn, {
   expires: {
     after: MAX_AGE,
-    shouldPersist: (item) => !!item.cache,
-    shouldRemove: (item) => item.releaseDate < new Date('2025-01-01').valueOf(),
+    shouldPersist: (item) => !item.expires,
+    shouldRemove: (item) => item.updatedAt < new Date('2025-01-01').valueOf(),
     update: true,
   },
 });
@@ -147,7 +149,7 @@ const conditionalExpiringMemoized = memoize(fn, {
 
 ### forceUpdate
 
-Force-updates the cache for a given key in certain call conditions. This is useful if the function being memoized has time-based side-effects.
+Updates the cache forcibly for a given key when the predicate returns true. This is mainly useful if the function being memoized has time-based side-effects.
 
 ```ts
 const fn = (item: string) => item;
@@ -169,7 +171,7 @@ const memoized = memoize(fn, {
 memoized('one');
 memoized('one'); // pulled from cache
 
-// 5 minutes later
+await Promise.resolve(() => setTimeout(resolve, MAX_AGE));
 
 memoized('one'); // re-calls method and updates cache
 ```
@@ -181,7 +183,7 @@ Custom method to compare equality of keys, determining whether to pull from cach
 ```ts
 type Arg = {
   one: string;
-  two: string;
+  two: null | string;
 };
 
 const fn = ({ one, two }: Arg) => [one, two];
@@ -264,6 +266,10 @@ const manyPossibleArgs = (one: string, two: string) => [one, two];
 
 const memoized = memoize(manyPossibleArgs, { maxSize: 3 });
 
+memoized.cache.on('delete', (event) =>
+  console.log('Deleted from cache: ', event.key),
+);
+
 console.log(memoized('one', 'two')); // ['one', 'two']
 console.log(memoized('two', 'three')); // ['two', 'three']
 console.log(memoized('three', 'four')); // ['three', 'four']
@@ -272,7 +278,7 @@ console.log(memoized('one', 'two')); // pulled from cache
 console.log(memoized('two', 'three')); // pulled from cache
 console.log(memoized('three', 'four')); // pulled from cache
 
-console.log(memoized('four', 'five')); // ['four', 'five'], drops ['one', 'two'] from cache
+console.log(memoized('four', 'five')); // ['four', 'five'], Deleted from cache: ['one', 'two']
 ```
 
 ### serialize
@@ -667,10 +673,10 @@ Cear statistics on `memoize`d functions.
 
 ```ts
 clearStats(); // clears all stats
-clearStats('profile-name'); // clears stats only for 'profile-name'
+clearStats('stats-name'); // clears stats only for 'stats-name'
 ```
 
-### getStats(profileName)
+### getStats(statsName)
 
 Get the statistics for a specific function, or globally.
 
@@ -683,7 +689,7 @@ const memoized = memoize(fn);
 
 const otherFn = (one: string[]) => one.slice(0, 1);
 
-const otherMemoized = memoize(otherFn, { profileName: 'otherMemoized' });
+const otherMemoized = memoize(otherFn, { statsName: 'otherMemoized' });
 
 memoized('one', 'two');
 memoized('one', 'two');
