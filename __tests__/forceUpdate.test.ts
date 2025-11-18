@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest';
-import { memoize } from '../index.js';
+import { memoize } from '../src/index.js';
 
 // Have `vitest` ignore any rejection it sees.
 process.on('unhandledRejection', () => undefined);
@@ -217,8 +217,6 @@ describe('infrastructure', () => {
     });
     const standardMoized = memoize(promiseMethodResolves, { maxSize: 2 });
 
-    expect(Object.getOwnPropertyNames(memoized)).toEqual(
-      Object.getOwnPropertyNames(standardMoized),
-    );
+    expect(Object.getOwnPropertyNames(memoized)).toEqual(Object.getOwnPropertyNames(standardMoized));
   });
 });

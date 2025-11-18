@@ -1,10 +1,5 @@
-/* globals document */
-
-/* eslint-disable */
-
 import Bluebird from 'bluebird';
 import { deepEqual } from 'fast-equals';
-
 import { memoize } from '../src/index.js';
 import type { Key } from '../src/internalTypes.ts';
 
@@ -79,8 +74,7 @@ console.groupEnd();
 console.group('maxArgs');
 
 // limit to testing the first args
-const isMatchingKeyMaxArgs = (originalKey: Key, newKey: Key): boolean =>
-  originalKey[0] === newKey[0];
+const isMatchingKeyMaxArgs = (originalKey: Key, newKey: Key): boolean => originalKey[0] === newKey[0];
 
 const memoizedMax = memoize(method, { isKeyEqual: isMatchingKeyMaxArgs });
 
@@ -92,13 +86,7 @@ console.groupEnd();
 
 console.group('custom - deep equals');
 
-const deepEqualMethod = ({
-  one,
-  two,
-}: {
-  one: string | number;
-  two: string | number;
-}) => {
+const deepEqualMethod = ({ one, two }: { one: string | number; two: string | number }) => {
   console.log('custom equal method fired', one, two);
 
   return [one, two];
@@ -122,7 +110,7 @@ console.group('promise');
 const promiseMethod = (number: number, otherNumber: number) => {
   console.log('promise method fired', number);
 
-  return new Promise((resolve: Function) => {
+  return new Promise((resolve) => {
     resolve(number * otherNumber);
   });
 };
@@ -146,7 +134,7 @@ memoizedPromiseRejected(3)
   .then((value: any) => {
     console.log(value);
   })
-  .catch((error: Error) => {
+  .catch((error: unknown) => {
     console.log(memoizedPromiseRejected.cache.snapshot);
     console.error(error);
   });
@@ -155,7 +143,7 @@ memoizedPromiseRejected(3)
   .then((value: any) => {
     console.log(value);
   })
-  .catch((error: Error) => {
+  .catch((error: unknown) => {
     console.log(memoizedPromiseRejected.cache.snapshot);
     console.error(error);
   });
@@ -164,7 +152,7 @@ memoizedPromiseRejected(3)
   .then((value: any) => {
     console.log(value);
   })
-  .catch((error: Error) => {
+  .catch((error: unknown) => {
     console.log(memoizedPromiseRejected.cache.snapshot);
     console.error(error);
   });
@@ -185,7 +173,7 @@ console.groupEnd();
 
 console.group('with default parameters');
 
-const withDefault = (foo: string, bar: string = 'default') => {
+const withDefault = (foo: string, bar = 'default') => {
   console.log('with default fired', foo, bar);
 
   return `${foo} ${bar}`;
@@ -201,7 +189,7 @@ console.groupEnd();
 
 console.group('transform key');
 
-const noFns = (one: string, two: string, three: Function) => {
+const noFns = (one: string, two: string, three: () => void) => {
   console.log('transform key called');
 
   return { one, two, three };
@@ -226,9 +214,7 @@ console.groupEnd();
 
 console.group('matching whole key');
 
-const matchingKeyMethod = function (object: {
-  deeply: { nested: { number: number } };
-}) {
+const matchingKeyMethod = function (object: { deeply: { nested: { number: number } } }) {
   return object.deeply.nested.number;
 };
 
@@ -247,18 +233,16 @@ console.log(matchingKeyMemoized.cache);
 
 console.groupEnd();
 
-type Dictionary<Type> = {
+interface Dictionary<Type> {
   [key: string]: Type;
   [index: number]: Type;
-};
+}
 
 const calc = memoize(
   (object: Dictionary<any>, metadata: Dictionary<any>): Dictionary<any> =>
     Object.keys(object).reduce((totals: Dictionary<any>, key: string) => {
       if (Array.isArray(object[key])) {
-        totals[key] = object[key].map((subObject: Dictionary<any>) =>
-          calc(subObject, metadata),
-        );
+        totals[key] = object[key].map((subObject: Dictionary<any>) => calc(subObject, metadata));
       } else {
         totals[key] = object[key].a + object[key].b + metadata.c;
       }

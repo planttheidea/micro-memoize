@@ -18,6 +18,7 @@
   },
   "description": "A tiny, crazy fast memoization library for the 95% use-case",
   "devDependencies": {
+    "@planttheidea/build-tools": "^1.0.1",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.3.0",
     "@types/bluebird": "^3.5.42",
@@ -25,7 +26,7 @@
     "@types/node": "^24.10.1",
     "@typescript-eslint/eslint-plugin": "^8.46.4",
     "@typescript-eslint/parser": "^8.46.4",
-    "@vitest/coverage-v8": "4.0.9",
+    "@vitest/coverage-v8": "^4.0.10",
     "bluebird": "^3.7.2",
     "cli-table2": "^0.2.0",
     "eslint": "^9.39.1",
@@ -46,20 +47,20 @@
     "typescript-eslint": "^8.46.4",
     "underscore": "^1.13.7",
     "vite": "^7.2.2",
-    "vitest": "^4.0.9"
+    "vitest": "^4.0.10"
   },
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/esm/types/index.d.mts",
-        "default": "./dist/esm/index.mjs"
+        "types": "./dist/es/index.d.mts",
+        "default": "./dist/es/index.mjs"
       },
       "require": {
-        "types": "./dist/cjs/types/index.d.cts",
+        "types": "./dist/cjs/index.d.cts",
         "default": "./dist/cjs/index.cjs"
       },
       "default": {
-        "types": "./dist/umd/types/index.d.ts",
+        "types": "./dist/umd/index.d.ts",
         "default": "./dist/umd/index.js"
       }
     }
@@ -90,31 +91,38 @@
   ],
   "license": "MIT",
   "main": "dist/cjs/index.cjs",
-  "module": "dist/esm/index.mjs",
+  "module": "dist/es/index.mjs",
   "name": "micro-memoize",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/planttheidea/micro-memoize.git"
   },
   "scripts": {
-    "benchmark": "npm run clean:esm && npm run build:esm && node benchmark/index.js",
-    "build": "npm run clean && npm run build:esm && npm run build:cjs && npm run build:umd && npm run build:min",
-    "build:cjs": "NODE_ENV=production rollup -c config/rollup/config.cjs.js && tsc -p config/tsconfig/cjs.declarations.json && node scripts/create-cts-files.js",
-    "build:esm": "NODE_ENV=production rollup -c config/rollup/config.esm.js && tsc -p config/tsconfig/esm.declarations.json && node scripts/create-mts-files.js",
+    "benchmark": "npm run clean:es && npm run build:esm && node benchmark/index.js",
+    "build": "npm run clean && npm run build:es && npm run build:es:types && npm run build:cjs && npm run build:cjs:types && npm run build:umd && npm run build:umd:types",
+    "build:cjs": "NODE_ENV=production rollup -c config/rollup/cjs.config.js",
+    "build:cjs:types": "tsc -p config/types/cjs.declaration.json && pti fix-types -t cjs",
+    "build:es": "NODE_ENV=production rollup -c config/rollup/es.config.js",
+    "build:es:types": "tsc -p config/types/es.declaration.json && pti fix-types -t es",
     "build:min": "NODE_ENV=production rollup -c config/rollup/config.min.js && tsc -p config/tsconfig/min.declarations.json",
-    "build:umd": "NODE_ENV=production rollup -c config/rollup/config.umd.js && tsc -p config/tsconfig/umd.declarations.json",
+    "build:umd": "NODE_ENV=production rollup -c config/rollup/umd.config.js",
+    "build:umd:types": "tsc -p config/types/umd.declaration.json",
     "clean": "rm -rf dist",
     "clean:cjs": "rm -rf dist/cjs",
-    "clean:esm": "rm -rf dist/esm",
+    "clean:es": "rm -rf dist/es",
     "clean:min": "rm -rf dist/min",
     "clean:umd": "rm -rf dist/umd",
-    "dev": "vite --config config/vite.config.js",
+    "dev": "vite --config=config/vite/vite.config.ts",
     "dist": "npm run clean && npm run build",
-    "lint": "eslint --max-warnings 0",
+    "format": "prettier . --log-level=warn --write",
+    "format:check": "prettier . --log-level=warn --check",
+    "lint": "eslint --max-warnings=0",
     "lint:fix": "npm run lint -- --fix",
-    "release": "release-it",
-    "release:beta": "release-it --config=.release-it.beta.json",
-    "release:scripts": "npm run typecheck && npm run lint && npm run test:coverage && npm run dist",
+    "release:alpha": "release-it --config=config/release-it/alpha.json",
+    "release:beta": "release-it --config=config/release-it/beta.json",
+    "release:rc": "release-it --config=config/release-it/rc.json",
+    "release:scripts": "npm run format:check && npm run typecheck && npm run lint && npm run test && npm run build",
+    "release:stable": "release-it --config=config/release-it/stable.json",
     "start": "npm run dev",
     "test": "vitest run --config=config/vitest.config.ts",
     "test:coverage": "npm run test -- --coverage",

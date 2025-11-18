@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
-
 import { copy } from 'fast-copy';
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { memoize } from '../index.js';
+import { memoize } from '../src/index.js';
 
 describe('serialize', () => {
   afterEach(() => {
@@ -79,9 +77,7 @@ describe('serialize', () => {
 
     expect(circularMethod).toHaveBeenCalledTimes(1);
 
-    expect(circularMemoized.cache.snapshot.keys).toEqual([
-      ['[{"deeply":{"nested":{"circular":"[ref=.0]"}}}]'],
-    ]);
+    expect(circularMemoized.cache.snapshot.keys).toEqual([['[{"deeply":{"nested":{"circular":"[ref=.0]"}}}]']]);
   });
 });
 

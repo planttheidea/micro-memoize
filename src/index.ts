@@ -8,24 +8,19 @@ import { isMemoized } from './utils.js';
 export type * from './internalTypes.js';
 export type { Cache };
 
-export const memoize: Memoize = function memoize<
-  Fn extends (...args: any[]) => any,
-  Opts extends Options<Fn>,
->(fn: Fn | Memoized<Fn, Opts>, options: Opts = {} as Opts): Memoized<Fn, Opts> {
+export const memoize: Memoize = function memoize<Fn extends (...args: any[]) => any, Opts extends Options<Fn>>(
+  fn: Fn | Memoized<Fn, Opts>,
+  options: Opts = {} as Opts,
+): Memoized<Fn, Opts> {
   if (typeof fn !== 'function') {
-    throw new TypeError(
-      `Expected first parameter to be function; received ${typeof fn}`,
-    );
+    throw new TypeError(`Expected first parameter to be function; received ${typeof fn}`);
   }
 
   if (isMemoized(fn)) {
     return memoize(fn.fn, Object.assign({}, fn.options, options));
   }
 
-  const memoized: Memoized<Fn, Opts> = function memoized(
-    this: any,
-    ...args: Parameters<Fn>
-  ) {
+  const memoized: Memoized<Fn, Opts> = function memoized(this: any, ...args: Parameters<Fn>) {
     const cache = memoized.cache;
     const key: Key = cache.k ? cache.k(args) : args;
 
@@ -63,10 +58,4 @@ export const memoize: Memoize = function memoize<
     : memoized;
 };
 
-export {
-  clearStats,
-  isCollectingStats,
-  getStats,
-  startCollectingStats,
-  stopCollectingStats,
-} from './stats.js';
+export { clearStats, isCollectingStats, getStats, startCollectingStats, stopCollectingStats } from './stats.js';

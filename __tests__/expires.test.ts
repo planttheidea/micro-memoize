@@ -1,5 +1,5 @@
 import { expect, test, vi } from 'vitest';
-import { memoize } from '../index.js';
+import { memoize } from '../src/index.js';
 
 function method(one: string, two: string) {
   return [one, two];
@@ -162,23 +162,12 @@ test('notifies of cache update when expiration re-established if update listener
   await new Promise((resolve) => setTimeout(resolve, 110));
 
   expect(withShouldRemove.cache.has([foo, bar])).toBe(true);
-  expect(shouldRemove).toHaveBeenCalledWith(
-    [foo, bar],
-    [foo, bar],
-    100,
-    withShouldRemove.cache,
-  );
+  expect(shouldRemove).toHaveBeenCalledWith([foo, bar], [foo, bar], 100, withShouldRemove.cache);
 
   await new Promise((resolve) => setTimeout(resolve, 110));
 
   expect(withShouldRemove.cache.has([foo, bar])).toBe(false);
-  expect(shouldRemove).toHaveBeenNthCalledWith(
-    2,
-    [foo, bar],
-    [foo, bar],
-    100,
-    withShouldRemove.cache,
-  );
+  expect(shouldRemove).toHaveBeenNthCalledWith(2, [foo, bar], [foo, bar], 100, withShouldRemove.cache);
 
   expect(onUpdate).toHaveBeenCalledWith({
     cache: withShouldRemove.cache,

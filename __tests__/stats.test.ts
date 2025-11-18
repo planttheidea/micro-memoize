@@ -6,7 +6,7 @@ import {
   memoize,
   startCollectingStats,
   stopCollectingStats,
-} from '../index.js';
+} from '../src/index.js';
 
 const foo = 'foo';
 const bar = 'bar';

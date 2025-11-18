@@ -37,24 +37,21 @@ interface CacheEventBase<Fn extends (...args: any[]) => any> {
 /**
  * Cache event fired when a new entry is added.
  */
-export interface OnAddEvent<Fn extends (...args: any[]) => any>
-  extends CacheEventBase<Fn> {
+export interface OnAddEvent<Fn extends (...args: any[]) => any> extends CacheEventBase<Fn> {
   type: 'add';
 }
 
 /**
  * Cache event fired when an existing entry is deleted.
  */
-export interface OnDeleteEvent<Fn extends (...args: any[]) => any>
-  extends CacheEventBase<Fn> {
+export interface OnDeleteEvent<Fn extends (...args: any[]) => any> extends CacheEventBase<Fn> {
   type: 'delete';
 }
 
 /**
  * Cache event fired when the topmost entry in cache is retrieved.
  */
-export interface OnHitEvent<Fn extends (...args: any[]) => any>
-  extends CacheEventBase<Fn> {
+export interface OnHitEvent<Fn extends (...args: any[]) => any> extends CacheEventBase<Fn> {
   type: 'hit';
 }
 
@@ -63,18 +60,14 @@ export interface OnHitEvent<Fn extends (...args: any[]) => any>
  * can be either updating the recency of an older entry in cache or
  * the resolution / rejection of an async entry.
  */
-export interface OnUpdateEvent<Fn extends (...args: any[]) => any>
-  extends CacheEventBase<Fn> {
+export interface OnUpdateEvent<Fn extends (...args: any[]) => any> extends CacheEventBase<Fn> {
   type: 'update';
 }
 
 /**
  * Cache event fired when a cache change occurs.
  */
-export type CacheEvent<
-  Type extends CacheEventType,
-  Fn extends (...args: any[]) => any,
-> = Type extends 'add'
+export type CacheEvent<Type extends CacheEventType, Fn extends (...args: any[]) => any> = Type extends 'add'
   ? OnAddEvent<Fn>
   : Type extends 'delete'
     ? OnDeleteEvent<Fn>
@@ -87,17 +80,14 @@ export type CacheEvent<
 /**
  * A listener for the given type of cache event.
  */
-export type CacheEventListener<
-  Type extends CacheEventType,
-  Fn extends (...args: any[]) => any,
-> = (event: CacheEvent<Type, Fn>) => void;
+export type CacheEventListener<Type extends CacheEventType, Fn extends (...args: any[]) => any> = (
+  event: CacheEvent<Type, Fn>,
+) => void;
 
 /**
  * Method use to trigger a forced update of cache.
  */
-export type ForceUpdate<Fn extends (...args: any[]) => any> = (
-  args: Parameters<Fn>,
-) => boolean;
+export type ForceUpdate<Fn extends (...args: any[]) => any> = (args: Parameters<Fn>) => boolean;
 /**
  * Method to retrieve the expiration duration in milliseconds based on
  * the values in cache.
@@ -114,11 +104,7 @@ export type IsKeyEqual = (cachedKey: Key, nextKey: Key) => boolean;
 /**
  * Method to determine if individual key items are equal.
  */
-export type IsKeyItemEqual = (
-  cachedKeyItem: Arg,
-  nextKeyItem: Arg,
-  index: number,
-) => boolean;
+export type IsKeyItemEqual = (cachedKeyItem: Arg, nextKeyItem: Arg, index: number) => boolean;
 /**
  * Method to serialize the key into a stringified key.
  */
@@ -144,9 +130,7 @@ export type ShouldRemoveOnExpire<Fn extends (...args: any[]) => any> = (
 /**
  * Method to transform the arguments passed into a custom key format.
  */
-export type TransformKey<Fn extends (...args: any[]) => any> = (
-  args: Parameters<Fn>,
-) => Key;
+export type TransformKey<Fn extends (...args: any[]) => any> = (args: Parameters<Fn>) => Key;
 
 /**
  * Advanced configuration for the `expires` option.
@@ -262,20 +246,17 @@ interface OptionsBase<Fn extends (...args: any[]) => any> {
   transformKey?: TransformKey<Fn>;
 }
 
-export interface OptionsNoCustomEqual<Fn extends (...args: any[]) => any>
-  extends OptionsBase<Fn> {
+export interface OptionsNoCustomEqual<Fn extends (...args: any[]) => any> extends OptionsBase<Fn> {
   isKeyEqual?: never;
   isKeyItemEqual?: never;
 }
 
-export interface OptionsKeyEqual<Fn extends (...args: any[]) => any>
-  extends OptionsBase<Fn> {
+export interface OptionsKeyEqual<Fn extends (...args: any[]) => any> extends OptionsBase<Fn> {
   isKeyEqual: IsKeyEqual;
   isKeyItemEqual?: never;
 }
 
-export interface OptionsKeyItemEqual<Fn extends (...args: any[]) => any>
-  extends OptionsBase<Fn> {
+export interface OptionsKeyItemEqual<Fn extends (...args: any[]) => any> extends OptionsBase<Fn> {
   isKeyEqual?: never;
   isKeyItemEqual?: 'deep' | 'shallow' | IsKeyItemEqual;
 }
@@ -292,10 +273,7 @@ export type Options<Fn extends (...args: any[]) => any> =
 /**
  * [key, value] pair for a given entry in cache.
  */
-export type CacheEntry<Fn extends (...args: any[]) => any> = [
-  Key,
-  ReturnType<Fn>,
-];
+export type CacheEntry<Fn extends (...args: any[]) => any> = [Key, ReturnType<Fn>];
 
 /**
  * Snapshot of the current cache state as a set of [key, value] entries.
@@ -310,10 +288,7 @@ export interface CacheSnapshot<Fn extends (...args: any[]) => any> {
 /**
  * Method that has been memoized via `micro-memoize`.
  */
-export interface Memoized<
-  Fn extends (...args: any[]) => any,
-  Opts extends Options<Fn>,
-> {
+export interface Memoized<Fn extends (...args: any[]) => any, Opts extends Options<Fn>> {
   (...args: Parameters<Fn>): ReturnType<Fn>;
 
   /**
@@ -345,28 +320,12 @@ export interface Memoized<
 }
 
 export interface Memoize {
-  <
-    Fn extends Memoized<
-      (...args: any[]) => any,
-      Options<(...args: any[]) => any>
-    >,
-  >(
-    fn: Fn,
-  ): Memoized<Fn, Fn['options']>;
-  <
-    Fn extends Memoized<
-      (...args: any[]) => any,
-      Options<(...args: any[]) => any>
-    >,
-    Opts extends Options<Fn['fn']>,
-  >(
+  <Fn extends Memoized<(...args: any[]) => any, Options<(...args: any[]) => any>>>(fn: Fn): Memoized<Fn, Fn['options']>;
+  <Fn extends Memoized<(...args: any[]) => any, Options<(...args: any[]) => any>>, Opts extends Options<Fn['fn']>>(
     fn: Fn,
     passedOptions: Opts,
   ): Memoized<Fn['fn'], Fn['options'] & Opts>;
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+
   <Fn extends (...args: any[]) => any>(fn: Fn): Memoized<Fn, {}>;
-  <Fn extends (...args: any[]) => any, Opts extends Options<Fn>>(
-    fn: Fn,
-    passedOptions: Opts,
-  ): Memoized<Fn, Opts>;
+  <Fn extends (...args: any[]) => any, Opts extends Options<Fn>>(fn: Fn, passedOptions: Opts): Memoized<Fn, Opts>;
 }

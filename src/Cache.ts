@@ -138,7 +138,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
 
     if (emitter && nodes) {
       for (let index = 0; index < nodes.length; ++index) {
-        emitter.n('delete', nodes[index], reason);
+        emitter.n('delete', nodes[index]!, reason);
       }
     }
   }
@@ -162,10 +162,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
   /**
    * Get the value in cache based on the given `key`.
    */
-  get(
-    key: Parameters<Fn>,
-    reason = 'explicit get',
-  ): ReturnType<Fn> | undefined {
+  get(key: Parameters<Fn>, reason = 'explicit get'): ReturnType<Fn> | undefined {
     const node = this.k ? this.gt(key) : this.g(key);
 
     if (node) {
@@ -192,20 +189,14 @@ export class Cache<Fn extends (...args: any[]) => any> {
   /**
    * Remove the given `listener` for the given `type` of cache event.
    */
-  off<Type extends CacheEventType>(
-    type: Type,
-    listener: CacheEventListener<Type, Fn>,
-  ): void {
+  off<Type extends CacheEventType>(type: Type, listener: CacheEventListener<Type, Fn>): void {
     this.o && this.o.r(type, listener);
   }
 
   /**
    * Add the given `listener` for the given `type` of cache event.
    */
-  on<Type extends CacheEventType>(
-    type: Type,
-    listener: CacheEventListener<Type, Fn>,
-  ): void {
+  on<Type extends CacheEventType>(type: Type, listener: CacheEventListener<Type, Fn>): void {
     if (!this.o) {
       this.o = new CacheEventEmitter<Fn>(this);
     }
@@ -216,11 +207,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
   /**
    * Add or update the cache entry for the given `key`.
    */
-  set(
-    key: Parameters<Fn>,
-    value: ReturnType<Fn>,
-    reason = 'explicit set',
-  ): void {
+  set(key: Parameters<Fn>, value: ReturnType<Fn>, reason = 'explicit set'): void {
     const normalizedKey = this.k ? this.k(key) : key;
 
     let node = this.g(normalizedKey);
@@ -403,7 +390,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
 
         return value;
       },
-      (error: Error) => {
+      (error: unknown) => {
         if (this.g(key)) {
           this.d(node);
           this.o && this.o.n('delete', node, 'rejected');
@@ -426,8 +413,7 @@ export function getTransformKey<Fn extends (...args: any[]) => any>(
   const transformers: Array<(...args: any[]) => any> = [];
 
   if (serialize) {
-    const transformer =
-      typeof serialize === 'function' ? serialize : transformKeySerialized;
+    const transformer = typeof serialize === 'function' ? serialize : transformKeySerialized;
 
     transformers.push(transformer);
   }

@@ -1,9 +1,5 @@
 import type { Cache } from './Cache.js';
-import type {
-  CacheEventListener,
-  CacheEventType,
-  CacheNode,
-} from './internalTypes.js';
+import type { CacheEventListener, CacheEventType, CacheNode } from './internalTypes.js';
 
 type ListenerMap<Fn extends (...args: any[]) => any> = Partial<
   Record<string, Array<CacheEventListener<CacheEventType, Fn>>>
@@ -33,10 +29,7 @@ export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
   /**
    * Method to [a]dd a listener for the given cache change event.
    */
-  a<Type extends CacheEventType>(
-    type: Type,
-    listener: CacheEventListener<Type, Fn>,
-  ): void {
+  a<Type extends CacheEventType>(type: Type, listener: CacheEventListener<Type, Fn>): void {
     const listeners = this.l[type];
 
     if (!listeners) {
@@ -49,7 +42,7 @@ export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
   /**
    * Method to [n]otify all listeners for the given cache change event.
    */
-  n(type: CacheEventType, node: CacheNode<Fn>, reason?: any): void {
+  n(type: CacheEventType, node: CacheNode<Fn>, reason?: string): void {
     const listeners = this.l[type];
 
     if (!listeners) {
@@ -57,7 +50,7 @@ export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
     }
 
     for (let index = 0; index < listeners.length; ++index) {
-      listeners[index]({
+      listeners[index]!({
         cache: this.c,
         key: node.k,
         reason,
@@ -70,10 +63,7 @@ export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
   /**
    * Method to [r]emove a listener for the given cache change event.
    */
-  r<Type extends CacheEventType>(
-    type: Type,
-    listener: CacheEventListener<Type, Fn>,
-  ): void {
+  r<Type extends CacheEventType>(type: Type, listener: CacheEventListener<Type, Fn>): void {
     const listeners = this.l[type];
 
     if (!listeners) {

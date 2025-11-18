@@ -16,16 +16,11 @@ export function addOsmaniMemoize(fn) {
 
     while (index--) {
       currentArg = args[index];
-      hash +=
-        currentArg === Object(currentArg)
-          ? JSON.stringify(currentArg)
-          : currentArg;
+      hash += currentArg === Object(currentArg) ? JSON.stringify(currentArg) : currentArg;
 
       fn.memoize || (fn.memoize = {});
     }
 
-    return hash in fn.memoize
-      ? fn.memoize[hash]
-      : (fn.memoize[hash] = fn.apply(this, args));
+    return hash in fn.memoize ? fn.memoize[hash] : (fn.memoize[hash] = fn.apply(this, args));
   };
 }

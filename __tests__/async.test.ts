@@ -1,18 +1,12 @@
 import Bluebird from 'bluebird';
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { memoize } from '../index.js';
-import type { Memoized, Options } from '../internalTypes.js';
+import { memoize } from '../src/index.js';
+import type { Memoized, Options } from '../src/internalTypes.js';
 
-function createMethod(
-  type: string,
-  method: 'resolve' | 'reject',
-  PromiseLibrary: PromiseConstructor,
-) {
+function createMethod(type: string, method: 'resolve' | 'reject', PromiseLibrary: PromiseConstructor) {
   if (method === 'reject') {
     return function (number: number, otherNumber: number) {
-      return PromiseLibrary.reject(
-        new Error(`rejected ${(number * otherNumber).toString()}`),
-      );
+      return PromiseLibrary.reject(new Error(`rejected ${(number * otherNumber).toString()}`));
     };
   }
 
@@ -22,21 +16,18 @@ function createMethod(
 }
 
 const bluebirdMemoizedResolve = memoize(
-  createMethod(
-    'bluebird',
-    'resolve',
-    Bluebird as unknown as PromiseConstructor,
-  ),
+  createMethod('bluebird', 'resolve', Bluebird as unknown as PromiseConstructor),
   { async: true, statsName: 'bluebird (reject)' },
 );
-const bluebirdMemoizedReject = memoize(
-  createMethod('bluebird', 'reject', Bluebird as unknown as PromiseConstructor),
-  { async: true, statsName: 'bluebird (reject)' },
-);
-const bluebirdMemoizedExpiring = memoize(
-  createMethod('native', 'resolve', Bluebird as unknown as PromiseConstructor),
-  { async: true, expires: 150, statsName: 'bluebird (expiring)' },
-);
+const bluebirdMemoizedReject = memoize(createMethod('bluebird', 'reject', Bluebird as unknown as PromiseConstructor), {
+  async: true,
+  statsName: 'bluebird (reject)',
+});
+const bluebirdMemoizedExpiring = memoize(createMethod('native', 'resolve', Bluebird as unknown as PromiseConstructor), {
+  async: true,
+  expires: 150,
+  statsName: 'bluebird (expiring)',
+});
 
 const bluebirdOnUpdateSpy = vi.fn();
 bluebirdMemoizedExpiring.cache.on('update', bluebirdOnUpdateSpy);
@@ -48,18 +39,16 @@ bluebirdMemoizedExpiring.cache.on('delete', (event) => {
   }
 });
 
-const nativeMemoizedResolve = memoize(
-  createMethod('native', 'resolve', Promise),
-  { async: true, statsName: 'native' },
-);
-const nativeMemoizedReject = memoize(
-  createMethod('native', 'reject', Promise),
-  { async: true, statsName: 'native (reject)' },
-);
-const nativeMemoizedExpiring = memoize(
-  createMethod('native', 'resolve', Promise),
-  { async: true, expires: 150, statsName: 'native (expiring)' },
-);
+const nativeMemoizedResolve = memoize(createMethod('native', 'resolve', Promise), { async: true, statsName: 'native' });
+const nativeMemoizedReject = memoize(createMethod('native', 'reject', Promise), {
+  async: true,
+  statsName: 'native (reject)',
+});
+const nativeMemoizedExpiring = memoize(createMethod('native', 'resolve', Promise), {
+  async: true,
+  expires: 150,
+  statsName: 'native (expiring)',
+});
 
 const nativeOnUpdateSpy = vi.fn();
 nativeMemoizedExpiring.cache.on('update', nativeOnUpdateSpy);
@@ -80,9 +69,7 @@ function testItem<Fn extends (...args: any[]) => any>(
 
   return method(...key).then((result: number) => {
     expect(method.cache.g(key)?.v).toBeInstanceOf(Constructor);
-    expect(method.cache.g(key.slice().reverse() as Parameters<Fn>)).toBe(
-      undefined,
-    );
+    expect(method.cache.g(key.slice().reverse() as Parameters<Fn>)).toBe(undefined);
 
     expect(result).toEqual(number * otherNumber);
   });
@@ -124,47 +111,46 @@ describe.for([
 ] as const)('$name', ({ name, onExpire, onUpdate }) => {
   const Constructor = TYPES[name];
 
-  test.each([
-    { type: 'resolve' },
-    { type: 'reject' },
-    { type: 'expiring' },
-  ] as const)('handles $type', async ({ type }) => {
-    const method = METHODS[name][type];
+  test.each([{ type: 'resolve' }, { type: 'reject' }, { type: 'expiring' }] as const)(
+    'handles $type',
+    async ({ type }) => {
+      const method = METHODS[name][type];
 
-    method.cache.clear();
+      method.cache.clear();
 
-    try {
-      await testItem([6, 9], method, Constructor);
+      try {
+        await testItem([6, 9], method, Constructor);
 
-      if (type === 'reject') {
-        throw new Error(`${type} should have rejected`);
+        if (type === 'reject') {
+          throw new Error(`${type} should have rejected`);
+        }
+      } catch (error) {
+        if (type !== 'reject') {
+          throw error;
+        }
       }
-    } catch (error) {
-      if (type !== 'reject') {
-        throw error;
-      }
-    }
 
-    if (type === 'expiring') {
-      expect(onUpdate).toHaveBeenCalledWith({
-        cache: method.cache,
-        key: [6, 9],
-        reason: 'resolved',
-        type: 'update',
-        value: expect.any(Constructor),
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 200)).then(() => {
-        expect(onExpire).toHaveBeenCalledWith({
+      if (type === 'expiring') {
+        expect(onUpdate).toHaveBeenCalledWith({
           cache: method.cache,
           key: [6, 9],
-          reason: 'expired',
-          type: 'delete',
+          reason: 'resolved',
+          type: 'update',
           value: expect.any(Constructor),
         });
-      });
-    }
-  });
+
+        await new Promise((resolve) => setTimeout(resolve, 200)).then(() => {
+          expect(onExpire).toHaveBeenCalledWith({
+            cache: method.cache,
+            key: [6, 9],
+            reason: 'expired',
+            type: 'delete',
+            value: expect.any(Constructor),
+          });
+        });
+      }
+    },
+  );
 });
 
 test('non-promise values are handled safely', () => {

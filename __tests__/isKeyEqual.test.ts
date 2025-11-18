@@ -1,5 +1,5 @@
 import { expect, test, vi } from 'vitest';
-import { memoize } from '../index.js';
+import { memoize } from '../src/index.js';
 
 test('performs a custom equality check of the key via option', () => {
   const method = (one: string, two?: string, three?: string) => ({
@@ -9,8 +9,7 @@ test('performs a custom equality check of the key via option', () => {
   });
   const fn = vi.fn(method);
   const memoized = memoize(fn, {
-    isKeyEqual: (_prevKey, nextKey) =>
-      nextKey.includes('foo') && !nextKey.includes('quz'),
+    isKeyEqual: (_prevKey, nextKey) => nextKey.includes('foo') && !nextKey.includes('quz'),
   });
 
   const resultA = memoized('foo', 'bar', 'baz');

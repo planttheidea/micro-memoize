@@ -1,5 +1,5 @@
 import { Cache } from './Cache.js';
-import { GlobalStats, Options, ProfileStats } from './internalTypes.js';
+import type { GlobalStats, Options, ProfileStats } from './internalTypes.js';
 
 interface ProfileCounts {
   c: number;
@@ -109,9 +109,7 @@ export function getStats<Name extends string | undefined>(
   statsName?: Name,
 ): undefined extends Name ? GlobalStats | undefined : ProfileStats | undefined {
   if (!active) {
-    console.warn(
-      'Stats are not being collected; please run "startCollectingStats()" to collect them.',
-    );
+    console.warn('Stats are not being collected; please run "startCollectingStats()" to collect them.');
     return;
   }
 

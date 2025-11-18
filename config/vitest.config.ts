@@ -1,12 +1,6 @@
-import { defineConfig } from 'vitest/config';
+import { createVitestConfig } from '@planttheidea/build-tools';
 
-export default defineConfig({
-  test: {
-    coverage: {
-      exclude: ['**/__helpers__/**'],
-      include: ['src/**/*.ts'],
-      provider: 'v8',
-    },
-    include: ['**/__tests__/**/*.ts'],
-  },
+export default createVitestConfig({
+  react: false,
+  source: 'src',
 });

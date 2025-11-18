@@ -27,22 +27,15 @@ const lruMemoize = lru.default;
 /************* tests *************/
 
 const fibonacciSinglePrimitive = (number) =>
-  number < 2
-    ? number
-    : fibonacciSinglePrimitive(number - 1) +
-      fibonacciSinglePrimitive(number - 2);
+  number < 2 ? number : fibonacciSinglePrimitive(number - 1) + fibonacciSinglePrimitive(number - 2);
 
 const fibonacciSingleArray = (array) =>
-  array[0] < 2
-    ? array[0]
-    : fibonacciSingleArray([array[0] - 1]) +
-      fibonacciSingleArray([array[0] - 2]);
+  array[0] < 2 ? array[0] : fibonacciSingleArray([array[0] - 1]) + fibonacciSingleArray([array[0] - 2]);
 
 const fibonacciSingleObject = (object) =>
   object.number < 2
     ? object.number
-    : fibonacciSingleObject({ number: object.number - 1 }) +
-      fibonacciSingleObject({ number: object.number - 2 });
+    : fibonacciSingleObject({ number: object.number - 1 }) + fibonacciSingleObject({ number: object.number - 2 });
 
 const fibonacciMultiplePrimitive = (number, isComplete) => {
   if (isComplete) {
@@ -53,8 +46,7 @@ const fibonacciMultiplePrimitive = (number, isComplete) => {
   const secondValue = number - 2;
 
   return (
-    fibonacciMultiplePrimitive(firstValue, firstValue < 2) +
-    fibonacciMultiplePrimitive(secondValue, secondValue < 2)
+    fibonacciMultiplePrimitive(firstValue, firstValue < 2) + fibonacciMultiplePrimitive(secondValue, secondValue < 2)
   );
 };
 
@@ -67,8 +59,7 @@ const fibonacciMultipleArray = (array, check) => {
   const secondValue = array[0] - 2;
 
   return (
-    fibonacciMultipleArray([firstValue], [firstValue < 2]) +
-    fibonacciMultipleArray([secondValue], [secondValue < 2])
+    fibonacciMultipleArray([firstValue], [firstValue < 2]) + fibonacciMultipleArray([secondValue], [secondValue < 2])
   );
 };
 
@@ -81,22 +72,15 @@ const fibonacciMultipleObject = (object, check) => {
   const secondValue = object.number - 2;
 
   return (
-    fibonacciMultipleObject(
-      { number: firstValue },
-      { isComplete: firstValue < 2 },
-    ) +
-    fibonacciMultipleObject(
-      { number: secondValue },
-      { isComplete: secondValue < 2 },
-    )
+    fibonacciMultipleObject({ number: firstValue }, { isComplete: firstValue < 2 })
+    + fibonacciMultipleObject({ number: secondValue }, { isComplete: secondValue < 2 })
   );
 };
 
 const fibonacciMultipleDeepEqual = ({ number }) => {
   return number < 2
     ? number
-    : fibonacciMultipleDeepEqual({ number: number - 1 }) +
-        fibonacciMultipleDeepEqual({ number: number - 2 });
+    : fibonacciMultipleDeepEqual({ number: number - 1 }) + fibonacciMultipleDeepEqual({ number: number - 2 });
 };
 
 /************* benchmarks *************/
@@ -111,10 +95,7 @@ const singularPrimitive = {
   memoizerific: memoizerific(1)(fibonacciSinglePrimitive),
   'micro-memoize': memoize(fibonacciSinglePrimitive),
   ramda: ramdaMemoize(resolveSingleArgument, fibonacciSinglePrimitive),
-  underscore: underscoreMemoize(
-    fibonacciSinglePrimitive,
-    resolveSingleArgument,
-  ),
+  underscore: underscoreMemoize(fibonacciSinglePrimitive, resolveSingleArgument),
 };
 
 const singularArray = {
@@ -146,58 +127,40 @@ const singularObject = {
 const multiplePrimitive = {
   'addy osmani': addOsmaniMemoize(fibonacciMultiplePrimitive),
   'fast-memoize': fastMemoize(fibonacciMultiplePrimitive),
-  lodashMemoize: lodashMemoize(
-    fibonacciMultiplePrimitive,
-    resolveMultipleArguments,
-  ),
+  lodashMemoize: lodashMemoize(fibonacciMultiplePrimitive, resolveMultipleArguments),
   'lru-memoize': lruMemoize(1)(fibonacciMultiplePrimitive),
   mem: mem(fibonacciMultiplePrimitive, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciMultiplePrimitive),
   memoizerific: memoizerific(1)(fibonacciMultiplePrimitive),
   'micro-memoize': memoize(fibonacciMultiplePrimitive),
   ramda: ramdaMemoize(resolveMultipleArguments, fibonacciMultiplePrimitive),
-  underscore: underscoreMemoize(
-    fibonacciMultiplePrimitive,
-    resolveMultipleArguments,
-  ),
+  underscore: underscoreMemoize(fibonacciMultiplePrimitive, resolveMultipleArguments),
 };
 
 const multipleArray = {
   'addy osmani': addOsmaniMemoize(fibonacciMultipleArray),
   'fast-memoize': fastMemoize(fibonacciMultipleArray),
-  lodashMemoize: lodashMemoize(
-    fibonacciMultipleArray,
-    resolveMultipleArguments,
-  ),
+  lodashMemoize: lodashMemoize(fibonacciMultipleArray, resolveMultipleArguments),
   'lru-memoize': lruMemoize(1)(fibonacciMultipleArray),
   mem: mem(fibonacciMultipleArray, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciMultipleArray),
   memoizerific: memoizerific(1)(fibonacciMultipleArray),
   'micro-memoize': memoize(fibonacciMultipleArray),
   ramda: ramdaMemoize(resolveMultipleArguments, fibonacciMultipleArray),
-  underscore: underscoreMemoize(
-    fibonacciMultipleArray,
-    resolveMultipleArguments,
-  ),
+  underscore: underscoreMemoize(fibonacciMultipleArray, resolveMultipleArguments),
 };
 
 const multipleObject = {
   'addy osmani': addOsmaniMemoize(fibonacciMultipleObject),
   'fast-memoize': fastMemoize(fibonacciMultipleObject),
-  lodashMemoize: lodashMemoize(
-    fibonacciMultipleObject,
-    resolveMultipleArguments,
-  ),
+  lodashMemoize: lodashMemoize(fibonacciMultipleObject, resolveMultipleArguments),
   'lru-memoize': lruMemoize(1)(fibonacciMultipleObject),
   mem: mem(fibonacciMultipleObject, { cacheKey: JSON.stringify }),
   memoizee: memoizee(fibonacciMultipleObject),
   memoizerific: memoizerific(1)(fibonacciMultipleObject),
   'micro-memoize': memoize(fibonacciMultipleObject),
   ramda: ramdaMemoize(resolveMultipleArguments, fibonacciMultipleObject),
-  underscore: underscoreMemoize(
-    fibonacciMultipleObject,
-    resolveMultipleArguments,
-  ),
+  underscore: underscoreMemoize(fibonacciMultipleObject, resolveMultipleArguments),
 };
 
 const number = 25;

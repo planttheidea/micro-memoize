@@ -1,11 +1,8 @@
 import { describe, expect, test, vi } from 'vitest';
-import { memoize } from '../index.js';
+import { memoize } from '../src/index.js';
 
 describe('deep', () => {
-  const method = ({ one, two }: { one: number; two: { deep: number } }) => [
-    one,
-    two.deep,
-  ];
+  const method = ({ one, two }: { one: number; two: { deep: number } }) => [one, two.deep];
 
   test('memoizes based on the deep values via option', () => {
     const fn = vi.fn(method);
@@ -22,10 +19,7 @@ describe('deep', () => {
 });
 
 describe('shallow', () => {
-  const method = ({ one, two }: { one: number; two: { deep: number } }) => [
-    one,
-    two.deep,
-  ];
+  const method = ({ one, two }: { one: number; two: { deep: number } }) => [one, two.deep];
 
   test('memoizes based on the shallow values via option', () => {
     const fn = vi.fn(method);

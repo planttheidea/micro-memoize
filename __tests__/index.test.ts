@@ -1,11 +1,8 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
-
 import { deepEqual } from 'fast-equals';
 import { describe, expect, test, vi } from 'vitest';
-import { memoize } from '../index.js';
+import { memoize } from '../src/index.js';
 
-const has = (object: any, property: string) =>
-  Object.prototype.hasOwnProperty.call(object, property);
+const has = (object: any, property: string) => Object.prototype.hasOwnProperty.call(object, property);
 
 test('will return the memoized function', () => {
   let callCount = 0;
@@ -96,9 +93,7 @@ test('will return the memoized function that handles variable keys', () => {
 
   expect(callCount).toEqual(3);
 
-  expect(memoized.cache.snapshot.entries).toEqual([
-    [['one', 'two'], { one: 'one', two: 'two' }],
-  ]);
+  expect(memoized.cache.snapshot.entries).toEqual([[['one', 'two'], { one: 'one', two: 'two' }]]);
 });
 
 test('will return the memoized function that can have multiple cached key => value pairs', () => {
@@ -228,22 +223,12 @@ test('will return the memoized function that will use the custom isKeyItemEqual 
 
   expect(memoized.options.isKeyItemEqual).toBe(deepEqual);
 
-  expect(
-    memoized(
-      { deep: { value: 'value' } },
-      { other: { deep: { value: 'value' } } },
-    ),
-  ).toEqual({
+  expect(memoized({ deep: { value: 'value' } }, { other: { deep: { value: 'value' } } })).toEqual({
     one: { deep: { value: 'value' } },
     two: { other: { deep: { value: 'value' } } },
   });
 
-  expect(
-    memoized(
-      { deep: { value: 'value' } },
-      { other: { deep: { value: 'value' } } },
-    ),
-  ).toEqual({
+  expect(memoized({ deep: { value: 'value' } }, { other: { deep: { value: 'value' } } })).toEqual({
     one: { deep: { value: 'value' } },
     two: { other: { deep: { value: 'value' } } },
   });
@@ -299,9 +284,7 @@ test('will return the memoized function that will use the transformKey method', 
 
   expect(callCount).toEqual(1);
 
-  expect(memoized.cache.snapshot.entries).toEqual([
-    [['[{"one":"one"},null]'], { one: { one: 'one' }, two: fnArg1 }],
-  ]);
+  expect(memoized.cache.snapshot.entries).toEqual([[['[{"one":"one"},null]'], { one: { one: 'one' }, two: fnArg1 }]]);
 });
 
 test('will return the memoized function that will use the transformKey method with a custom isKeyItemEqual', () => {
@@ -660,20 +643,15 @@ type Dictionary<Type> = Record<string, Type>;
 test('if recursive calls to self will be respected at runtime', () => {
   const calc = memoize(
     (object: Record<string, any>, metadata: { c: number }): Dictionary<any> =>
-      Object.keys(object).reduce(
-        (totals: Record<string, number | Array<Dictionary<any>>>, key) => {
-          if (Array.isArray(object[key])) {
-            totals[key] = object[key].map((subObject: Record<string, number>) =>
-              calc(subObject, metadata),
-            );
-          } else {
-            totals[key] = object[key].a + object[key].b + metadata.c;
-          }
+      Object.keys(object).reduce((totals: Record<string, number | Array<Dictionary<any>>>, key) => {
+        if (Array.isArray(object[key])) {
+          totals[key] = object[key].map((subObject: Record<string, number>) => calc(subObject, metadata));
+        } else {
+          totals[key] = object[key].a + object[key].b + metadata.c;
+        }
 
-          return totals;
-        },
-        {},
-      ),
+        return totals;
+      }, {}),
     {
       maxSize: 10,
     },
@@ -751,11 +729,7 @@ describe('documentation examples', () => {
       deep: string;
     }
 
-    const deepObject = (object: {
-      foo: ContrivedObject;
-      bar: ContrivedObject;
-      baz?: any;
-    }) => ({
+    const deepObject = (object: { foo: ContrivedObject; bar: ContrivedObject; baz?: any }) => ({
       foo: object.foo,
       bar: object.bar,
     });
@@ -853,11 +827,7 @@ describe('documentation examples', () => {
         const object1 = key1[0];
         const object2 = key2[0];
 
-        return (
-          has(object1, 'foo') &&
-          has(object2, 'foo') &&
-          object1.bar === object2.bar
-        );
+        return has(object1, 'foo') && has(object2, 'foo') && object1.bar === object2.bar;
       },
     });
 
@@ -881,9 +851,7 @@ describe('documentation examples', () => {
 
     const pending = memoized('one', 'two');
 
-    expect(memoized.cache.snapshot.entries).toEqual([
-      [['one', 'two'], expect.any(Promise)],
-    ]);
+    expect(memoized.cache.snapshot.entries).toEqual([[['one', 'two'], expect.any(Promise)]]);
 
     const catchSpy = vi.fn();
 
@@ -891,9 +859,7 @@ describe('documentation examples', () => {
 
     expect(memoized.cache.snapshot.entries).toEqual([]);
 
-    expect(catchSpy).toHaveBeenCalledWith(
-      new Error('{"one":"one","two":"two"}'),
-    );
+    expect(catchSpy).toHaveBeenCalledWith(new Error('{"one":"one","two":"two"}'));
   });
 
   test('matches for option `maxSize`', () => {
@@ -1080,9 +1046,7 @@ describe('documentation examples', () => {
       isKeyEqual: (key1, key2) => key1[0] === key2[0],
       // Cache based on the serialized first parameter
       transformKey: (args) => [
-        JSON.stringify(args, (_key: string, value: any) =>
-          typeof value === 'function' ? value.toString() : value,
-        ),
+        JSON.stringify(args, (_key: string, value: any) => (typeof value === 'function' ? value.toString() : value)),
       ],
     });
 
@@ -1091,10 +1055,7 @@ describe('documentation examples', () => {
 
     expect(ignoreFunctionArg).toHaveBeenCalledTimes(1);
     expect(memoized.cache.snapshot.entries).toEqual([
-      [
-        ['["one","() => {\\n    }"]'],
-        { one: 'one', two: expect.any(Function) },
-      ],
+      [['["one","() => {\\n    }"]'], { one: 'one', two: expect.any(Function) }],
     ]);
     expect(memoized.cache.get(['one', () => {}])).toEqual({
       one: 'one',
@@ -1180,9 +1141,7 @@ describe('cache mutation methods', () => {
 
     memoized.cache.set(['foo', 'bar'], 'foobar');
 
-    expect(memoized.cache.snapshot.entries).toEqual([
-      [['foo', 'bar'], 'foobar'],
-    ]);
+    expect(memoized.cache.snapshot.entries).toEqual([[['foo', 'bar'], 'foobar']]);
 
     expect(memoized.cache.get(['foo', 'bar'])).toBe('foobar');
 
@@ -1199,15 +1158,11 @@ describe('cache mutation methods', () => {
 
     fn.mockClear();
 
-    expect(memoized.cache.snapshot.entries).toEqual([
-      [['foo', 'bar'], 'foobar'],
-    ]);
+    expect(memoized.cache.snapshot.entries).toEqual([[['foo', 'bar'], 'foobar']]);
 
     memoized.cache.set(['foo', 'bar'], 'OVERRIDE');
 
-    expect(memoized.cache.snapshot.entries).toEqual([
-      [['foo', 'bar'], 'OVERRIDE'],
-    ]);
+    expect(memoized.cache.snapshot.entries).toEqual([[['foo', 'bar'], 'OVERRIDE']]);
 
     expect(memoized.cache.get(['foo', 'bar'])).toBe('OVERRIDE');
 
@@ -1250,9 +1205,7 @@ describe('cache mutation methods', () => {
 
     memoized.cache.set(['foo', 'bar'], 'foobar');
 
-    expect(memoized.cache.snapshot.entries).toEqual([
-      [['foo', 'bar'], 'foobar'],
-    ]);
+    expect(memoized.cache.snapshot.entries).toEqual([[['foo', 'bar'], 'foobar']]);
 
     const result = memoized.cache.delete(['foo', 'bar']);
 

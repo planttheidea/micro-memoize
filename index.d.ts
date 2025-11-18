@@ -69,27 +69,17 @@ declare class Cache<Fn extends (...args: any[]) => any> {
   /**
    * Remove the given `listener` for the given `type` of cache event.
    */
-  off<Type extends CacheEventType>(
-    type: Type,
-    listener: CacheEventListener<Type, Fn>,
-  ): void;
+  off<Type extends CacheEventType>(type: Type, listener: CacheEventListener<Type, Fn>): void;
 
   /**
    * Add the given `listener` for the given `type` of cache event.
    */
-  on<Type extends CacheEventType>(
-    type: Type,
-    listener: CacheEventListener<Type, Fn>,
-  ): void;
+  on<Type extends CacheEventType>(type: Type, listener: CacheEventListener<Type, Fn>): void;
 
   /**
    * Add or update the cache entry for the given `key`.
    */
-  set(
-    key: Parameters<Fn>,
-    value: ReturnType<Fn>,
-    reason?: string,
-  ): ReturnType<Fn>;
+  set(key: Parameters<Fn>, value: ReturnType<Fn>, reason?: string): ReturnType<Fn>;
 
   /**
    * Method to [d]elete the given `node` from the cache.
@@ -152,10 +142,7 @@ export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
   /**
    * Method to [a]dd a listener for the given cache change event.
    */
-  a<Type extends CacheEventType>(
-    type: Type,
-    listener: CacheEventListener<Type, Fn>,
-  ): void;
+  a<Type extends CacheEventType>(type: Type, listener: CacheEventListener<Type, Fn>): void;
 
   /**
    * Method to [n]otify all listeners for the given cache change event.
@@ -165,10 +152,7 @@ export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
   /**
    * Method to [r]emove a listener for the given cache change event.
    */
-  r<Type extends CacheEventType>(
-    type: Type,
-    listener: CacheEventListener<Type, Fn>,
-  ): void;
+  r<Type extends CacheEventType>(type: Type, listener: CacheEventListener<Type, Fn>): void;
 }
 
 /**
@@ -211,8 +195,7 @@ interface CacheEventBase<Fn extends (...args: any[]) => any> {
 /**
  * Cache event fired when a new entry is added.
  */
-export interface OnAddEvent<Fn extends (...args: any[]) => any>
-  extends CacheEventBase<Fn> {
+export interface OnAddEvent<Fn extends (...args: any[]) => any> extends CacheEventBase<Fn> {
   reason?: undefined;
   type: 'add';
 }
@@ -220,8 +203,7 @@ export interface OnAddEvent<Fn extends (...args: any[]) => any>
 /**
  * Cache event fired when an existing entry is deleted.
  */
-export interface OnDeleteEvent<Fn extends (...args: any[]) => any>
-  extends CacheEventBase<Fn> {
+export interface OnDeleteEvent<Fn extends (...args: any[]) => any> extends CacheEventBase<Fn> {
   reason?: 'evicted' | 'rejected';
   type: 'delete';
 }
@@ -229,8 +211,7 @@ export interface OnDeleteEvent<Fn extends (...args: any[]) => any>
 /**
  * Cache event fired when the topmost entry in cache is retrieved.
  */
-export interface OnHitEvent<Fn extends (...args: any[]) => any>
-  extends CacheEventBase<Fn> {
+export interface OnHitEvent<Fn extends (...args: any[]) => any> extends CacheEventBase<Fn> {
   reason?: undefined;
   type: 'hit';
 }
@@ -240,8 +221,7 @@ export interface OnHitEvent<Fn extends (...args: any[]) => any>
  * can be either updating the recency of an older entry in cache or
  * the resolution / rejection of an async entry.
  */
-export interface OnUpdateEvent<Fn extends (...args: any[]) => any>
-  extends CacheEventBase<Fn> {
+export interface OnUpdateEvent<Fn extends (...args: any[]) => any> extends CacheEventBase<Fn> {
   reason?: 'resolved';
   type: 'update';
 }
@@ -249,10 +229,7 @@ export interface OnUpdateEvent<Fn extends (...args: any[]) => any>
 /**
  * Cache event fired when a cache change occurs.
  */
-export type CacheEvent<
-  Type extends CacheEventType,
-  Fn extends (...args: any[]) => any,
-> = Type extends 'add'
+export type CacheEvent<Type extends CacheEventType, Fn extends (...args: any[]) => any> = Type extends 'add'
   ? OnAddEvent<Fn>
   : Type extends 'delete'
     ? OnDeleteEvent<Fn>
@@ -265,18 +242,15 @@ export type CacheEvent<
 /**
  * A listener for the given type of cache event.
  */
-export type CacheEventListener<
-  Type extends CacheEventType,
-  Fn extends (...args: any[]) => any,
-> = (event: CacheEvent<Type, Fn>) => void;
+export type CacheEventListener<Type extends CacheEventType, Fn extends (...args: any[]) => any> = (
+  event: CacheEvent<Type, Fn>,
+) => void;
 
 /**
  * Method that transforms the arguments passed to the function into
  * a custom cache key.
  */
-export type TransformKey<Fn extends (...args: any[]) => any> = (
-  args: Parameters<Fn>,
-) => Key;
+export type TransformKey<Fn extends (...args: any[]) => any> = (args: Parameters<Fn>) => Key;
 
 interface OptionsBase<Fn extends (...args: any[]) => any> {
   /**
@@ -307,11 +281,7 @@ interface OptionsBase<Fn extends (...args: any[]) => any> {
    * @note
    * This option will be ignored if the `isKeyEqual` option is provided.
    */
-  isKeyItemEqual?: (
-    cachedKeyArg: Arg,
-    nextKeyArg: Arg,
-    index: number,
-  ) => boolean;
+  isKeyItemEqual?: (cachedKeyArg: Arg, nextKeyArg: Arg, index: number) => boolean;
   /**
    * The maximum number of entries to store in cache.
    * @default 1
@@ -324,20 +294,17 @@ interface OptionsBase<Fn extends (...args: any[]) => any> {
   transformKey?: TransformKey<Fn>;
 }
 
-export interface OptionsNoCustomEqual<Fn extends (...args: any[]) => any>
-  extends OptionsBase<Fn> {
+export interface OptionsNoCustomEqual<Fn extends (...args: any[]) => any> extends OptionsBase<Fn> {
   isKeyEqual?: never;
   isKeyItemEqual?: never;
 }
 
-export interface OptionsKeyEqual<Fn extends (...args: any[]) => any>
-  extends OptionsBase<Fn> {
+export interface OptionsKeyEqual<Fn extends (...args: any[]) => any> extends OptionsBase<Fn> {
   isKeyEqual: (cachedKey: Key, nextKey: Key) => boolean;
   isKeyItemEqual?: never;
 }
 
-export interface OptionsKeyItemEqual<Fn extends (...args: any[]) => any>
-  extends OptionsBase<Fn> {
+export interface OptionsKeyItemEqual<Fn extends (...args: any[]) => any> extends OptionsBase<Fn> {
   isKeyEqual?: never;
   isKeyItemEqual: (cachedKeyItem: Arg, nextKeyItem: Arg) => boolean;
 }
@@ -347,10 +314,7 @@ export type Options<Fn extends (...args: any[]) => any> =
   | OptionsKeyEqual<Fn>
   | OptionsKeyItemEqual<Fn>;
 
-export type CacheEntry<Fn extends (...args: any[]) => any> = [
-  Key,
-  ReturnType<Fn>,
-];
+export type CacheEntry<Fn extends (...args: any[]) => any> = [Key, ReturnType<Fn>];
 
 /**
  * Snapshot of the current cache state as a set of [key, value] entries.
@@ -362,10 +326,7 @@ export interface CacheSnapshot<Fn extends (...args: any[]) => any> {
   values: Array<ReturnType<Fn>>;
 }
 
-export interface Memoized<
-  Fn extends (...args: any[]) => any,
-  Opts extends Options<Fn>,
-> {
+export interface Memoized<Fn extends (...args: any[]) => any, Opts extends Options<Fn>> {
   (...args: Parameters<Fn>): ReturnType<Fn>;
 
   /**
@@ -387,28 +348,12 @@ export interface Memoized<
 }
 
 export interface Memoize {
-  <
-    Fn extends Memoized<
-      (...args: any[]) => any,
-      Options<(...args: any[]) => any>
-    >,
-    Opts extends Options<Fn['fn']>,
-  >(
+  <Fn extends Memoized<(...args: any[]) => any, Options<(...args: any[]) => any>>, Opts extends Options<Fn['fn']>>(
     fn: Fn,
     passedOptions: Opts,
   ): Memoized<Fn['fn'], Fn['options'] & Opts>;
-  <
-    Fn extends Memoized<
-      (...args: any[]) => any,
-      Options<(...args: any[]) => any>
-    >,
-  >(
-    fn: Fn,
-  ): Memoized<Fn, Fn['options']>;
-  <Fn extends (...args: any[]) => any, Opts extends Options<Fn>>(
-    fn: Fn,
-    passedOptions: Opts,
-  ): Memoized<Fn, Opts>;
+  <Fn extends Memoized<(...args: any[]) => any, Options<(...args: any[]) => any>>>(fn: Fn): Memoized<Fn, Fn['options']>;
+  <Fn extends (...args: any[]) => any, Opts extends Options<Fn>>(fn: Fn, passedOptions: Opts): Memoized<Fn, Opts>;
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   <Fn extends (...args: any[]) => any>(fn: Fn): Memoized<Fn, {}>;
 }

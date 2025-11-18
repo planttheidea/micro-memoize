@@ -1,16 +1,16 @@
 import { expect, test, vi } from 'vitest';
-import { memoize } from '../index.js';
+import { memoize } from '../src/index.js';
 
 const args = [1, 2, 3, 4];
 
 test.each(args)('limits the args to %d via option', (limit) => {
-  const method = (
-    one: string,
-    two: string,
-    three?: string,
-    four?: string,
-    five?: string,
-  ) => ({ one, two, three, four, five });
+  const method = (one: string, two: string, three?: string, four?: string, five?: string) => ({
+    one,
+    two,
+    three,
+    four,
+    five,
+  });
   const fn = vi.fn(method);
   const memoized = memoize(fn, { maxArgs: limit });
 
@@ -35,13 +35,13 @@ test.each(args)('limits the args to %d via option', (limit) => {
 });
 
 test('will always return from cache if 0 via option', () => {
-  const method = (
-    one: string,
-    two: string,
-    three?: string,
-    four?: string,
-    five?: string,
-  ) => ({ one, two, three, four, five });
+  const method = (one: string, two: string, three?: string, four?: string, five?: string) => ({
+    one,
+    two,
+    three,
+    four,
+    five,
+  });
   const fn = vi.fn(method);
   const memoized = memoize(fn, { maxArgs: 0 });
 
@@ -62,13 +62,13 @@ test('will always return from cache if 0 via option', () => {
 });
 
 test('will use the args passed if less than the size limited via option', () => {
-  const method = (
-    one: string,
-    two: string,
-    three?: string,
-    four?: string,
-    five?: string,
-  ) => ({ one, two, three, four, five });
+  const method = (one: string, two: string, three?: string, four?: string, five?: string) => ({
+    one,
+    two,
+    three,
+    four,
+    five,
+  });
   const fn = vi.fn(method);
   const memoized = memoize(fn, { maxArgs: 10 });
 

@@ -1,11 +1,5 @@
 import type { Cache } from './Cache.js';
-import type {
-  GetExpires,
-  Key,
-  Options,
-  ShouldPersist,
-  ShouldRemoveOnExpire,
-} from './internalTypes.js';
+import type { GetExpires, Key, Options, ShouldPersist, ShouldRemoveOnExpire } from './internalTypes.js';
 import { isNumericValueValid } from './utils.js';
 
 export class ExpirationManager<Fn extends (...args: any[]) => any> {
@@ -90,13 +84,10 @@ export class ExpirationManager<Fn extends (...args: any[]) => any> {
     }
 
     const cache = this.c;
-    const time =
-      typeof this.t === 'function' ? this.t(key, value, cache) : this.t;
+    const time = typeof this.t === 'function' ? this.t(key, value, cache) : this.t;
 
     if (!isNumericValueValid(time)) {
-      throw new TypeError(
-        `The expiration time must be a finite, non-negative number; received ${time as string}`,
-      );
+      throw new TypeError(`The expiration time must be a finite, non-negative number; received ${time as string}`);
     }
 
     const timeout = setTimeout(() => {

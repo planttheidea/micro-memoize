@@ -14,9 +14,7 @@ function replacer(key: string, value: any) {
 /**
  * Default serializer used when `serialize` option set to `true`.
  */
-export function transformKeySerialized<Fn extends (...args: any[]) => any>(
-  args: Parameters<Fn>,
-) {
+export function transformKeySerialized<Fn extends (...args: any[]) => any>(args: Parameters<Fn>) {
   return [stringify(args, { replacer })];
 }
 

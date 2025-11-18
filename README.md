@@ -85,7 +85,8 @@ const withAsync = memoize(withUpToFive, { async: true }); // { async: true, maxS
 const withCustomEquals = memoize(withAsync, { isEqual: deepEqual }); // { async: true, maxSize: 5, isEqual: deepEqual }
 ```
 
-**NOTE**: The original function is the function used in the composition, the composition only applies to the options. In the example above, `upToFive` does not call `simple`, it calls `fn`.
+**NOTE**: The original function is the function used in the composition, the composition only applies to the options. In
+the example above, `upToFive` does not call `simple`, it calls `fn`.
 
 ## Options
 
@@ -118,7 +119,8 @@ setTimeout(() => {
 }, 1000);
 ```
 
-**NOTE**: If you don't want rejections to auto-remove the entry from cache, set `async` to `false` (or simply do not set it), but be aware this will also remove the cache listeners that fire on successful resolution.
+**NOTE**: If you don't want rejections to auto-remove the entry from cache, set `async` to `false` (or simply do not set
+it), but be aware this will also remove the cache listeners that fire on successful resolution.
 
 ### expires
 
@@ -145,11 +147,14 @@ const conditionalExpiringMemoized = memoize(fn, {
 });
 ```
 
-**TIP**: A common usage of this is in tandem with `async` for AJAX calls, and in that scenario the expected behavior is usually to have the `expires` countdown begin upon resolution of the promise. If this is your intended use case, you should also apply the `update` configuration option.
+**TIP**: A common usage of this is in tandem with `async` for AJAX calls, and in that scenario the expected behavior is
+usually to have the `expires` countdown begin upon resolution of the promise. If this is your intended use case, you
+should also apply the `update` configuration option.
 
 ### forceUpdate
 
-Updates the cache forcibly for a given key when the predicate returns true. This is mainly useful if the function being memoized has time-based side-effects.
+Updates the cache forcibly for a given key when the predicate returns true. This is mainly useful if the function being
+memoized has time-based side-effects.
 
 ```ts
 const fn = (item: string) => item;
@@ -189,9 +194,7 @@ type Arg = {
 const fn = ({ one, two }: Arg) => [one, two];
 
 const isFooEqualAndHasBar = (cacheKey: [Arg], key: [Arg]) =>
-  cacheKey[0].one === key[0].one &&
-  cacheKey[1].hasOwnProperty('two') &&
-  key[1].hasOwnProperty('two');
+  cacheKey[0].one === key[0].one && cacheKey[1].hasOwnProperty('two') && key[1].hasOwnProperty('two');
 
 const memoized = memoize(fn, { isKeyEqual: isFooEqualAndHasBar });
 
@@ -203,7 +206,9 @@ memoized({ one: 'two' }, { two: 'three' }); // pulls from cache
 
 _defaults to [`Object.is`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is)_
 
-Custom method to compare equality of keys, determining whether to pull from cache or not, by comparing each argument in order. There are simple options available for deep / shallow comparison, or you can pass your own function for custom comparison.
+Custom method to compare equality of keys, determining whether to pull from cache or not, by comparing each argument in
+order. There are simple options available for deep / shallow comparison, or you can pass your own function for custom
+comparison.
 
 ```ts
 type Arg = {
@@ -240,8 +245,7 @@ customMemoized({ two: 'three' }); // pulls from cache
 The maximum number of arguments (starting from the first) used in creating the key for the cache.
 
 ```ts
-const fn = (item1: string, item2: string, item3: string) =>
-  item1 + item2 + item3;
+const fn = (item1: string, item2: string, item3: string) => item1 + item2 + item3;
 
 const memoized = memoize(fn, { maxArgs: 2 });
 
@@ -259,16 +263,16 @@ If `maxArgs` is combined with either `serialize` or `transformArgs`, the followi
 
 _defaults to `1`_
 
-The number of values to store in cache, based on a [Least Recently Used](https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_Recently_Used_.28LRU.29) basis. This operates the same as [`maxSize`](https://github.com/planttheidea/memoize#maxsize) on `memoize`.
+The number of values to store in cache, based on a
+[Least Recently Used](https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_Recently_Used_.28LRU.29) basis.
+This operates the same as [`maxSize`](https://github.com/planttheidea/memoize#maxsize) on `memoize`.
 
 ```ts
 const manyPossibleArgs = (one: string, two: string) => [one, two];
 
 const memoized = memoize(manyPossibleArgs, { maxSize: 3 });
 
-memoized.cache.on('delete', (event) =>
-  console.log('Deleted from cache: ', event.key),
-);
+memoized.cache.on('delete', (event) => console.log('Deleted from cache: ', event.key));
 
 console.log(memoized('one', 'two')); // ['one', 'two']
 console.log(memoized('two', 'three')); // ['two', 'three']
@@ -283,11 +287,11 @@ console.log(memoized('four', 'five')); // ['four', 'five'], Deleted from cache: 
 
 ### serialize
 
-Serializes the parameters passed into a string and uses this as the key for cache comparison. If a method is passed instead of a boolean, it is used as a custom serializer.
+Serializes the parameters passed into a string and uses this as the key for cache comparison. If a method is passed
+instead of a boolean, it is used as a custom serializer.
 
 ```ts
-const fn = (mutableObject: { one: Record<string, any> }) =>
-  mutableObject.property;
+const fn = (mutableObject: { one: Record<string, any> }) => mutableObject.property;
 
 const serializedMemoized = memoize(fn, { serialize: true });
 const customSerializedMemoized = memoize(fn, {
@@ -301,11 +305,13 @@ If `serialize` is combined with either `maxArgs` or `transformKey`, the followin
 1.  limit by `maxArgs` (if applicable)
 1.  serialize
 
-**NOTE**: This is much slower than the default key storage, and usually the same requirements can be meet with `isKeyItemEqual: 'deep'`, so use at your discretion.
+**NOTE**: This is much slower than the default key storage, and usually the same requirements can be meet with
+`isKeyItemEqual: 'deep'`, so use at your discretion.
 
 ### statsName
 
-Name to use as unique identifier for the function when collecting statistics. Applying a `statsName` will also activate stats collection for that method.
+Name to use as unique identifier for the function when collecting statistics. Applying a `statsName` will also activate
+stats collection for that method.
 
 ```ts
 startCollectingStats();
@@ -323,7 +329,8 @@ console.log(getStats('my fancy identity')); // { calls: 3, hits: 2, name: "my fa
 
 ### transformKey
 
-Method that allows you transform the key that is used for caching, if you want to use something other than the arguments passed.
+Method that allows you transform the key that is used for caching, if you want to use something other than the arguments
+passed.
 
 ```ts
 const ignoreFunctionArgs = (one: string, two: () => {}) => [one, two];
@@ -336,7 +343,9 @@ console.log(memoized('one', () => {})); // ['one', () => {}]
 console.log(memoized('one', () => {})); // pulled from cache, ['one', () => {}]
 ```
 
-If your transformed keys require something other than [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero) equality, you can combine `transformKey` with [`isKeyEqual`](#iskeyequal) for completely custom key creation and comparison.
+If your transformed keys require something other than
+[`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero) equality, you can combine
+`transformKey` with [`isKeyEqual`](#iskeyequal) for completely custom key creation and comparison.
 
 ```ts
 const ignoreFunctionArg = (one: string, two: () => void) => [one, two];
@@ -361,9 +370,11 @@ If `transformKey` is combined with either `maxArgs` or `serialize`, the followin
 
 ### memoized.cache
 
-The `cache` object that is used internally. This is a highly-optimized structure, but has several methods for manual cache manipulation.Direct cache manipulation
+The `cache` object that is used internally. This is a highly-optimized structure, but has several methods for manual
+cache manipulation.Direct cache manipulation
 
-The cache is an optimized linked list internally, so working with the cache directly is advised against. However, there are several exposed ways to introspect or manually manipulate the cache based on common use-cases.
+The cache is an optimized linked list internally, so working with the cache directly is advised against. However, there
+are several exposed ways to introspect or manually manipulate the cache based on common use-cases.
 
 #### memoized.cache.clear()
 
@@ -377,7 +388,8 @@ memoized.cache.clear();
 
 #### memoized.cache.delete(args)
 
-This will remove the key based on the provided `args` from cache. `args` should be an `Array` of values, meant to reflect the arguments passed to the method.
+This will remove the key based on the provided `args` from cache. `args` should be an `Array` of values, meant to
+reflect the arguments passed to the method.
 
 ```ts
 const memoized = memoize((item: { one: string }) => item);
@@ -396,7 +408,8 @@ memoized(arg);
 
 #### memoized.cache.get(args)
 
-Returns the value in cache if the key based on `args` matches, else returns `undefined`. `args` should be an `Array` of values, meant to reflect the arguments passed to the method.
+Returns the value in cache if the key based on `args` matches, else returns `undefined`. `args` should be an `Array` of
+values, meant to reflect the arguments passed to the method.
 
 ```ts
 const memoized = memoize((one: string, two: string) => [one, two);
@@ -409,7 +422,8 @@ console.log(memoized.cache.get(['two', 'three'])); // undefined
 
 #### memoized.cache.has(args)
 
-This will return `true` if a cache entry exists for the key based on the `args` passed, else will return `false`. `args` should be an `Array` of values, meant to reflect the arguments passed to the method.
+This will return `true` if a cache entry exists for the key based on the `args` passed, else will return `false`. `args`
+should be an `Array` of values, meant to reflect the arguments passed to the method.
 
 ```ts
 const memoized = memoize((one: string, two: string) => [one, two]);
@@ -482,9 +496,7 @@ const fn = (one: string, two: string) => [one, two];
 const memoized = memoize(fn);
 
 memoized.cache.on('delete', (event) => {
-  console.log(
-    `cache entry was deleted (${event.reason}): ${JSON.stringify(event.key)}`,
-  );
+  console.log(`cache entry was deleted (${event.reason}): ${JSON.stringify(event.key)}`);
 });
 
 memoized('foo', 'bar');
@@ -536,7 +548,8 @@ memoized('foo', 'bar'); // cache entry was found: ["foo","bar"]
 
 ##### update
 
-Fires when cache was reordered based on finding an older entry in cache and making it the most recent. Receives the event:
+Fires when cache was reordered based on finding an older entry in cache and making it the most recent. Receives the
+event:
 
 ```ts
 interface OnUpdateEvent<Fn> {
@@ -570,7 +583,9 @@ memoized('foo', 'bar');
 
 #### memoized.cache.set(args, value)
 
-This will manually add the `value` at the key based on `args` in cache if the key does not already exist; if the key exists, it will update the value. `args` should be an `Array` of values, meant to reflect the arguments passed to the method.
+This will manually add the `value` at the key based on `args` in cache if the key does not already exist; if the key
+exists, it will update the value. `args` should be an `Array` of values, meant to reflect the arguments passed to the
+method.
 
 ```ts
 // single parameter is straightforward
@@ -584,7 +599,9 @@ memoized('one');
 
 #### memoized.cache.snapshot
 
-The `cache` is mutated internally for performance reasons, so logging out the cache at a specific step in the workflow may not give you the information you need. As such, to help with debugging you can request the `cache.snapshot`, which provides a well-formed snapshot of the cache:
+The `cache` is mutated internally for performance reasons, so logging out the cache at a specific step in the workflow
+may not give you the information you need. As such, to help with debugging you can request the `cache.snapshot`, which
+provides a well-formed snapshot of the cache:
 
 ```ts
 type CacheSnapshot = {
@@ -601,7 +618,8 @@ The original function passed to be memoized.
 
 ### memoized.isMemoized
 
-Hard-coded to `true` when the function is memoized. This is useful for introspection, to identify if a method has been memoized or not.
+Hard-coded to `true` when the function is memoized. This is useful for introspection, to identify if a method has been
+memoized or not.
 
 ### memoized.options
 
@@ -609,7 +627,8 @@ The [`options`](#options) passed when creating the memoized method.
 
 ## Statistics
 
-As-of version 5, you can collect statistics of memoize to determine if your cached methods are effective. To activate stats collection for a given memoized method, you must provide a [`statsName`](#statsname).
+As-of version 5, you can collect statistics of memoize to determine if your cached methods are effective. To activate
+stats collection for a given memoized method, you must provide a [`statsName`](#statsname).
 
 ```ts
 import { getStats, memoize, startCollectingStats } from 'memoize';
@@ -752,9 +771,13 @@ stopCollectingStats();
 
 ## Benchmarks
 
-All values provided are the number of operations per second (ops/sec) calculated by the [Benchmark suite](https://benchmarkjs.com/). Note that `underscore`, `lodash`, and `ramda` do not support mulitple-parameter memoization (which is where `micro-memoize` really shines), so they are not included in those benchmarks.
+All values provided are the number of operations per second (ops/sec) calculated by the
+[Benchmark suite](https://benchmarkjs.com/). Note that `underscore`, `lodash`, and `ramda` do not support
+mulitple-parameter memoization (which is where `micro-memoize` really shines), so they are not included in those
+benchmarks.
 
-Benchmarks was performed on an i9 16-core Linux laptop with 64GB of memory using NodeJS version `24.11.0`. The default configuration of each library was tested with a fibonacci calculation based on the following parameters:
+Benchmarks was performed on an i9 16-core Linux laptop with 64GB of memory using NodeJS version `24.11.0`. The default
+configuration of each library was tested with a fibonacci calculation based on the following parameters:
 
 - Single primitive = `35`
 - Single array = `[35]`
@@ -763,7 +786,10 @@ Benchmarks was performed on an i9 16-core Linux laptop with 64GB of memory using
 - Multiple arrays = `[35], [true]`
 - Multiple objects = `{ number: 35 }, { isComplete: true }`
 
-**NOTE**: Not all libraries tested support multiple parameters out of the box, but support the ability to pass a custom `resolver`. Because these often need to resolve to a string value, [a common suggestion](https://github.com/lodash/lodash/issues/2115) is to just `JSON.stringify` the arguments, so that is what is used when needed.
+**NOTE**: Not all libraries tested support multiple parameters out of the box, but support the ability to pass a custom
+`resolver`. Because these often need to resolve to a string value,
+[a common suggestion](https://github.com/lodash/lodash/issues/2115) is to just `JSON.stringify` the arguments, so that
+is what is used when needed.
 
 ### Single primitive parameter
 
