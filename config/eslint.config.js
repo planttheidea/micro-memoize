@@ -18,7 +18,7 @@ export default createEslintConfig({
       },
     },
     {
-      files: ['dev/*.ts'],
+      files: ['__tests__/**/*.ts', 'dev/**/*.ts'],
       rules: {
         '@typescript-eslint/no-empty-function': 'off',
         '@typescript-eslint/no-floating-promises': 'off',
