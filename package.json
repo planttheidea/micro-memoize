@@ -18,7 +18,7 @@
   },
   "description": "A tiny, crazy fast memoization library for the 95% use-case",
   "devDependencies": {
-    "@planttheidea/build-tools": "^1.0.3",
+    "@planttheidea/build-tools": "^1.0.5",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.3.0",
     "@types/bluebird": "^3.5.42",
@@ -112,7 +112,7 @@
     "clean:es": "rm -rf dist/es",
     "clean:min": "rm -rf dist/min",
     "clean:umd": "rm -rf dist/umd",
-    "dev": "vite --config=config/vite/vite.config.ts",
+    "dev": "vite --config=config/vite.config.ts",
     "dist": "npm run clean && npm run build",
     "format": "prettier . --log-level=warn --write",
     "format:check": "prettier . --log-level=warn --check",

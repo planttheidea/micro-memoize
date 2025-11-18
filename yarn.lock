@@ -1033,9 +1033,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@planttheidea/build-tools@npm:^1.0.3":
-  version: 1.0.3
-  resolution: "@planttheidea/build-tools@npm:1.0.3"
+"@planttheidea/build-tools@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "@planttheidea/build-tools@npm:1.0.5"
   dependencies:
     "@rollup/plugin-terser": "npm:^0.4.4"
     "@rollup/plugin-typescript": "npm:^12.3.0"
@@ -1059,7 +1059,7 @@ __metadata:
     yargs: "npm:^18.0.0"
   bin:
     pti: bin/index.js
-  checksum: 10c0/078ee02a5f76a5760e3df4907d886764921619d4ac1b8695fcf808ff7a44c4d657c9e3b79de501d818967c91ea73b6820e5dcf76597526109ccf7cc57a781d2b
+  checksum: 10c0/87f806200ee98a8a0c681b9e7b69069092b0455e1395d918cdd97bf922beedd350b42eb88abc0964155352d081a70f888f5ec5aa3f8154c99e62fdccd533155b
   languageName: node
   linkType: hard
 
@@ -4641,7 +4641,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "micro-memoize@workspace:."
   dependencies:
-    "@planttheidea/build-tools": "npm:^1.0.3"
+    "@planttheidea/build-tools": "npm:^1.0.5"
     "@rollup/plugin-terser": "npm:^0.4.4"
     "@rollup/plugin-typescript": "npm:^12.3.0"
     "@types/bluebird": "npm:^3.5.42"
