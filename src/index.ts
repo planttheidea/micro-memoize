@@ -6,7 +6,6 @@ import { getStatsManager } from './stats.js';
 import { isMemoized } from './utils.js';
 
 export type * from './internalTypes.js';
-export type { Cache };
 
 export const memoize: Memoize = function memoize<Fn extends (...args: any[]) => any, Opts extends Options<Fn>>(
   fn: Fn | Memoized<Fn, Opts>,

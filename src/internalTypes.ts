@@ -1,6 +1,9 @@
 import type { Cache } from './Cache.js';
+import type { CacheEventEmitter } from './CacheEventEmitter.js';
 import type { ExpirationManager } from './expires.js';
 import type { StatsManager } from './stats.js';
+
+export type { Cache, CacheEventEmitter };
 
 /**
  * Key used for cache entries.

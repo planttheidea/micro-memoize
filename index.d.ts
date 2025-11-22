@@ -124,7 +124,7 @@ type ListenerMap<Fn extends (...args: any[]) => any> = Partial<
   Record<string, Array<CacheEventListener<CacheEventType, Fn>>>
 >;
 
-export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
+declare class CacheEventEmitter<Fn extends (...args: any[]) => any> {
   /**
    * The [c]ache the emitter is associated with.
    */
@@ -154,6 +154,8 @@ export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
    */
   r<Type extends CacheEventType>(type: Type, listener: CacheEventListener<Type, Fn>): void;
 }
+
+export type { CacheEventEmitter };
 
 /**
  * Key used for cache entries.
