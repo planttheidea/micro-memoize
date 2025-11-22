@@ -32,7 +32,9 @@ keeping bundle size very small (~2.62KB gzipped).
   - `onCacheUpdate` (replaced with `fn.cache.on('delete', handler)` for deletes, `fn.cache.on('update', handler)` for
     updates)
 - Package is now ESM primary (but CommonJS should still be supported)
+- Dedicated import for ESM has changed (`dist/esm/index.mjs` => `dist/es/index.mjs`)
 - Browser / Node support has updated (requires ES2016+)
+- Removed `min` build
 
 ## 4.2.0
 
