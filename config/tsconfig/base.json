@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "declaration": false,
+    "esModuleInterop": true,
+    "jsx": "react",
+    "lib": ["DOM", "ESNext"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noImplicitAny": true,
+    "outDir": "../../dist",
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "inlineSources": true,
+    "target": "ES2015",
+    "types": ["node"]
+  },
+  "exclude": ["node_modules"],
+  "include": ["../../src/**/*", "../../dev/*"]
+}

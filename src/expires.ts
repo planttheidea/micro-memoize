@@ -1,0 +1,130 @@
+import type { Cache } from './Cache.js';
+import type { GetExpires, Key, Options, ShouldPersist, ShouldRemoveOnExpire } from './internalTypes.js';
+import { isNumericValueValid } from './utils.js';
+
+export class ExpirationManager<Fn extends (...args: any[]) => any> {
+  /**
+   * The [c]ache being monitored.
+   */
+  c: Cache<Fn>;
+  /**
+   * Map of [e]xpiration timeouts.
+   */
+  e = new Map<Key, ReturnType<typeof setTimeout>>();
+  /**
+   * Whether the entry in cache should [p]ersist, and therefore not
+   * have any expiration.
+   */
+  p: ShouldPersist<Fn> | undefined;
+  /**
+   * Whether the entry in cache should be [r]emoved on expiration.
+   */
+  r: ShouldRemoveOnExpire<Fn> | undefined;
+  /**
+   * The [t]ime to wait before expiring, or a method that determines that time.
+   */
+  t: number | GetExpires<Fn>;
+  /**
+   * Whether the expiration should [u]pdate when the cache entry is hit.
+   */
+  u: boolean;
+
+  constructor(cache: Cache<Fn>, expires: Required<Options<Fn>>['expires']) {
+    this.c = cache;
+
+    if (typeof expires === 'object') {
+      this.t = expires.after;
+      this.p = expires.shouldPersist;
+      this.r = expires.shouldRemove;
+      this.u = !!expires.update;
+    } else {
+      this.t = expires;
+      this.u = false;
+    }
+
+    this.c.on('add', ({ key, value }) => {
+      this.c.g(key) && !this.p?.(key, value, cache) && this.s(key, value);
+    });
+
+    // Only set up a `hit` listener if we care about updating the expiration.
+    if (this.u) {
+      this.c.on('hit', ({ key, value }) => {
+        this.c.g(key) && !this.p?.(key, value, cache) && this.s(key, value);
+      });
+    }
+
+    this.c.on('delete', ({ key }) => {
+      this.e.has(key) && this.d(key);
+    });
+  }
+
+  get size(): number {
+    return this.e.size;
+  }
+
+  /**
+   * Method to [d]elete the expiration.
+   */
+  d(key: Key): void {
+    const expiration = this.e.get(key);
+
+    if (expiration) {
+      clearTimeout(expiration);
+      this.e.delete(key);
+    }
+  }
+
+  /**
+   * Method to [s]et the new expiration. If one is present for the given `key`, it will delete
+   * the existing expiration before creating the new one.
+   */
+  s(key: Key, value: ReturnType<Fn>): void {
+    if (this.e.has(key)) {
+      this.d(key);
+    }
+
+    const cache = this.c;
+    const time = typeof this.t === 'function' ? this.t(key, value, cache) : this.t;
+
+    if (!isNumericValueValid(time)) {
+      throw new TypeError(`The expiration time must be a finite, non-negative number; received ${time as string}`);
+    }
+
+    const timeout = setTimeout(() => {
+      this.d(key);
+
+      const node = cache.g(key);
+
+      if (!node) {
+        return;
+      }
+
+      if (typeof this.r === 'function' && !this.r(key, node.v, time, cache)) {
+        node !== cache.h && cache.u(node);
+        cache.o && cache.o.n('update', node, 'expiration reset');
+
+        this.s(key, node.v);
+      } else {
+        cache.d(node);
+        cache.o && cache.o.n('delete', node, 'expired');
+      }
+    }, time);
+
+    if (typeof timeout.unref === 'function') {
+      // If done in NodeJS, the timeout should have its reference removed to avoid
+      // hanging timers if collected while running.
+      timeout.unref();
+    }
+
+    this.e.set(key, timeout);
+  }
+}
+
+export function getExpirationManager<Fn extends (...args: any[]) => any>(
+  cache: Cache<Fn>,
+  options: Options<Fn>,
+): ExpirationManager<Fn> | undefined {
+  if (options.expires != null) {
+    return new ExpirationManager(cache, options.expires);
+  }
+}
