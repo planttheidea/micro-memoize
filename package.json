@@ -18,15 +18,15 @@
   },
   "description": "A tiny, crazy fast memoization library for the 95% use-case",
   "devDependencies": {
-    "@planttheidea/build-tools": "^1.0.5",
+    "@planttheidea/build-tools": "^1.0.6",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.3.0",
     "@types/bluebird": "^3.5.42",
     "@types/lodash": "^4.17.20",
     "@types/node": "^24.10.1",
-    "@typescript-eslint/eslint-plugin": "^8.46.4",
-    "@typescript-eslint/parser": "^8.46.4",
-    "@vitest/coverage-v8": "^4.0.10",
+    "@typescript-eslint/eslint-plugin": "^8.47.0",
+    "@typescript-eslint/parser": "^8.47.0",
+    "@vitest/coverage-v8": "^4.0.13",
     "bluebird": "^3.7.2",
     "cli-table2": "^0.2.0",
     "eslint": "^9.39.1",
@@ -41,13 +41,13 @@
     "prettier": "^3.6.2",
     "ramda": "^0.32.0",
     "release-it": "^19.0.6",
-    "rollup": "^4.53.2",
+    "rollup": "^4.53.3",
     "tinybench": "^5.1.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.4",
+    "typescript-eslint": "^8.47.0",
     "underscore": "^1.13.7",
-    "vite": "^7.2.2",
-    "vitest": "^4.0.10"
+    "vite": "^7.2.4",
+    "vitest": "^4.0.13"
   },
   "exports": {
     ".": {
