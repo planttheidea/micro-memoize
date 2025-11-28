@@ -1,5 +1,10 @@
 # micro-memoize CHANGELOG
 
+## 5.0.1
+
+- [#127](https://github.com/planttheidea/micro-memoize/pull/127) fix type narrowing not being respected on memoized
+  functions (fixes [#126](https://github.com/planttheidea/micro-memoize/issues/126))
+
 ## 5.0.0
 
 This was a rewrite from the ground up, and this increased speed while also allowing for easier augmentation of feature

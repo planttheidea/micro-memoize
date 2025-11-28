@@ -16,6 +16,8 @@ A [blazing fast](#benchmarks) memoization library that is tiny but feature-rich.
     - [forceUpdate](#forceupdate)
     - [isKeyEqual](#iskeyequal)
     - [isKeyItemEqual](#iskeyitemequal)
+      - [deep](#deep)
+      - [shallow](#shallow)
     - [maxArgs](#maxargs)
     - [maxSize](#maxsize)
     - [serialize](#serialize)
@@ -207,8 +209,8 @@ memoized({ one: 'two' }, { two: 'three' }); // pulls from cache
 _defaults to [`Object.is`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is)_
 
 Custom method to compare equality of keys, determining whether to pull from cache or not, by comparing each argument in
-order. There are simple options available for deep / shallow comparison, or you can pass your own function for custom
-comparison.
+order. There are simple string options available for deep / shallow equality comparisons, or you can pass your own
+function for custom comparison.
 
 ```ts
 type Arg = {
@@ -239,6 +241,14 @@ const customMemoized = memoize(fn, {
 customMemoized({ one: 'two' };
 customMemoized({ two: 'three' }); // pulls from cache
 ```
+
+#### `deep`
+
+Performs a deep equality comparison of each key item using the `deepEqual` method from `fast-equals`.
+
+#### `shallow`
+
+Performs a shallow equality comparison using the `shallowEqual` method from `fast-equals`.
 
 ### maxArgs
 
