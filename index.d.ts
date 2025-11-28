@@ -1,8 +1,35 @@
-declare class Cache<Fn extends (...args: any[]) => any> {
+type ListenerMap<Fn extends (...args: any[]) => any> = Partial<
+  Record<string, Array<CacheEventListener<CacheEventType, Fn>>>
+>;
+declare class CacheEventEmitter<Fn extends (...args: any[]) => any> {
   /**
-   * The size of the populated cache.
+   * The [c]ache the emitter is associated with.
    */
-  get size(): number;
+  private c;
+  /**
+   * The list of [l]isteners for the given [t]ype.
+   */
+  private l;
+  constructor(cache: Cache<Fn>);
+  /**
+   * Expose the listeners for testing only.
+   */
+  get listeners(): ListenerMap<Fn>;
+  /**
+   * Method to [a]dd a listener for the given cache change event.
+   */
+  a<Type extends CacheEventType>(type: Type, listener: CacheEventListener<Type, Fn>): void;
+  /**
+   * Method to [n]otify all listeners for the given cache change event.
+   */
+  n(type: CacheEventType, node: CacheNode<Fn>, reason?: string): void;
+  /**
+   * Method to [r]emove a listener for the given cache change event.
+   */
+  r<Type extends CacheEventType>(type: Type, listener: CacheEventListener<Type, Fn>): void;
+}
+
+declare class Cache<Fn extends (...args: any[]) => any> {
   /**
    * The current [c]ount of entries in the cache.
    */
@@ -12,18 +39,18 @@ declare class Cache<Fn extends (...args: any[]) => any> {
    */
   h: CacheNode<Fn> | undefined;
   /**
-   * Whether the individual key [i]tem passed is equal to the same argument in order
+   * Whether the individual argument passed [i]s equal to the same argument in order
    * for a key in cache.
    */
-  i: (a: Arg, b: Arg) => boolean;
+  i: IsKeyItemEqual;
   /**
    * The transformer for the [k]ey stored in cache.
    */
-  k: TransformKey<Fn> | undefined;
+  k: Options<Fn>['transformKey'] | undefined;
   /**
    * Whether the entire key [m]atches an existing key in cache.
    */
-  m: (a: Key, b: Key) => boolean;
+  m: IsKeyEqual;
   /**
    * Event emitter for `[o]`n events.
    */
@@ -31,7 +58,7 @@ declare class Cache<Fn extends (...args: any[]) => any> {
   /**
    * Whether to await the [p]romise returned by the function.
    */
-  p: boolean;
+  p: Options<Fn>['async'];
   /**
    * The maximum [s]ize of the cache.
    */
@@ -40,77 +67,67 @@ declare class Cache<Fn extends (...args: any[]) => any> {
    * The [t]ail of the cache linked list.
    */
   t: CacheNode<Fn> | undefined;
-
+  constructor(options: Options<Fn>);
+  /**
+   * The size of the populated cache.
+   */
+  get size(): number;
   /**
    * The [key, value] pairs for the existing entries in cache.
    */
   get snapshot(): CacheSnapshot<Fn>;
-
   /**
    * Clear the cache.
    */
   clear(reason?: string): void;
-
   /**
    * Delete the entry for the given `key` in cache.
    */
   delete(key: Parameters<Fn>, reason?: string): boolean;
-
   /**
    * Get the value in cache based on the given `key`.
    */
   get(key: Parameters<Fn>, reason?: string): ReturnType<Fn> | undefined;
-
   /**
    * Determine whether the given `key` has a related entry in the cache.
    */
   has(key: Parameters<Fn>): boolean;
-
   /**
    * Remove the given `listener` for the given `type` of cache event.
    */
   off<Type extends CacheEventType>(type: Type, listener: CacheEventListener<Type, Fn>): void;
-
   /**
    * Add the given `listener` for the given `type` of cache event.
    */
   on<Type extends CacheEventType>(type: Type, listener: CacheEventListener<Type, Fn>): void;
-
   /**
    * Add or update the cache entry for the given `key`.
    */
-  set(key: Parameters<Fn>, value: ReturnType<Fn>, reason?: string): ReturnType<Fn>;
-
+  set(key: Parameters<Fn>, value: ReturnType<Fn>, reason?: string): void;
   /**
    * Method to [d]elete the given `node` from the cache.
    */
   d(node: CacheNode<Fn>): void;
-
   /**
    * Method to determine if the next key is [e]qual to an existing key in cache.
    */
   e(prevKey: Key, nextKey: Key): boolean;
-
   /**
    * Method to [g]et an existing node from cache based on the given `key`.
    */
   g(key: Key): CacheNode<Fn> | undefined;
-
   /**
    * Method to [g]et an existing node from cache based on the [t]ransformed `key`.
    */
   gt(key: Parameters<Fn>): CacheNode<Fn> | undefined;
-
   /**
    * Method to create a new [n]ode and set it at the head of the linked list.
    */
   n(key: Key, value: ReturnType<Fn>): CacheNode<Fn>;
-
   /**
    * Method to [u]date the location of the given `node` in cache.
    */
   u(node: CacheNode<Fn>): void;
-
   /**
    * Method to [w]rap the promise in a handler to automatically delete the
    * entry if it rejects.
@@ -118,120 +135,162 @@ declare class Cache<Fn extends (...args: any[]) => any> {
   w(node: CacheNode<Fn>): ReturnType<Fn>;
 }
 
-export type { Cache };
-
-type ListenerMap<Fn extends (...args: any[]) => any> = Partial<
-  Record<string, Array<CacheEventListener<CacheEventType, Fn>>>
->;
-
-declare class CacheEventEmitter<Fn extends (...args: any[]) => any> {
+declare class ExpirationManager<Fn extends (...args: any[]) => any> {
   /**
-   * The [c]ache the emitter is associated with.
+   * The [c]ache being monitored.
    */
-  private c: Cache<Fn>;
+  c: Cache<Fn>;
   /**
-   * The list of [l]isteners for the given [t]ype.
+   * Map of [e]xpiration timeouts.
    */
-  private l: ListenerMap<Fn>;
-
+  e: Map<Key, NodeJS.Timeout>;
   /**
-   * Expose the listeners for testing only.
+   * Whether the entry in cache should [p]ersist, and therefore not
+   * have any expiration.
    */
-  get listeners(): ListenerMap<Fn>;
-
+  p: ShouldPersist<Fn> | undefined;
   /**
-   * Method to [a]dd a listener for the given cache change event.
+   * Whether the entry in cache should be [r]emoved on expiration.
    */
-  a<Type extends CacheEventType>(type: Type, listener: CacheEventListener<Type, Fn>): void;
-
+  r: ShouldRemoveOnExpire<Fn> | undefined;
   /**
-   * Method to [n]otify all listeners for the given cache change event.
+   * The [t]ime to wait before expiring, or a method that determines that time.
    */
-  n(type: CacheEventType, node: CacheNode<Fn>, reason?: any): void;
-
+  t: number | GetExpires<Fn>;
   /**
-   * Method to [r]emove a listener for the given cache change event.
+   * Whether the expiration should [u]pdate when the cache entry is hit.
    */
-  r<Type extends CacheEventType>(type: Type, listener: CacheEventListener<Type, Fn>): void;
+  u: boolean;
+  constructor(cache: Cache<Fn>, expires: Required<Options<Fn>>['expires']);
+  get size(): number;
+  /**
+   * Method to [d]elete the expiration.
+   */
+  d(key: Key): void;
+  /**
+   * Method to [s]et the new expiration. If one is present for the given `key`, it will delete
+   * the existing expiration before creating the new one.
+   */
+  s(key: Key, value: ReturnType<Fn>): void;
 }
 
-export type { CacheEventEmitter };
+interface ProfileCounts {
+  c: number;
+  h: number;
+}
+declare class StatsManager<Fn extends (...args: any[]) => any> {
+  /**
+   * The [c]ache listened to when collecting counts.
+   */
+  c: Cache<Fn>;
+  /**
+   * Method to [d]elete existing cache listeners.
+   */
+  d: (() => void) | undefined;
+  /**
+   * The [n]ame of the profile to manage in stats.
+   */
+  n: string;
+  /**
+   * The counts for the stats [p]rofile.
+   */
+  p: ProfileCounts;
+  constructor(cache: Cache<Fn>, statsName: string);
+  /**
+   * Method to compute the [m]etrics for the profile stats.
+   */
+  m(): ProfileStats;
+  /**
+   * Method to [r]eset the counts.
+   */
+  r(): void;
+  /**
+   * Method to [s]tart the collection of stats for the given profile.
+   */
+  s(): void;
+}
+/**
+ * Clear all existing stats stored, either of the specific profile whose name is passed,
+ * or globally if no name is passed.
+ */
+declare function clearStats(statsName?: string): void;
+/**
+ * Get the stats of a given profile, or global stats if no `statsName` is given.
+ */
+declare function getStats<Name extends string | undefined>(
+  statsName?: Name,
+): undefined extends Name ? GlobalStats | undefined : ProfileStats | undefined;
+/**
+ * Whether stats are currently being collected.
+ */
+declare function isCollectingStats(): boolean;
+/**
+ * Start collecting stats.
+ */
+declare function startCollectingStats(): void;
+/**
+ * Stop collecting stats.
+ */
+declare function stopCollectingStats(): void;
 
 /**
  * Key used for cache entries.
  */
-export type Key = any[];
+type Key = any[];
 /**
  * A single argument in a cache key.
  */
-export type Arg = Key[number];
-
+type Arg = Key[number];
 /**
  * The internal cache node used in the cache's linked list.
  */
-export interface CacheNode<Fn extends (...args: any[]) => any> {
+interface CacheNode<Fn extends (...args: any[]) => any> {
   n: CacheNode<Fn> | undefined;
   p: CacheNode<Fn> | undefined;
   k: Key;
   v: ReturnType<Fn>;
 }
-
 /**
  * The type of cache event fired.
  */
-export type CacheEventType = 'add' | 'delete' | 'hit' | 'update';
-
-/**
- * The reason for the given cache event type (optional).
- */
-export type CacheEventReason = 'evicted' | 'rejected' | 'resolved';
-
+type CacheEventType = 'add' | 'delete' | 'hit' | 'update';
 interface CacheEventBase<Fn extends (...args: any[]) => any> {
   cache: Cache<Fn>;
   key: Key;
-  reason?: CacheEventReason;
+  reason?: string;
   value: ReturnType<Fn>;
   type: CacheEventType;
 }
-
 /**
  * Cache event fired when a new entry is added.
  */
-export interface OnAddEvent<Fn extends (...args: any[]) => any> extends CacheEventBase<Fn> {
-  reason?: undefined;
+interface OnAddEvent<Fn extends (...args: any[]) => any> extends CacheEventBase<Fn> {
   type: 'add';
 }
-
 /**
  * Cache event fired when an existing entry is deleted.
  */
-export interface OnDeleteEvent<Fn extends (...args: any[]) => any> extends CacheEventBase<Fn> {
-  reason?: 'evicted' | 'rejected';
+interface OnDeleteEvent<Fn extends (...args: any[]) => any> extends CacheEventBase<Fn> {
   type: 'delete';
 }
-
 /**
  * Cache event fired when the topmost entry in cache is retrieved.
  */
-export interface OnHitEvent<Fn extends (...args: any[]) => any> extends CacheEventBase<Fn> {
-  reason?: undefined;
+interface OnHitEvent<Fn extends (...args: any[]) => any> extends CacheEventBase<Fn> {
   type: 'hit';
 }
-
 /**
  * Cache event fired when an existing entry in cache is updated. This
  * can be either updating the recency of an older entry in cache or
  * the resolution / rejection of an async entry.
  */
-export interface OnUpdateEvent<Fn extends (...args: any[]) => any> extends CacheEventBase<Fn> {
-  reason?: 'resolved';
+interface OnUpdateEvent<Fn extends (...args: any[]) => any> extends CacheEventBase<Fn> {
   type: 'update';
 }
-
 /**
  * Cache event fired when a cache change occurs.
  */
-export type CacheEvent<Type extends CacheEventType, Fn extends (...args: any[]) => any> = Type extends 'add'
+type CacheEvent<Type extends CacheEventType, Fn extends (...args: any[]) => any> = Type extends 'add'
   ? OnAddEvent<Fn>
   : Type extends 'delete'
     ? OnDeleteEvent<Fn>
@@ -240,20 +299,91 @@ export type CacheEvent<Type extends CacheEventType, Fn extends (...args: any[]) 
       : Type extends 'update'
         ? OnUpdateEvent<Fn>
         : never;
-
 /**
  * A listener for the given type of cache event.
  */
-export type CacheEventListener<Type extends CacheEventType, Fn extends (...args: any[]) => any> = (
+type CacheEventListener<Type extends CacheEventType, Fn extends (...args: any[]) => any> = (
   event: CacheEvent<Type, Fn>,
 ) => void;
-
 /**
- * Method that transforms the arguments passed to the function into
- * a custom cache key.
+ * Method use to trigger a forced update of cache.
  */
-export type TransformKey<Fn extends (...args: any[]) => any> = (args: Parameters<Fn>) => Key;
-
+type ForceUpdate<Fn extends (...args: any[]) => any> = (args: Parameters<Fn>) => boolean;
+/**
+ * Method to retrieve the expiration duration in milliseconds based on
+ * the values in cache.
+ */
+type GetExpires<Fn extends (...args: any[]) => any> = (key: Key, value: ReturnType<Fn>, cache: Cache<Fn>) => number;
+/**
+ * Method to determine if two complete keys are equal.
+ */
+type IsKeyEqual = (cachedKey: Key, nextKey: Key) => boolean;
+/**
+ * Method to determine if individual key items are equal.
+ */
+type IsKeyItemEqual = (cachedKeyItem: Arg, nextKeyItem: Arg, index: number) => boolean;
+/**
+ * Method to serialize the key into a stringified key.
+ */
+type Serializer = (key: Key) => [string];
+/**
+ * Method to determine whether the cache entry should not expire.
+ */
+type ShouldPersist<Fn extends (...args: any[]) => any> = (key: Key, value: ReturnType<Fn>, cache: Cache<Fn>) => boolean;
+/**
+ * Method to determine whether the cache entry should be removed on expire, or
+ * start a new expiration period.
+ */
+type ShouldRemoveOnExpire<Fn extends (...args: any[]) => any> = (
+  key: Key,
+  value: ReturnType<Fn>,
+  time: number,
+  cache: Cache<Fn>,
+) => boolean;
+/**
+ * Method to transform the arguments passed into a custom key format.
+ */
+type TransformKey<Fn extends (...args: any[]) => any> = (args: Parameters<Fn>) => Key;
+/**
+ * Advanced configuration for the `expires` option.
+ */
+interface ExpiresConfig<Fn extends (...args: any[]) => any> {
+  /**
+   * The amount of time before the cache entry is automatically removed.
+   */
+  after: number | GetExpires<Fn>;
+  /**
+   * Determine whether the cache entry should never expire.
+   */
+  shouldPersist?: ShouldPersist<Fn>;
+  /**
+   * Determine whether the cache entry should be removed upon expiration.
+   * If `false` is returned, a new expiration is generated (not persistent).
+   */
+  shouldRemove?: ShouldRemoveOnExpire<Fn>;
+  /**
+   * Whether the cache entry expiration should be reset upon being hit.
+   */
+  update?: boolean;
+}
+/**
+ * Statistics object for a specific `statsName` profile.
+ */
+interface ProfileStats {
+  calls: number;
+  hits: number;
+  name: string;
+  usage: string;
+}
+/**
+ * Statistics for all possible profiles who have stats collected.
+ */
+interface GlobalStats {
+  calls: number;
+  hits: number;
+  profiles: Record<string, ProfileStats>;
+  usage: string;
+}
 interface OptionsBase<Fn extends (...args: any[]) => any> {
   /**
    * Whether the result of calling the function is a promise. This
@@ -262,79 +392,114 @@ interface OptionsBase<Fn extends (...args: any[]) => any> {
    */
   async?: boolean;
   /**
+   * Whether the entry in cache should automatically remove itself
+   * after a period of time.
+   */
+  expires?: number | GetExpires<Fn> | ExpiresConfig<Fn>;
+  /**
+   * Method to determine whether to bypass the cache to force an update
+   * of the underlying entry based on new results.
+   *
+   * This should only be necessary if the memoized function is not
+   * deterministic due to side-effects.
+   */
+  forceUpdate?: ForceUpdate<Fn>;
+  /**
    * Whether the two keys are equal in value. This is used to compare
    * the key the function is called with against a given cache key to
    * determine whether the cached entry can be used.
    *
-   * @default isShallowEqual
-   *
    * @note
    * If provided, the `isKeyItemEqual` option will be ignored.
    */
-  isKeyEqual?: (cachedKey: Key, nextKey: Key) => boolean;
+  isKeyEqual?: IsKeyEqual;
   /**
    * Whether the two args are equal in value. This is used to compare
    * specific arguments in order for a cached key versus the key the
    * function is called with to determine whether the cached entry
    * can be used.
    *
-   * @default isSameValueZero
+   * @default `Object.is`
    *
    * @note
    * This option will be ignored if the `isKeyEqual` option is provided.
    */
-  isKeyItemEqual?: (cachedKeyArg: Arg, nextKeyArg: Arg, index: number) => boolean;
+  isKeyItemEqual?: 'deep' | 'shallow' | IsKeyItemEqual;
+  /**
+   * The maximum number of args to consider for caching.
+   */
+  maxArgs?: number;
   /**
    * The maximum number of entries to store in cache.
    * @default 1
    */
   maxSize?: number;
   /**
+   * Whether to serialize the arguments into a string value for cache
+   * purposes. A custom serializer can also be provided, if the default
+   * one is insufficient.
+   *
+   * This can potentially be faster than `isKeyItemEqual: 'deep'` in rare
+   * cases, but can also be used to provide a deep equal check that handles
+   * circular references.
+   */
+  serialize?: boolean | Serializer;
+  /**
+   * The name to give this method when recording profiling stats.
+   */
+  statsName?: string;
+  /**
    * Transform the parameters passed into a custom key for storage in
    * cache.
    */
   transformKey?: TransformKey<Fn>;
 }
-
-export interface OptionsNoCustomEqual<Fn extends (...args: any[]) => any> extends OptionsBase<Fn> {
+interface OptionsNoCustomEqual<Fn extends (...args: any[]) => any> extends OptionsBase<Fn> {
   isKeyEqual?: never;
   isKeyItemEqual?: never;
 }
-
-export interface OptionsKeyEqual<Fn extends (...args: any[]) => any> extends OptionsBase<Fn> {
-  isKeyEqual: (cachedKey: Key, nextKey: Key) => boolean;
+interface OptionsKeyEqual<Fn extends (...args: any[]) => any> extends OptionsBase<Fn> {
+  isKeyEqual: IsKeyEqual;
   isKeyItemEqual?: never;
 }
-
-export interface OptionsKeyItemEqual<Fn extends (...args: any[]) => any> extends OptionsBase<Fn> {
+interface OptionsKeyItemEqual<Fn extends (...args: any[]) => any> extends OptionsBase<Fn> {
   isKeyEqual?: never;
-  isKeyItemEqual: (cachedKeyItem: Arg, nextKeyItem: Arg) => boolean;
+  isKeyItemEqual?: 'deep' | 'shallow' | IsKeyItemEqual;
 }
-
-export type Options<Fn extends (...args: any[]) => any> =
+/**
+ * Configuration options to drive how entries are stored, checked for cache breakage,
+ * and evicted from cache.
+ */
+type Options<Fn extends (...args: any[]) => any> =
   | OptionsNoCustomEqual<Fn>
   | OptionsKeyEqual<Fn>
   | OptionsKeyItemEqual<Fn>;
-
-export type CacheEntry<Fn extends (...args: any[]) => any> = [Key, ReturnType<Fn>];
-
+/**
+ * [key, value] pair for a given entry in cache.
+ */
+type CacheEntry<Fn extends (...args: any[]) => any> = [Key, ReturnType<Fn>];
 /**
  * Snapshot of the current cache state as a set of [key, value] entries.
  */
-export interface CacheSnapshot<Fn extends (...args: any[]) => any> {
+interface CacheSnapshot<Fn extends (...args: any[]) => any> {
   entries: Array<CacheEntry<Fn>>;
   keys: Key[];
   size: number;
   values: Array<ReturnType<Fn>>;
 }
-
-export interface Memoized<Fn extends (...args: any[]) => any, Opts extends Options<Fn>> {
-  (...args: Parameters<Fn>): ReturnType<Fn>;
-
+/**
+ * Method that has been memoized via `micro-memoize`.
+ */
+type Memoized<Fn extends (...args: any[]) => any, Opts extends Options<Fn>> = Fn & {
   /**
    * The cache used for the memoized method.
    */
   cache: Cache<Fn>;
+  /**
+   * Manager for the expirations cache. This is only populated when
+   * `options.expires` is set.
+   */
+  expirationManager: ExpirationManager<Fn> | undefined;
   /**
    * The original method that is memoized.
    */
@@ -347,17 +512,62 @@ export interface Memoized<Fn extends (...args: any[]) => any, Opts extends Optio
    * Options passed for the memoized method.
    */
   options: Opts;
-}
-
-export interface Memoize {
+  /**
+   * Manager for the stats cache. This is only populated when `options.statsName`
+   * is set.
+   */
+  statsManager: StatsManager<Fn> | undefined;
+};
+interface Memoize {
+  <Fn extends Memoized<(...args: any[]) => any, Options<(...args: any[]) => any>>>(fn: Fn): Memoized<Fn, Fn['options']>;
   <Fn extends Memoized<(...args: any[]) => any, Options<(...args: any[]) => any>>, Opts extends Options<Fn['fn']>>(
     fn: Fn,
     passedOptions: Opts,
   ): Memoized<Fn['fn'], Fn['options'] & Opts>;
-  <Fn extends Memoized<(...args: any[]) => any, Options<(...args: any[]) => any>>>(fn: Fn): Memoized<Fn, Fn['options']>;
-  <Fn extends (...args: any[]) => any, Opts extends Options<Fn>>(fn: Fn, passedOptions: Opts): Memoized<Fn, Opts>;
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   <Fn extends (...args: any[]) => any>(fn: Fn): Memoized<Fn, {}>;
+  <Fn extends (...args: any[]) => any, Opts extends Options<Fn>>(fn: Fn, passedOptions: Opts): Memoized<Fn, Opts>;
 }
 
-export declare const memoize: Memoize;
+declare const memoize: Memoize;
+
+export {
+  Cache,
+  CacheEventEmitter,
+  clearStats,
+  getStats,
+  isCollectingStats,
+  memoize,
+  startCollectingStats,
+  stopCollectingStats,
+};
+export type {
+  Arg,
+  CacheEntry,
+  CacheEvent,
+  CacheEventListener,
+  CacheEventType,
+  CacheNode,
+  CacheSnapshot,
+  ExpiresConfig,
+  ForceUpdate,
+  GetExpires,
+  GlobalStats,
+  IsKeyEqual,
+  IsKeyItemEqual,
+  Key,
+  Memoize,
+  Memoized,
+  OnAddEvent,
+  OnDeleteEvent,
+  OnHitEvent,
+  OnUpdateEvent,
+  Options,
+  OptionsKeyEqual,
+  OptionsKeyItemEqual,
+  OptionsNoCustomEqual,
+  ProfileStats,
+  Serializer,
+  ShouldPersist,
+  ShouldRemoveOnExpire,
+  TransformKey,
+};
