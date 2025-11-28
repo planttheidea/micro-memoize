@@ -18,14 +18,14 @@
   },
   "description": "A tiny, crazy fast memoization library for the 95% use-case",
   "devDependencies": {
-    "@planttheidea/build-tools": "^1.0.6",
+    "@planttheidea/build-tools": "^1.2.0",
     "@rollup/plugin-typescript": "^12.3.0",
     "@types/bluebird": "^3.5.42",
     "@types/lodash": "^4.17.20",
     "@types/node": "^24.10.1",
     "@typescript-eslint/eslint-plugin": "^8.47.0",
     "@typescript-eslint/parser": "^8.47.0",
-    "@vitest/coverage-v8": "^4.0.13",
+    "@vitest/coverage-v8": "^4.0.14",
     "bluebird": "^3.7.2",
     "cli-table2": "^0.2.0",
     "eslint": "^9.39.1",
@@ -37,7 +37,7 @@
     "mem": "^10.0.0",
     "memoizee": "^0.4.17",
     "memoizerific": "^1.11.3",
-    "prettier": "^3.6.2",
+    "prettier": "^3.7.0",
     "ramda": "^0.32.0",
     "release-it": "^19.0.6",
     "rollup": "^4.53.3",
@@ -46,7 +46,7 @@
     "typescript-eslint": "^8.47.0",
     "underscore": "^1.13.7",
     "vite": "^7.2.4",
-    "vitest": "^4.0.13"
+    "vitest": "^4.0.14"
   },
   "exports": {
     ".": {
@@ -67,10 +67,10 @@
   "files": [
     "dist",
     "CHANGELOG.md",
-    "index.d.ts",
     "LICENSE",
-    "package.json",
-    "README.md"
+    "README.md",
+    "index.d.ts",
+    "package.json"
   ],
   "homepage": "https://github.com/planttheidea/micro-memoize#readme",
   "keywords": [
@@ -98,14 +98,9 @@
   },
   "scripts": {
     "benchmark": "npm run clean:es && npm run build:esm && node benchmark/index.js",
-    "build": "npm run clean && npm run build:es && npm run build:es:types && npm run build:cjs && npm run build:cjs:types && npm run build:umd && npm run build:umd:types",
-    "build:cjs": "NODE_ENV=production rollup -c config/rollup/cjs.config.js",
-    "build:cjs:types": "tsc -p config/types/cjs.declaration.json && pti fix-types -t cjs",
-    "build:es": "NODE_ENV=production rollup -c config/rollup/es.config.js",
-    "build:es:types": "tsc -p config/types/es.declaration.json && pti fix-types -t es",
-    "build:min": "NODE_ENV=production rollup -c config/rollup/config.min.js && tsc -p config/tsconfig/min.declarations.json",
-    "build:umd": "NODE_ENV=production rollup -c config/rollup/umd.config.js",
-    "build:umd:types": "tsc -p config/types/umd.declaration.json",
+    "build": "npm run clean && npm run build:dist && npm run build:types",
+    "build:dist": "NODE_ENV=production rollup -c config/rollup.config.js",
+    "build:types": "pti fix-types -l dist",
     "clean": "rm -rf dist",
     "clean:cjs": "rm -rf dist/cjs",
     "clean:es": "rm -rf dist/es",
@@ -124,8 +119,6 @@
     "release:stable": "release-it --config=config/release-it/stable.json",
     "start": "npm run dev",
     "test": "vitest run --config=config/vitest.config.ts",
-    "test:coverage": "npm run test -- --coverage",
-    "test:watch": "vitest --config=config/vitest.config.ts",
     "typecheck": "tsc --noEmit"
   },
   "sideEffects": false,
