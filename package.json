@@ -27,7 +27,7 @@
     "@typescript-eslint/parser": "^8.47.0",
     "@vitest/coverage-v8": "^4.0.14",
     "bluebird": "^3.7.2",
-    "cli-table2": "^0.2.0",
+    "cli-table3": "^0.6.5",
     "eslint": "^9.39.1",
     "eslint-plugin-import": "^2.32.0",
     "fast-copy": "^4.0.0",
@@ -97,7 +97,7 @@
     "url": "git+https://github.com/planttheidea/micro-memoize.git"
   },
   "scripts": {
-    "benchmark": "npm run clean:es && npm run build:esm && node benchmark/index.js",
+    "benchmark": "npm run build && node benchmark/index.js",
     "build": "npm run clean && npm run build:dist && npm run build:types",
     "build:dist": "NODE_ENV=production rollup -c config/rollup.config.js",
     "build:types": "pti fix-types -l dist",
