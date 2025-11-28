@@ -11,16 +11,17 @@ export const memoize: Memoize = function memoize<Fn extends (...args: any[]) => 
   fn: Fn | Memoized<Fn, Opts>,
   options: Opts = {} as Opts,
 ): Memoized<Fn, Opts> {
-  if (typeof fn !== 'function') {
-    throw new TypeError(`Expected first parameter to be function; received ${typeof fn}`);
-  }
-
   if (isMemoized(fn)) {
     return memoize(fn.fn, Object.assign({}, fn.options, options));
   }
 
-  const memoized: Memoized<Fn, Opts> = function memoized(this: any, ...args: Parameters<Fn>) {
-    const cache = memoized.cache;
+  if (typeof fn !== 'function') {
+    throw new TypeError(`Expected first parameter to be function; received ${typeof fn}`);
+  }
+
+  const cache = new Cache(options);
+
+  const memoized = function memoized(this: any, ...args: Parameters<Fn>) {
     const key: Key = cache.k ? cache.k(args) : args;
 
     let node = cache.g(key);
@@ -41,9 +42,7 @@ export const memoize: Memoize = function memoize<Fn extends (...args: any[]) => 
     }
 
     return node.v;
-  };
-
-  const cache = new Cache(options);
+  } as Memoized<Fn, Opts>;
 
   memoized.cache = cache;
   memoized.expirationManager = getExpirationManager(cache, options);

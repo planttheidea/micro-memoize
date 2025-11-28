@@ -1,9 +1,11 @@
-import type { Memoized } from './internalTypes.js';
+import type { Memoized, Options } from './internalTypes.js';
 
 /**
  * Whether the value passed is a memoized function via `micro-memoize`.
  */
-export function isMemoized(fn: any): fn is Memoized<any, any> {
+export function isMemoized<Fn extends (...args: any) => any, Opts extends Options<Fn>>(
+  fn: any,
+): fn is Memoized<Fn, Opts> {
   return typeof fn === 'function' && fn.isMemoized;
 }
 
