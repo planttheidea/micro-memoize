@@ -291,9 +291,7 @@ export interface CacheSnapshot<Fn extends (...args: any[]) => any> {
 /**
  * Method that has been memoized via `micro-memoize`.
  */
-export interface Memoized<Fn extends (...args: any[]) => any, Opts extends Options<Fn>> {
-  (...args: Parameters<Fn>): ReturnType<Fn>;
-
+export type Memoized<Fn extends (...args: any[]) => any, Opts extends Options<Fn>> = Fn & {
   /**
    * The cache used for the memoized method.
    */
@@ -320,7 +318,7 @@ export interface Memoized<Fn extends (...args: any[]) => any, Opts extends Optio
    * is set.
    */
   statsManager: StatsManager<Fn> | undefined;
-}
+};
 
 export interface Memoize {
   <Fn extends Memoized<(...args: any[]) => any, Options<(...args: any[]) => any>>>(fn: Fn): Memoized<Fn, Fn['options']>;
