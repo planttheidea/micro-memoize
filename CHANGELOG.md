@@ -2,10 +2,11 @@
 
 ## 5.0.1
 
-- [#127](https://github.com/planttheidea/micro-memoize/pull/127) fix type narrowing not being respected on memoized
+- [#127](https://github.com/planttheidea/micro-memoize/pull/127) - fix type narrowing not being respected on memoized
   functions (fixes [#126](https://github.com/planttheidea/micro-memoize/issues/126))
-- [#128](https://github.com/planttheidea/micro-memoize/pull/128) bolster documentation related to `'deep'` and
+- [#128](https://github.com/planttheidea/micro-memoize/pull/128) - bolster documentation related to `'deep'` and
   `'shallow'` options for `isKeyItemIEqual` (fixes [#125](https://github.com/planttheidea/micro-memoize/issues/125))
+- [#129](https://github.com/planttheidea/micro-memoize/pull/129) - fix legacy types being out of date
 
 ## 5.0.0
 
