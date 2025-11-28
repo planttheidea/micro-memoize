@@ -2,7 +2,7 @@ import lodashDeepEqual from 'lodash/isEqual.js';
 import lodashMemoize from 'lodash/memoize.js';
 import orderBy from 'lodash/orderBy.js';
 import { Bench } from 'tinybench';
-import Table from 'cli-table2';
+import Table from 'cli-table3';
 
 import { addOsmaniMemoize } from './addy-osmani.js';
 import fastMemoize from 'fast-memoize';
@@ -10,7 +10,7 @@ import lru from 'lru-memoize';
 import mem from 'mem';
 import memoizee from 'memoizee';
 import memoizerific from 'memoizerific';
-import { memoize } from '../dist/esm/index.mjs';
+import { memoize } from '../dist/es/index.mjs';
 import { memoizeWith as ramdaMemoize } from 'ramda';
 import { memoize as underscoreMemoize } from 'underscore';
 
