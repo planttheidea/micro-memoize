@@ -133,7 +133,17 @@ const fn = (item: Record<string, any>) => item;
 
 const MAX_AGE = 1000 * 60 * 5; // five minutes;
 
-const expiringMemoized = memoize(fn, { maxAge: MAX_AGE });
+const expiringMemoized = memoize(fn, { expires: MAX_AGE });
+```
+
+This can also be dynamic based on the entry, if a method is passed:
+
+```ts
+const fn = (item: Record<string, any>) => item;
+
+const expiringMemoized = memoize(fn, {
+  expires: (key, value) => shouldExpire(key, value),
+});
 ```
 
 You can also pass a custom configuration to handle conditional expiration.
@@ -263,9 +273,9 @@ memoize('one', 'two', 'three');
 memoize('one', 'two', 'four'); // pulls from cache, as the first two args are the same
 ```
 
-If `maxArgs` is combined with either `serialize` or `transformArgs`, the following order is used:
+If `maxArgs` is combined with either `serialize` or `transformKey`, the following order is used:
 
-1.  transform by `transformArgs` (if applicable)
+1.  transform by `transformKey` (if applicable)
 1.  limit by `maxArgs`
 1.  serialize by `serializer` (if applicable)
 
