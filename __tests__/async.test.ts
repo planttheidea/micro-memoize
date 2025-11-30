@@ -162,7 +162,7 @@ test('non-promise values are handled safely', () => {
   expect(result).toEqual(['foo', 'bar']);
 });
 
-test('removed entries do not fire events', async () => {
+test('removed entries do not fire events', () => {
   const { promise, resolve } = Promise.withResolvers();
   const fn = async () => {
     return await promise;
