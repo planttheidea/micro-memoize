@@ -209,3 +209,49 @@ test('does nothing on timeout if the node cannot be found in cache', async () =>
   expect(memoized.cache.has([foo, bar])).toBe(false);
   expect(onExpire).not.toHaveBeenCalled();
 });
+
+test('updates the expiration when the async method resolves', async () => {
+  const { promise, resolve } = Promise.withResolvers();
+  const fn = async () => {
+    return await promise;
+  };
+
+  const memoized = memoize(fn, {
+    async: true,
+    expires: { after: 1000, update: true },
+  });
+
+  const onHitSpy = vi.fn();
+  memoized.cache.on('hit', onHitSpy);
+
+  const onUpdateSpy = vi.fn();
+  memoized.cache.on('update', onUpdateSpy);
+
+  const onDeleteSpy = vi.fn();
+  memoized.cache.on('delete', onDeleteSpy);
+
+  memoized();
+
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
+  resolve('foo');
+
+  // wait a tick to ensure promises resolve
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  // update has been called from resolution
+  expect(onUpdateSpy).toHaveBeenCalled();
+  // hit has not been called to update expiration normally
+  expect(onHitSpy).not.toHaveBeenCalled();
+  // no expiration has happened
+  expect(onDeleteSpy).not.toHaveBeenCalled();
+
+  await new Promise((resolve) => setTimeout(resolve, 600));
+
+  expect(onDeleteSpy).not.toHaveBeenCalled();
+
+  await new Promise((resolve) => setTimeout(resolve, 600));
+
+  // Now the updated expiration has happened.
+  expect(onDeleteSpy).toHaveBeenCalledWith(expect.objectContaining({ reason: 'expired' }));
+});

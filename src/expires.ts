@@ -46,11 +46,18 @@ export class ExpirationManager<Fn extends (...args: any[]) => any> {
       this.c.g(key) && !this.p?.(key, value, cache) && this.s(key, value);
     });
 
-    // Only set up a `hit` listener if we care about updating the expiration.
     if (this.u) {
+      // Set up a `hit` listener if we care about updating the expiration.
       this.c.on('hit', ({ key, value }) => {
         this.c.g(key) && !this.p?.(key, value, cache) && this.s(key, value);
       });
+
+      if (this.c.p) {
+        // If the method is also async, then when the value resolved update the expiration cache.
+        this.c.on('update', ({ key, reason, value }) => {
+          reason === 'resolved' && this.c.g(key) && !this.p?.(key, value, cache) && this.s(key, value);
+        });
+      }
     }
 
     this.c.on('delete', ({ key }) => {
