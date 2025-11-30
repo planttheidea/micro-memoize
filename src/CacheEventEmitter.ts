@@ -2,7 +2,7 @@ import type { Cache } from './Cache.js';
 import type { CacheEventListener, CacheEventType, CacheNode } from './internalTypes.js';
 
 type ListenerMap<Fn extends (...args: any[]) => any> = Partial<
-  Record<string, Array<CacheEventListener<CacheEventType, Fn>>>
+  Record<string, Set<CacheEventListener<CacheEventType, Fn>>>
 >;
 
 export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
@@ -33,9 +33,9 @@ export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
     const listeners = this.l[type];
 
     if (!listeners) {
-      this.l[type] = [listener];
-    } else if (!listeners.includes(listener)) {
-      listeners.push(listener);
+      this.l[type] = new Set([listener]);
+    } else if (!listeners.has(listener)) {
+      listeners.add(listener);
     }
   }
 
@@ -49,15 +49,15 @@ export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
       return;
     }
 
-    for (let index = 0; index < listeners.length; ++index) {
-      listeners[index]!({
+    listeners.forEach((listener) => {
+      listener({
         cache: this.c,
         key: node.k,
         reason,
         value: node.v,
         type,
       });
-    }
+    });
   }
 
   /**
@@ -70,13 +70,9 @@ export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
       return;
     }
 
-    const index = listeners.indexOf(listener);
+    listeners.delete(listener);
 
-    if (index !== -1) {
-      listeners.splice(index, 1);
-    }
-
-    if (!listeners.length) {
+    if (!listeners.size) {
       this.l[type] = undefined;
     }
   }

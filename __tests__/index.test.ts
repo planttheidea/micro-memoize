@@ -1290,4 +1290,26 @@ describe('cache mutation methods', () => {
     expect(memoized.cache.snapshot.entries).toEqual([]);
     expect(deleteSpy).not.toHaveBeenCalled();
   });
+
+  test('supports removal in listener', () => {
+    const fn = vi.fn((one: string, two: string) => one + two);
+    const memoized = memoize(fn);
+
+    const hitSpy = vi.fn(() => {
+      memoized.cache.off('hit', hitSpy);
+    });
+    memoized.cache.on('hit', hitSpy);
+
+    const persistentHitSpy = vi.fn();
+    memoized.cache.on('hit', persistentHitSpy);
+
+    memoized('foo', 'bar');
+    memoized('foo', 'bar');
+    memoized('foo', 'bar');
+    memoized('foo', 'bar');
+    memoized('foo', 'bar');
+
+    expect(hitSpy).toHaveBeenCalledTimes(1);
+    expect(persistentHitSpy).toHaveBeenCalledTimes(4);
+  });
 });
