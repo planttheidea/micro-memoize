@@ -161,3 +161,33 @@ test('non-promise values are handled safely', () => {
 
   expect(result).toEqual(['foo', 'bar']);
 });
+
+test('removed entries do not fire events', async () => {
+  const { promise, resolve } = Promise.withResolvers();
+  const fn = async () => {
+    return await promise;
+  };
+
+  const memoized = memoize(fn, { async: true });
+
+  const onHitSpy = vi.fn();
+  memoized.cache.on('hit', onHitSpy);
+
+  const onDeleteSpy = vi.fn();
+  memoized.cache.on('delete', onDeleteSpy);
+
+  memoized();
+
+  expect(memoized.cache.get([])).toBeInstanceOf(Promise);
+  expect(onHitSpy).toHaveBeenCalled();
+
+  onHitSpy.mockClear();
+
+  memoized.cache.delete([]);
+
+  expect(onDeleteSpy).toHaveBeenCalled();
+
+  resolve('foo');
+
+  expect(onHitSpy).not.toHaveBeenCalled();
+});
