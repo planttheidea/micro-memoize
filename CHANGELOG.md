@@ -1,5 +1,18 @@
 # micro-memoize CHANGELOG
 
+## 5.1.0
+
+### Enhancements
+
+- [#132](https://github.com/planttheidea/micro-memoize/pull/132) - Update expiration on `async` methods when
+  `update: true` is set in the `expires` config
+- [#131](https://github.com/planttheidea/micro-memoize/pull/131) - Faster internal checks if a node has been removed
+
+### Fixes
+
+- [#133](https://github.com/planttheidea/micro-memoize/pull/133) - fix listeners being skipped when one is removed
+  mid-iteration
+
 ## 5.0.1
 
 - [#127](https://github.com/planttheidea/micro-memoize/pull/127) - fix type narrowing not being respected on memoized
