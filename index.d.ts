@@ -1,5 +1,5 @@
 type ListenerMap<Fn extends (...args: any[]) => any> = Partial<
-  Record<string, Array<CacheEventListener<CacheEventType, Fn>>>
+  Record<string, Set<CacheEventListener<CacheEventType, Fn>>>
 >;
 declare class CacheEventEmitter<Fn extends (...args: any[]) => any> {
   /**
