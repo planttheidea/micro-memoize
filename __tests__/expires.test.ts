@@ -123,7 +123,7 @@ test('updates the expiration timing and calls the onExpire method when the item 
   expect(onExpire).toHaveBeenCalledTimes(1);
 });
 
-test('allows the expiration to be re-established if `shouldRemove returns false', async () => {
+test('allows the expiration to be re-established if `shouldRemove` returns false', async () => {
   const shouldRemove = vi.fn().mockReturnValueOnce(false).mockReturnValue(true);
   const withShouldRemove = memoize(method, {
     expires: { after: 100, shouldRemove },
@@ -178,6 +178,22 @@ test('notifies of cache update when expiration re-established if update listener
   });
 });
 
+test('ignores cancellation when `shouldPersist` returns true', async () => {
+  const shouldPersist = vi.fn().mockReturnValue(true);
+  const withShouldPersist = memoize(method, {
+    expires: { after: 100, shouldPersist },
+  });
+
+  const deleteSpy = vi.fn();
+  withShouldPersist.cache.on('delete', deleteSpy);
+
+  withShouldPersist(foo, bar);
+
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
+  expect(deleteSpy).not.toHaveBeenCalled();
+});
+
 test('throws an error when invalid time is passed', () => {
   const throws = memoize(method, {
     expires: Infinity,
@@ -208,4 +224,50 @@ test('does nothing on timeout if the node cannot be found in cache', async () =>
 
   expect(memoized.cache.has([foo, bar])).toBe(false);
   expect(onExpire).not.toHaveBeenCalled();
+});
+
+test('updates the expiration when the async method resolves', async () => {
+  const { promise, resolve } = Promise.withResolvers();
+  const fn = async () => {
+    return await promise;
+  };
+
+  const memoized = memoize(fn, {
+    async: true,
+    expires: { after: 200, update: true },
+  });
+
+  const onHitSpy = vi.fn();
+  memoized.cache.on('hit', onHitSpy);
+
+  const onUpdateSpy = vi.fn();
+  memoized.cache.on('update', onUpdateSpy);
+
+  const onDeleteSpy = vi.fn();
+  memoized.cache.on('delete', onDeleteSpy);
+
+  memoized();
+
+  await new Promise((resolve) => setTimeout(resolve, 100));
+
+  resolve('foo');
+
+  // wait a tick to ensure promises resolve
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  // update has been called from resolution
+  expect(onUpdateSpy).toHaveBeenCalled();
+  // hit has not been called to update expiration normally
+  expect(onHitSpy).not.toHaveBeenCalled();
+  // no expiration has happened
+  expect(onDeleteSpy).not.toHaveBeenCalled();
+
+  await new Promise((resolve) => setTimeout(resolve, 150));
+
+  expect(onDeleteSpy).not.toHaveBeenCalled();
+
+  await new Promise((resolve) => setTimeout(resolve, 100));
+
+  // Now the updated expiration has happened.
+  expect(onDeleteSpy).toHaveBeenCalledWith(expect.objectContaining({ reason: 'expired' }));
 });

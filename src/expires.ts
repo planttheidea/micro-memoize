@@ -1,5 +1,12 @@
 import type { Cache } from './Cache.js';
-import type { GetExpires, Key, Options, ShouldPersist, ShouldRemoveOnExpire } from './internalTypes.js';
+import type {
+  CacheEventListener,
+  GetExpires,
+  Key,
+  Options,
+  ShouldPersist,
+  ShouldRemoveOnExpire,
+} from './internalTypes.js';
 import { isNumericValueValid } from './utils.js';
 
 export class ExpirationManager<Fn extends (...args: any[]) => any> {
@@ -43,14 +50,28 @@ export class ExpirationManager<Fn extends (...args: any[]) => any> {
     }
 
     this.c.on('add', ({ key, value }) => {
-      this.c.g(key) && !this.p?.(key, value, cache) && this.s(key, value);
+      this.a(key, value) && this.s(key, value);
     });
 
-    // Only set up a `hit` listener if we care about updating the expiration.
     if (this.u) {
+      // Set up a `hit` listener if we care about updating the expiration.
       this.c.on('hit', ({ key, value }) => {
-        this.c.g(key) && !this.p?.(key, value, cache) && this.s(key, value);
+        this.a(key, value) && this.s(key, value);
       });
+
+      if (this.c.p) {
+        const onResolved: CacheEventListener<'update', Fn> = ({ key, reason, value }) => {
+          if (reason === 'resolved' && this.a(key, value)) {
+            this.s(key, value);
+            // Automatically remove the listener to avoid unnecessary work on updates after
+            // the item is resolved, as that can only ever happen once.
+            this.c.off('update', onResolved);
+          }
+        };
+
+        // If the method is also async, then when the value resolved update the expiration cache.
+        this.c.on('update', onResolved);
+      }
     }
 
     this.c.on('delete', ({ key }) => {
@@ -60,6 +81,13 @@ export class ExpirationManager<Fn extends (...args: any[]) => any> {
 
   get size(): number {
     return this.e.size;
+  }
+
+  /**
+   * Whether the cache expiration should be set [a]gain, generally after some cache change.
+   */
+  a(key: Key, value: ReturnType<Fn>): boolean {
+    return !!(this.c.g(key) && !this.p?.(key, value, this.c));
   }
 
   /**
