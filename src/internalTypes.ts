@@ -18,9 +18,25 @@ export type Arg = Key[number];
  * The internal cache node used in the cache's linked list.
  */
 export interface CacheNode<Fn extends (...args: any[]) => any> {
+  /**
+   * The [n]ext node in the cache order.
+   */
   n: CacheNode<Fn> | undefined;
+  /**
+   * The [p]revious node in the cache order.
+   */
   p: CacheNode<Fn> | undefined;
+  /**
+   * If present, the node has been [r]emovd from cache.
+   */
+  r?: true;
+  /**
+   * The [k]ey for the given node in cache.
+   */
   k: Key;
+  /**
+   * The cached [v]alue returned from the function call.
+   */
   v: ReturnType<Fn>;
 }
 
@@ -30,10 +46,25 @@ export interface CacheNode<Fn extends (...args: any[]) => any> {
 export type CacheEventType = 'add' | 'delete' | 'hit' | 'update';
 
 interface CacheEventBase<Fn extends (...args: any[]) => any> {
+  /**
+   * The cache associated with the given memoized function.
+   */
   cache: Cache<Fn>;
+  /**
+   * The key of the affected node.
+   */
   key: Key;
+  /**
+   * The reason (if any) the operation was performed on the node.
+   */
   reason?: string;
+  /**
+   * The value of the affected node.
+   */
   value: ReturnType<Fn>;
+  /**
+   * The type of operation performed on the node.
+   */
   type: CacheEventType;
 }
 

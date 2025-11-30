@@ -251,6 +251,8 @@ export class Cache<Fn extends (...args: any[]) => any> {
     }
 
     --this.c;
+
+    node.r = true;
   }
 
   /**
@@ -282,7 +284,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
   g(key: Key): CacheNode<Fn> | undefined {
     let node = this.h;
 
-    if (!node) {
+    if (!node || node.r) {
       return;
     }
 
@@ -297,6 +299,10 @@ export class Cache<Fn extends (...args: any[]) => any> {
     node = node.n;
 
     while (node) {
+      if (node.r) {
+        return;
+      }
+
       if (this.m(node.k, key)) {
         return node;
       }
@@ -374,7 +380,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
    * entry if it rejects.
    */
   w(node: CacheNode<Fn>): ReturnType<Fn> {
-    const { k: key, v: value } = node;
+    const { v: value } = node;
 
     // If the method does not return a promise for some reason, just keep the
     // original value.
@@ -384,14 +390,14 @@ export class Cache<Fn extends (...args: any[]) => any> {
 
     return value.then(
       (value: any) => {
-        if (this.o && this.g(key)) {
+        if (!node.r && this.o) {
           this.o.n('update', node, 'resolved');
         }
 
         return value;
       },
       (error: unknown) => {
-        if (this.g(key)) {
+        if (!node.r) {
           this.d(node);
           this.o && this.o.n('delete', node, 'rejected');
         }
