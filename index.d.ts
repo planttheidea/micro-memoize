@@ -164,6 +164,10 @@ declare class ExpirationManager<Fn extends (...args: any[]) => any> {
   constructor(cache: Cache<Fn>, expires: Required<Options<Fn>>['expires']);
   get size(): number;
   /**
+   * Whether the cache expiration should be set [a]gain, generally after some cache change.
+   */
+  a(key: Key, value: ReturnType<Fn>): boolean;
+  /**
    * Method to [d]elete the expiration.
    */
   d(key: Key): void;
