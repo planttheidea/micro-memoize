@@ -20,6 +20,7 @@ export type Arg = Key[number];
 export interface CacheNode<Fn extends (...args: any[]) => any> {
   n: CacheNode<Fn> | undefined;
   p: CacheNode<Fn> | undefined;
+  r?: true;
   k: Key;
   v: ReturnType<Fn>;
 }
