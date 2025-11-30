@@ -1,5 +1,12 @@
 import type { Cache } from './Cache.js';
-import type { GetExpires, Key, Options, ShouldPersist, ShouldRemoveOnExpire } from './internalTypes.js';
+import type {
+  CacheEventListener,
+  GetExpires,
+  Key,
+  Options,
+  ShouldPersist,
+  ShouldRemoveOnExpire,
+} from './internalTypes.js';
 import { isNumericValueValid } from './utils.js';
 
 export class ExpirationManager<Fn extends (...args: any[]) => any> {
@@ -53,10 +60,17 @@ export class ExpirationManager<Fn extends (...args: any[]) => any> {
       });
 
       if (this.c.p) {
+        const onResolved: CacheEventListener<'update', Fn> = ({ key, reason, value }) => {
+          if (reason === 'resolved' && this.c.g(key) && !this.p?.(key, value, cache)) {
+            this.s(key, value);
+            // Automatically remove the listener to avoid unnecessary work on updates after
+            // the item is resolved, as that can only ever happen once.
+            this.c.off('update', onResolved);
+          }
+        };
+
         // If the method is also async, then when the value resolved update the expiration cache.
-        this.c.on('update', ({ key, reason, value }) => {
-          reason === 'resolved' && this.c.g(key) && !this.p?.(key, value, cache) && this.s(key, value);
-        });
+        this.c.on('update', onResolved);
       }
     }
 
