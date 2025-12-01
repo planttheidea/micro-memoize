@@ -35,22 +35,17 @@ declare class Cache<Fn extends (...args: any[]) => any> {
    */
   c: number;
   /**
+   * Whether the entire key is [e]qual to an existing key in cache.
+   */
+  e: IsKeyEqual;
+  /**
    * The [h]ead of the cache linked list.
    */
   h: CacheNode<Fn> | undefined;
   /**
-   * Whether the individual argument passed [i]s equal to the same argument in order
-   * for a key in cache.
-   */
-  i: IsKeyItemEqual;
-  /**
    * The transformer for the [k]ey stored in cache.
    */
   k: Options<Fn>['transformKey'] | undefined;
-  /**
-   * Whether the entire key [m]atches an existing key in cache.
-   */
-  m: IsKeyEqual;
   /**
    * Event emitter for `[o]`n events.
    */
@@ -108,10 +103,6 @@ declare class Cache<Fn extends (...args: any[]) => any> {
    * Method to [d]elete the given `node` from the cache.
    */
   d(node: CacheNode<Fn>): void;
-  /**
-   * Method to determine if the next key is [e]qual to an existing key in cache.
-   */
-  e(prevKey: Key, nextKey: Key): boolean;
   /**
    * Method to [g]et an existing node from cache based on the given `key`.
    */

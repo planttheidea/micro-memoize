@@ -6,7 +6,6 @@ import type {
   CacheEventListener,
   CacheNode,
   CacheSnapshot,
-  IsKeyItemEqual,
   Key,
   Options,
   IsKeyEqual,
@@ -22,22 +21,17 @@ export class Cache<Fn extends (...args: any[]) => any> {
    */
   c = 0;
   /**
+   * Whether the entire key is [e]qual to an existing key in cache.
+   */
+  e: IsKeyEqual;
+  /**
    * The [h]ead of the cache linked list.
    */
   h: CacheNode<Fn> | undefined;
   /**
-   * Whether the individual argument passed [i]s equal to the same argument in order
-   * for a key in cache.
-   */
-  i: IsKeyItemEqual;
-  /**
    * The transformer for the [k]ey stored in cache.
    */
   k: Options<Fn>['transformKey'] | undefined;
-  /**
-   * Whether the entire key [m]atches an existing key in cache.
-   */
-  m: IsKeyEqual;
   /**
    * Event emitter for `[o]`n events.
    */
@@ -56,28 +50,12 @@ export class Cache<Fn extends (...args: any[]) => any> {
   t: CacheNode<Fn> | undefined;
 
   constructor(options: Options<Fn>) {
-    const { async, isKeyEqual, isKeyItemEqual, maxSize, serialize } = options;
+    const { async, maxSize } = options;
 
-    this.i =
-      typeof isKeyItemEqual === 'function'
-        ? isKeyItemEqual
-        : isKeyItemEqual === 'deep'
-          ? deepEqual
-          : isKeyItemEqual === 'shallow'
-            ? shallowEqual
-            : Object.is;
-    this.m =
-      typeof isKeyEqual === 'function'
-        ? isKeyEqual
-        : serialize
-          ? isSerializedKeyEqual
-          : // eslint-disable-next-line @typescript-eslint/unbound-method
-            this.e;
-
+    this.e = createIsKeyEqual(options);
+    this.k = getTransformKey(options);
     this.p = typeof async === 'boolean' && async;
     this.s = isNumericValueValid(maxSize) ? maxSize : 1;
-
-    this.k = getTransformKey(options);
   }
 
   /**
@@ -256,29 +234,6 @@ export class Cache<Fn extends (...args: any[]) => any> {
   }
 
   /**
-   * Method to determine if the next key is [e]qual to an existing key in cache.
-   */
-  e(prevKey: Key, nextKey: Key): boolean {
-    const length = nextKey.length;
-
-    if (prevKey.length !== length) {
-      return false;
-    }
-
-    if (length === 1) {
-      return this.i(prevKey[0], nextKey[0], 0);
-    }
-
-    for (let index = 0; index < length; ++index) {
-      if (!this.i(prevKey[index], nextKey[index], index)) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  /**
    * Method to [g]et an existing node from cache based on the given `key`.
    */
   g(key: Key): CacheNode<Fn> | undefined {
@@ -288,7 +243,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
       return;
     }
 
-    if (this.m(node.k, key)) {
+    if (this.e(node.k, key)) {
       return node;
     }
 
@@ -303,7 +258,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
         return;
       }
 
-      if (this.m(node.k, key)) {
+      if (this.e(node.k, key)) {
         return node;
       }
 
@@ -406,6 +361,49 @@ export class Cache<Fn extends (...args: any[]) => any> {
       },
     );
   }
+}
+
+function createIsKeyEqual<Fn extends (...args: any[]) => any>({
+  isKeyEqual,
+  isKeyItemEqual,
+  serialize,
+}: Options<Fn>): IsKeyEqual {
+  if (typeof isKeyEqual === 'function') {
+    return isKeyEqual;
+  }
+
+  if (serialize) {
+    return isSerializedKeyEqual;
+  }
+
+  const isItemEqual =
+    typeof isKeyItemEqual === 'function'
+      ? isKeyItemEqual
+      : isKeyItemEqual === 'deep'
+        ? deepEqual
+        : isKeyItemEqual === 'shallow'
+          ? shallowEqual
+          : Object.is;
+
+  return function isKeyEqual(prevKey: Key, nextKey: Key): boolean {
+    const length = nextKey.length;
+
+    if (prevKey.length !== length) {
+      return false;
+    }
+
+    if (length === 1) {
+      return isItemEqual(prevKey[0], nextKey[0], 0);
+    }
+
+    for (let index = 0; index < length; ++index) {
+      if (!isItemEqual(prevKey[index], nextKey[index], index)) {
+        return false;
+      }
+    }
+
+    return true;
+  };
 }
 
 /**
