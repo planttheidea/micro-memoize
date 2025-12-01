@@ -45,15 +45,8 @@ function createMemoizedMethod<Fn extends (...args: any) => any, Opts extends Opt
 
     if (!node) {
       node = cache.n(key, fn.apply(this, args) as ReturnType<Fn>);
-
-      cache.o && cache.o.n('add', node);
     } else if (node !== cache.h) {
-      cache.u(node);
-
-      if (cache.o) {
-        cache.o.n('hit', node);
-        cache.o.n('update', node);
-      }
+      cache.u(node, undefined, true);
     } else if (cache.o) {
       cache.o.n('hit', node);
     }

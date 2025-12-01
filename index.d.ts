@@ -72,17 +72,17 @@ declare class Cache<Fn extends (...args: any[]) => any> {
    */
   clear(reason?: string): void;
   /**
-   * Delete the entry for the given `key` in cache.
+   * Delete the entry for the key based on the given `args` in cache.
    */
-  delete(key: Parameters<Fn>, reason?: string): boolean;
+  delete(args: Parameters<Fn>, reason?: string): boolean;
   /**
-   * Get the value in cache based on the given `key`.
+   * Get the value in cache based on the given `args`.
    */
-  get(key: Parameters<Fn>, reason?: string): ReturnType<Fn> | undefined;
+  get(args: Parameters<Fn>, reason?: string): ReturnType<Fn> | undefined;
   /**
-   * Determine whether the given `key` has a related entry in the cache.
+   * Determine whether the given `args` have a related entry in the cache.
    */
-  has(key: Parameters<Fn>): boolean;
+  has(args: Parameters<Fn>): boolean;
   /**
    * Remove the given `listener` for the given `type` of cache event.
    */
@@ -98,23 +98,19 @@ declare class Cache<Fn extends (...args: any[]) => any> {
   /**
    * Method to [d]elete the given `node` from the cache.
    */
-  d(node: CacheNode<Fn>): void;
+  d(node: CacheNode<Fn>, reason: string): void;
   /**
    * Method to [g]et an existing node from cache based on the given `key`.
    */
   g(key: Key): CacheNode<Fn> | undefined;
   /**
-   * Method to [g]et an existing node from cache based on the [t]ransformed `key`.
-   */
-  gt(key: Parameters<Fn>): CacheNode<Fn> | undefined;
-  /**
    * Method to create a new [n]ode and set it at the head of the linked list.
    */
-  n(key: Key, value: ReturnType<Fn>): CacheNode<Fn>;
+  n(key: Key, value: ReturnType<Fn>, reason?: string): CacheNode<Fn>;
   /**
    * Method to [u]date the location of the given `node` in cache.
    */
-  u(node: CacheNode<Fn>): void;
+  u(node: CacheNode<Fn>, reason: string | undefined, hit: boolean): void;
   /**
    * Method to [w]rap the promise in a handler to automatically delete the
    * entry if it rejects.

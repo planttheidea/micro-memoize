@@ -122,14 +122,13 @@ export class Cache<Fn extends (...args: any[]) => any> {
   }
 
   /**
-   * Delete the entry for the given `key` in cache.
+   * Delete the entry for the key based on the given `args` in cache.
    */
-  delete(key: Parameters<Fn>, reason = 'explicit delete'): boolean {
-    const node = this.k ? this.gt(key) : this.g(key);
+  delete(args: Parameters<Fn>, reason = 'explicit delete'): boolean {
+    const node = this.g(this.k ? this.k(args) : args);
 
     if (node) {
-      this.d(node);
-      this.o && this.o.n('delete', node, reason);
+      this.d(node, reason);
 
       return true;
     }
@@ -138,17 +137,14 @@ export class Cache<Fn extends (...args: any[]) => any> {
   }
 
   /**
-   * Get the value in cache based on the given `key`.
+   * Get the value in cache based on the given `args`.
    */
-  get(key: Parameters<Fn>, reason = 'explicit get'): ReturnType<Fn> | undefined {
-    const node = this.k ? this.gt(key) : this.g(key);
+  get(args: Parameters<Fn>, reason = 'explicit get'): ReturnType<Fn> | undefined {
+    const node = this.g(this.k ? this.k(args) : args);
 
     if (node) {
       if (node !== this.h) {
-        this.u(node);
-
-        this.o && this.o.n('hit', node, reason);
-        this.o && this.o.n('update', node, reason);
+        this.u(node, reason, true);
       } else if (this.o) {
         this.o.n('hit', node, reason);
       }
@@ -158,10 +154,10 @@ export class Cache<Fn extends (...args: any[]) => any> {
   }
 
   /**
-   * Determine whether the given `key` has a related entry in the cache.
+   * Determine whether the given `args` have a related entry in the cache.
    */
-  has(key: Parameters<Fn>): boolean {
-    return !!(this.k ? this.gt(key) : this.g(key));
+  has(args: Parameters<Fn>): boolean {
+    return !!this.g(this.k ? this.k(args) : args);
   }
 
   /**
@@ -199,20 +195,16 @@ export class Cache<Fn extends (...args: any[]) => any> {
         node.v = this.w(node);
       }
 
-      node !== this.h && this.u(node);
-
-      this.o && this.o.n('update', node, reason);
+      node !== this.h && this.u(node, reason, false);
     } else {
       node = this.n(normalizedKey, value);
-
-      this.o && this.o.n('add', node, reason);
     }
   }
 
   /**
    * Method to [d]elete the given `node` from the cache.
    */
-  d(node: CacheNode<Fn>): void {
+  d(node: CacheNode<Fn>, reason: string): void {
     const next = node.n;
     const prev = node.p;
 
@@ -231,6 +223,8 @@ export class Cache<Fn extends (...args: any[]) => any> {
     --this.c;
 
     node.r = true;
+
+    this.o && this.o.n('delete', node, reason);
   }
 
   /**
@@ -267,16 +261,9 @@ export class Cache<Fn extends (...args: any[]) => any> {
   }
 
   /**
-   * Method to [g]et an existing node from cache based on the [t]ransformed `key`.
-   */
-  gt(key: Parameters<Fn>): CacheNode<Fn> | undefined {
-    return this.g(this.k ? this.k(key) : key);
-  }
-
-  /**
    * Method to create a new [n]ode and set it at the head of the linked list.
    */
-  n(key: Key, value: ReturnType<Fn>): CacheNode<Fn> {
+  n(key: Key, value: ReturnType<Fn>, reason?: string): CacheNode<Fn> {
     const prevHead = this.h;
     const prevTail = this.t;
     const node = { k: key, n: prevHead, p: undefined, v: value };
@@ -294,9 +281,10 @@ export class Cache<Fn extends (...args: any[]) => any> {
     }
 
     if (++this.c > this.s && prevTail) {
-      this.d(prevTail);
-      this.o && this.o.n('delete', prevTail, 'evicted');
+      this.d(prevTail, 'evicted');
     }
+
+    this.o && this.o.n('add', node, reason);
 
     return node;
   }
@@ -304,7 +292,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
   /**
    * Method to [u]date the location of the given `node` in cache.
    */
-  u(node: CacheNode<Fn>): void {
+  u(node: CacheNode<Fn>, reason: string | undefined, hit: boolean): void {
     const next = node.n;
     const prev = node.p;
 
@@ -328,6 +316,11 @@ export class Cache<Fn extends (...args: any[]) => any> {
     if (node === this.t) {
       this.t = prev;
     }
+
+    if (this.o) {
+      hit && this.o.n('hit', node, reason);
+      this.o.n('update', node, reason);
+    }
   }
 
   /**
@@ -345,17 +338,12 @@ export class Cache<Fn extends (...args: any[]) => any> {
 
     return value.then(
       (value: any) => {
-        if (!node.r && this.o) {
-          this.o.n('update', node, 'resolved');
-        }
+        !node.r && this.o && this.o.n('update', node, 'resolved');
 
         return value;
       },
       (error: unknown) => {
-        if (!node.r) {
-          this.d(node);
-          this.o && this.o.n('delete', node, 'rejected');
-        }
+        !node.r && this.d(node, 'rejected');
 
         throw error;
       },
