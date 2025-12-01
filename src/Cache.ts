@@ -400,25 +400,11 @@ function createIsKeyEqual<Fn extends (...args: any[]) => any>({
 function getTransformKey<Fn extends (...args: any[]) => any>(options: Options<Fn>): TransformKey<Fn> | undefined {
   const { maxArgs, serialize, transformKey } = options;
 
-  const transformers: Array<(...args: any[]) => any> = [];
-
-  if (serialize) {
-    const transformer = typeof serialize === 'function' ? serialize : transformKeySerialized;
-
-    transformers.push(transformer);
-  }
-
-  if (isNumericValueValid(maxArgs)) {
-    const transformer = getMaxArgsTransformKey(maxArgs);
-
-    if (transformer) {
-      transformers.push(transformer);
-    }
-  }
-
-  if (typeof transformKey === 'function') {
-    transformers.push(transformKey);
-  }
+  const transformers = [
+    serialize ? (typeof serialize === 'function' ? serialize : transformKeySerialized) : undefined,
+    isNumericValueValid(maxArgs) ? getMaxArgsTransformKey(maxArgs) : undefined,
+    typeof transformKey === 'function' ? transformKey : undefined,
+  ].filter(Boolean) as Array<(...args: any[]) => any>;
 
   return transformers.length
     ? transformers.reduce(
