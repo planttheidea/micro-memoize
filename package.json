@@ -16,7 +16,7 @@
     "fast-equals": "^5.3.3",
     "fast-stringify": "^4.0.0"
   },
-  "description": "A tiny, crazy fast memoization library for the 95% use-case",
+  "description": "A blazing fast memoization library that is tiny but feature-rich.",
   "devDependencies": {
     "@planttheidea/build-tools": "^1.2.1",
     "@rollup/plugin-typescript": "^12.3.0",
