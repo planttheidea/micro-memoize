@@ -411,9 +411,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
 /**
  * Get the `transformKey` option based on the options provided.
  */
-export function getTransformKey<Fn extends (...args: any[]) => any>(
-  options: Options<Fn>,
-): TransformKey<Fn> | undefined {
+function getTransformKey<Fn extends (...args: any[]) => any>(options: Options<Fn>): TransformKey<Fn> | undefined {
   const { maxArgs, serialize, transformKey } = options;
 
   const transformers: Array<(...args: any[]) => any> = [];

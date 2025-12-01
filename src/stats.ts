@@ -166,7 +166,7 @@ export function getStatsManager<Fn extends (...args: any[]) => any>(
 /**
  * Get the usage percentage based on the number of hits and total calls.
  */
-function getUsagePercentage(calls: number, hits: number) {
+function getUsagePercentage(calls: number, hits: number): string {
   return calls ? `${((hits / calls) * 100).toFixed(4)}%` : '0.0000%';
 }
 
