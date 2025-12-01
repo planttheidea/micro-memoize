@@ -3,18 +3,14 @@ type ListenerMap<Fn extends (...args: any[]) => any> = Partial<
 >;
 declare class CacheEventEmitter<Fn extends (...args: any[]) => any> {
   /**
+   * The list of [l]isteners for the given [t]ype.
+   */
+  l: ListenerMap<Fn>;
+  /**
    * The [c]ache the emitter is associated with.
    */
   private c;
-  /**
-   * The list of [l]isteners for the given [t]ype.
-   */
-  private l;
   constructor(cache: Cache<Fn>);
-  /**
-   * Expose the listeners for testing only.
-   */
-  get listeners(): ListenerMap<Fn>;
   /**
    * Method to [a]dd a listener for the given cache change event.
    */
@@ -35,22 +31,17 @@ declare class Cache<Fn extends (...args: any[]) => any> {
    */
   c: number;
   /**
+   * Whether the entire key is [e]qual to an existing key in cache.
+   */
+  e: IsKeyEqual;
+  /**
    * The [h]ead of the cache linked list.
    */
   h: CacheNode<Fn> | undefined;
   /**
-   * Whether the individual argument passed [i]s equal to the same argument in order
-   * for a key in cache.
-   */
-  i: IsKeyItemEqual;
-  /**
    * The transformer for the [k]ey stored in cache.
    */
   k: Options<Fn>['transformKey'] | undefined;
-  /**
-   * Whether the entire key [m]atches an existing key in cache.
-   */
-  m: IsKeyEqual;
   /**
    * Event emitter for `[o]`n events.
    */
@@ -81,17 +72,17 @@ declare class Cache<Fn extends (...args: any[]) => any> {
    */
   clear(reason?: string): void;
   /**
-   * Delete the entry for the given `key` in cache.
+   * Delete the entry for the key based on the given `args` in cache.
    */
-  delete(key: Parameters<Fn>, reason?: string): boolean;
+  delete(args: Parameters<Fn>, reason?: string): boolean;
   /**
-   * Get the value in cache based on the given `key`.
+   * Get the value in cache based on the given `args`.
    */
-  get(key: Parameters<Fn>, reason?: string): ReturnType<Fn> | undefined;
+  get(args: Parameters<Fn>, reason?: string): ReturnType<Fn> | undefined;
   /**
-   * Determine whether the given `key` has a related entry in the cache.
+   * Determine whether the given `args` have a related entry in the cache.
    */
-  has(key: Parameters<Fn>): boolean;
+  has(args: Parameters<Fn>): boolean;
   /**
    * Remove the given `listener` for the given `type` of cache event.
    */
@@ -107,27 +98,19 @@ declare class Cache<Fn extends (...args: any[]) => any> {
   /**
    * Method to [d]elete the given `node` from the cache.
    */
-  d(node: CacheNode<Fn>): void;
-  /**
-   * Method to determine if the next key is [e]qual to an existing key in cache.
-   */
-  e(prevKey: Key, nextKey: Key): boolean;
+  d(node: CacheNode<Fn>, reason: string): void;
   /**
    * Method to [g]et an existing node from cache based on the given `key`.
    */
   g(key: Key): CacheNode<Fn> | undefined;
   /**
-   * Method to [g]et an existing node from cache based on the [t]ransformed `key`.
-   */
-  gt(key: Parameters<Fn>): CacheNode<Fn> | undefined;
-  /**
    * Method to create a new [n]ode and set it at the head of the linked list.
    */
-  n(key: Key, value: ReturnType<Fn>): CacheNode<Fn>;
+  n(key: Key, value: ReturnType<Fn>, reason?: string): CacheNode<Fn>;
   /**
    * Method to [u]date the location of the given `node` in cache.
    */
-  u(node: CacheNode<Fn>): void;
+  u(node: CacheNode<Fn>, reason: string | undefined, hit: boolean): void;
   /**
    * Method to [w]rap the promise in a handler to automatically delete the
    * entry if it rejects.
@@ -534,7 +517,7 @@ type Memoized<Fn extends (...args: any[]) => any, Opts extends Options<Fn>> = Fn
    * Manager for the expirations cache. This is only populated when
    * `options.expires` is set.
    */
-  expirationManager: ExpirationManager<Fn> | undefined;
+  expirationManager: ExpirationManager<Fn> | null;
   /**
    * The original method that is memoized.
    */
@@ -551,7 +534,7 @@ type Memoized<Fn extends (...args: any[]) => any, Opts extends Options<Fn>> = Fn
    * Manager for the stats cache. This is only populated when `options.statsName`
    * is set.
    */
-  statsManager: StatsManager<Fn> | undefined;
+  statsManager: StatsManager<Fn> | null;
 };
 interface Memoize {
   <Fn extends Memoized<(...args: any[]) => any, Options<(...args: any[]) => any>>>(fn: Fn): Memoized<Fn, Fn['options']>;

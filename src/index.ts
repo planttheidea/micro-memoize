@@ -1,8 +1,7 @@
 import { Cache } from './Cache.js';
-import { getExpirationManager } from './expires.js';
-import { getWrappedForceUpdateMoize } from './forceUpdate.js';
+import { ExpirationManager } from './expires.js';
 import type { Key, Memoize, Memoized, Options } from './internalTypes.js';
-import { getStatsManager } from './stats.js';
+import { StatsManager } from './stats.js';
 import { isMemoized } from './utils.js';
 
 export type * from './internalTypes.js';
@@ -20,23 +19,34 @@ export const memoize: Memoize = function memoize<Fn extends (...args: any[]) => 
   }
 
   const cache = new Cache(options);
+  const memoized = createMemoizedMethod<Fn, Opts>(fn, cache, options.forceUpdate);
 
-  const memoized = function memoized(this: any, ...args: Parameters<Fn>) {
+  const { expires, statsName } = options;
+
+  memoized.cache = cache;
+  memoized.expirationManager = expires != null ? new ExpirationManager(cache, expires) : null;
+  memoized.fn = fn;
+  memoized.isMemoized = true;
+  memoized.options = options;
+  memoized.statsManager = statsName != null ? new StatsManager(cache, statsName) : null;
+
+  return memoized;
+};
+
+function createMemoizedMethod<Fn extends (...args: any) => any, Opts extends Options<Fn>>(
+  fn: Fn,
+  cache: Cache<Fn>,
+  forceUpdate: Opts['forceUpdate'],
+): Memoized<Fn, Opts> {
+  const memoized = function memoized(this: any, ...args: Parameters<Fn>): ReturnType<Fn> {
     const key: Key = cache.k ? cache.k(args) : args;
 
     let node = cache.g(key);
 
     if (!node) {
       node = cache.n(key, fn.apply(this, args) as ReturnType<Fn>);
-
-      cache.o && cache.o.n('add', node);
     } else if (node !== cache.h) {
-      cache.u(node);
-
-      if (cache.o) {
-        cache.o.n('hit', node);
-        cache.o.n('update', node);
-      }
+      cache.u(node, undefined, true);
     } else if (cache.o) {
       cache.o.n('hit', node);
     }
@@ -44,16 +54,21 @@ export const memoize: Memoize = function memoize<Fn extends (...args: any[]) => 
     return node.v;
   } as Memoized<Fn, Opts>;
 
-  memoized.cache = cache;
-  memoized.expirationManager = getExpirationManager(cache, options);
-  memoized.fn = fn;
-  memoized.isMemoized = true;
-  memoized.options = options;
-  memoized.statsManager = getStatsManager(cache, options);
+  if (!forceUpdate) {
+    return memoized;
+  }
 
-  return typeof options.forceUpdate === 'function'
-    ? getWrappedForceUpdateMoize(memoized, options.forceUpdate)
-    : memoized;
-};
+  return function wrappedMemoized(this: any, ...args: Parameters<Fn>): ReturnType<Fn> {
+    if (!forceUpdate(args) || !cache.has(args)) {
+      return memoized.apply(this, args);
+    }
+
+    const value: ReturnType<Fn> = fn.apply(this, args);
+
+    cache.set(args, value, 'forced');
+
+    return value;
+  } as Memoized<Fn, Opts>;
+}
 
 export { clearStats, isCollectingStats, getStats, startCollectingStats, stopCollectingStats } from './stats.js';

@@ -415,7 +415,7 @@ test('will notify of rejected when async is true and rejects', async () => {
 
   memoized.cache.off('delete', onDelete);
 
-  expect(memoized.cache.o?.listeners.delete).toBeUndefined();
+  expect(memoized.cache.o?.l.delete).toBeUndefined();
 });
 
 test('will return a memoized method that will auto-remove the key from cache if async is true and the async is rejected', async () => {

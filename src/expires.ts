@@ -128,13 +128,16 @@ export class ExpirationManager<Fn extends (...args: any[]) => any> {
       }
 
       if (typeof this.r === 'function' && !this.r(key, node.v, time, cache)) {
-        node !== cache.h && cache.u(node);
-        cache.o && cache.o.n('update', node, 'expiration reset');
+        if (node !== cache.h) {
+          cache.u(node, 'expiration reset', false);
+        } else if (cache.o) {
+          // Always notify, even if at the top of the cache.
+          cache.o.n('update', node, 'expiration reset');
+        }
 
         this.s(key, node.v);
       } else {
-        cache.d(node);
-        cache.o && cache.o.n('delete', node, 'expired');
+        cache.d(node, 'expired');
       }
     }, time);
 
@@ -145,14 +148,5 @@ export class ExpirationManager<Fn extends (...args: any[]) => any> {
     }
 
     this.e.set(key, timeout);
-  }
-}
-
-export function getExpirationManager<Fn extends (...args: any[]) => any>(
-  cache: Cache<Fn>,
-  options: Options<Fn>,
-): ExpirationManager<Fn> | undefined {
-  if (options.expires != null) {
-    return new ExpirationManager(cache, options.expires);
   }
 }

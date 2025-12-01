@@ -1,5 +1,9 @@
 # micro-memoize CHANGELOG
 
+## 5.1.1
+
+- [#134](https://github.com/planttheidea/micro-memoize/pull/134) - Various internal tweaks for smaller bundle size
+
 ## 5.1.0
 
 ### Enhancements

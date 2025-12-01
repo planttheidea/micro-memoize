@@ -1,5 +1,5 @@
 import { Cache } from './Cache.js';
-import type { GlobalStats, Options, ProfileStats } from './internalTypes.js';
+import type { GlobalStats, ProfileStats } from './internalTypes.js';
 
 interface ProfileCounts {
   c: number;
@@ -152,21 +152,9 @@ export function getStats<Name extends string | undefined>(
 }
 
 /**
- * Get the stats manager for the given moized function.
- */
-export function getStatsManager<Fn extends (...args: any[]) => any>(
-  cache: Cache<Fn>,
-  options: Options<Fn>,
-): StatsManager<Fn> | undefined {
-  if (options.statsName) {
-    return new StatsManager(cache, options.statsName);
-  }
-}
-
-/**
  * Get the usage percentage based on the number of hits and total calls.
  */
-function getUsagePercentage(calls: number, hits: number) {
+function getUsagePercentage(calls: number, hits: number): string {
   return calls ? `${((hits / calls) * 100).toFixed(4)}%` : '0.0000%';
 }
 
