@@ -3,18 +3,14 @@ type ListenerMap<Fn extends (...args: any[]) => any> = Partial<
 >;
 declare class CacheEventEmitter<Fn extends (...args: any[]) => any> {
   /**
+   * The list of [l]isteners for the given [t]ype.
+   */
+  l: ListenerMap<Fn>;
+  /**
    * The [c]ache the emitter is associated with.
    */
   private c;
-  /**
-   * The list of [l]isteners for the given [t]ype.
-   */
-  private l;
   constructor(cache: Cache<Fn>);
-  /**
-   * Expose the listeners for testing only.
-   */
-  get listeners(): ListenerMap<Fn>;
   /**
    * Method to [a]dd a listener for the given cache change event.
    */

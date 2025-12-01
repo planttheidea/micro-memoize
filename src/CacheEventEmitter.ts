@@ -7,23 +7,17 @@ type ListenerMap<Fn extends (...args: any[]) => any> = Partial<
 
 export class CacheEventEmitter<Fn extends (...args: any[]) => any> {
   /**
+   * The list of [l]isteners for the given [t]ype.
+   */
+  l: ListenerMap<Fn> = {};
+
+  /**
    * The [c]ache the emitter is associated with.
    */
   private c: Cache<Fn>;
-  /**
-   * The list of [l]isteners for the given [t]ype.
-   */
-  private l: ListenerMap<Fn> = {};
 
   constructor(cache: Cache<Fn>) {
     this.c = cache;
-  }
-
-  /**
-   * Expose the listeners for testing only.
-   */
-  get listeners(): ListenerMap<Fn> {
-    return this.l;
   }
 
   /**
