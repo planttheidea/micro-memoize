@@ -52,7 +52,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
   constructor(options: Options<Fn>) {
     const { async, maxSize } = options;
 
-    this.e = createIsKeyEqual(options);
+    this.e = getIsKeyEqual(options);
     this.k = getTransformKey(options);
     this.p = typeof async === 'boolean' && async;
     this.s = isNumericValueValid(maxSize) ? maxSize : 1;
@@ -351,7 +351,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
   }
 }
 
-function createIsKeyEqual<Fn extends (...args: any[]) => any>({
+function getIsKeyEqual<Fn extends (...args: any[]) => any>({
   isKeyEqual,
   isKeyItemEqual,
   serialize,
