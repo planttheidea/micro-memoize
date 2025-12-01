@@ -147,12 +147,3 @@ export class ExpirationManager<Fn extends (...args: any[]) => any> {
     this.e.set(key, timeout);
   }
 }
-
-export function getExpirationManager<Fn extends (...args: any[]) => any>(
-  cache: Cache<Fn>,
-  options: Options<Fn>,
-): ExpirationManager<Fn> | undefined {
-  if (options.expires != null) {
-    return new ExpirationManager(cache, options.expires);
-  }
-}

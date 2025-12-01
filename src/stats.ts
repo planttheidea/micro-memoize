@@ -1,5 +1,5 @@
 import { Cache } from './Cache.js';
-import type { GlobalStats, Options, ProfileStats } from './internalTypes.js';
+import type { GlobalStats, ProfileStats } from './internalTypes.js';
 
 interface ProfileCounts {
   c: number;
@@ -149,18 +149,6 @@ export function getStats<Name extends string | undefined>(
 
   // @ts-expect-error - Conditional returns can be tricky.
   return globalStats;
-}
-
-/**
- * Get the stats manager for the given moized function.
- */
-export function getStatsManager<Fn extends (...args: any[]) => any>(
-  cache: Cache<Fn>,
-  options: Options<Fn>,
-): StatsManager<Fn> | undefined {
-  if (options.statsName) {
-    return new StatsManager(cache, options.statsName);
-  }
 }
 
 /**

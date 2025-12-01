@@ -534,7 +534,7 @@ type Memoized<Fn extends (...args: any[]) => any, Opts extends Options<Fn>> = Fn
    * Manager for the expirations cache. This is only populated when
    * `options.expires` is set.
    */
-  expirationManager: ExpirationManager<Fn> | undefined;
+  expirationManager: ExpirationManager<Fn> | null;
   /**
    * The original method that is memoized.
    */
@@ -551,7 +551,7 @@ type Memoized<Fn extends (...args: any[]) => any, Opts extends Options<Fn>> = Fn
    * Manager for the stats cache. This is only populated when `options.statsName`
    * is set.
    */
-  statsManager: StatsManager<Fn> | undefined;
+  statsManager: StatsManager<Fn> | null;
 };
 interface Memoize {
   <Fn extends Memoized<(...args: any[]) => any, Options<(...args: any[]) => any>>>(fn: Fn): Memoized<Fn, Fn['options']>;

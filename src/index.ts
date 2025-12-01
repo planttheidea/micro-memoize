@@ -1,8 +1,8 @@
 import { Cache } from './Cache.js';
-import { getExpirationManager } from './expires.js';
+import { ExpirationManager } from './expires.js';
 import { getWrappedForceUpdateMoize } from './forceUpdate.js';
 import type { Key, Memoize, Memoized, Options } from './internalTypes.js';
-import { getStatsManager } from './stats.js';
+import { StatsManager } from './stats.js';
 import { isMemoized } from './utils.js';
 
 export type * from './internalTypes.js';
@@ -45,11 +45,11 @@ export const memoize: Memoize = function memoize<Fn extends (...args: any[]) => 
   } as Memoized<Fn, Opts>;
 
   memoized.cache = cache;
-  memoized.expirationManager = getExpirationManager(cache, options);
+  memoized.expirationManager = options.expires != null ? new ExpirationManager(cache, options.expires) : null;
   memoized.fn = fn;
   memoized.isMemoized = true;
   memoized.options = options;
-  memoized.statsManager = getStatsManager(cache, options);
+  memoized.statsManager = options.statsName != null ? new StatsManager(cache, options.statsName) : null;
 
   return typeof options.forceUpdate === 'function'
     ? getWrappedForceUpdateMoize(memoized, options.forceUpdate)
