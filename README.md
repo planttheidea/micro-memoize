@@ -108,7 +108,7 @@ const fn = async (one: string, two: string) => {
   });
 };
 
-const memoized = memoize(fn, { isPromise: true });
+const memoized = memoize(fn, { async: true });
 
 memoized('one', 'two');
 
