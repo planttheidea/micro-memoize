@@ -277,7 +277,7 @@ If `maxArgs` is combined with either `serialize` or `transformKey`, the followin
 
 1.  transform by `transformKey` (if applicable)
 1.  limit by `maxArgs`
-1.  serialize by `serializer` (if applicable)
+1.  serialize by `serialize` (if applicable)
 
 ### maxSize
 
@@ -323,7 +323,7 @@ If `serialize` is combined with either `maxArgs` or `transformKey`, the followin
 
 1.  transform by `transformKey` (if applicable)
 1.  limit by `maxArgs` (if applicable)
-1.  serialize
+1.  serialize by `serialize`
 
 **NOTE**: This is much slower than the default key storage, and usually the same requirements can be meet with
 `isKeyItemEqual: 'deep'`, so use at your discretion.
@@ -384,7 +384,7 @@ If `transformKey` is combined with either `maxArgs` or `serialize`, the followin
 
 1.  transform by `transformKey`
 1.  limit by `maxArgs` (if applicable)
-1.  serialize (if applicable)
+1.  serialize by `serialize` (if applicable)
 
 ## Additional properties
 
