@@ -300,9 +300,7 @@ export interface OptionsKeyItemEqual<Fn extends (...args: any[]) => any> extends
  * and evicted from cache.
  */
 export type Options<Fn extends (...args: any[]) => any> =
-  | OptionsNoCustomEqual<Fn>
-  | OptionsKeyEqual<Fn>
-  | OptionsKeyItemEqual<Fn>;
+  OptionsNoCustomEqual<Fn> | OptionsKeyEqual<Fn> | OptionsKeyItemEqual<Fn>;
 
 /**
  * [key, value] pair for a given entry in cache.
