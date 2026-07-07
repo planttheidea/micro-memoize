@@ -16,8 +16,13 @@ export class ExpirationManager<Fn extends (...args: any[]) => any> {
   c: Cache<Fn>;
   /**
    * Map of [e]xpiration timeouts.
+   *
+   * @NOTE
+   * The refs stored are `any` because the return of `setTimeout` differs between browser and
+   * NodeJS types. The widening allows for multiple types to be used without unexpected false
+   * failures.
    */
-  e = new Map<Key, ReturnType<typeof setTimeout>>();
+  e = new Map<Key, any>();
   /**
    * Whether the entry in cache should [p]ersist, and therefore not
    * have any expiration.
@@ -97,6 +102,8 @@ export class ExpirationManager<Fn extends (...args: any[]) => any> {
     const expiration = this.e.get(key);
 
     if (expiration) {
+      // `expiration` is typed as `any` to avoid conflict between browser and NodeJS types, however it is valid here.
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       clearTimeout(expiration);
       this.e.delete(key);
     }
@@ -118,7 +125,7 @@ export class ExpirationManager<Fn extends (...args: any[]) => any> {
       throw new TypeError(`The expiration time must be a finite, non-negative number; received ${time as string}`);
     }
 
-    const timeout = setTimeout(() => {
+    const timeout: any = setTimeout(() => {
       this.d(key);
 
       const node = cache.g(key);

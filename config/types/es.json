@@ -20,7 +20,7 @@
     "strictNullChecks": true,
     "target": "ES2015",
     "verbatimModuleSyntax": true,
-    "types": ["node"],
+    "types": [],
     "inlineSources": true,
     "declarationDir": "../../dist/es/types",
     "outDir": "../../dist/es"

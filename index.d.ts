@@ -123,8 +123,13 @@ declare class ExpirationManager<Fn extends (...args: any[]) => any> {
     c: Cache<Fn>;
     /**
      * Map of [e]xpiration timeouts.
+     *
+     * @NOTE
+     * The refs stored are `any` because the return of `setTimeout` differs between browser and
+     * NodeJS types. The widening allows for multiple types to be used without unexpected false
+     * failures.
      */
-    e: Map<Key, NodeJS.Timeout>;
+    e: Map<Key, any>;
     /**
      * Whether the entry in cache should [p]ersist, and therefore not
      * have any expiration.
