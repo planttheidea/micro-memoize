@@ -1504,14 +1504,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:^4.17.21":
+"@types/lodash@npm:^4.17.24":
   version: 4.17.24
   resolution: "@types/lodash@npm:4.17.24"
   checksum: 10/0f2082565f60f9787eefc046edc38458054512be5a8b3584ef0bad5fd9e85d0ab55ec5a1fbfae1ed6ba015cf1f9e837d5fb4da1f99fc60b8f74b2a46146fb00f
   languageName: node
   linkType: hard
 
-"@types/node@npm:^24.10.1, @types/node@npm:^24.10.4":
+"@types/node@npm:^24.10.4, @types/node@npm:^24.13.2":
   version: 24.13.2
   resolution: "@types/node@npm:24.13.2"
   dependencies:
@@ -1545,7 +1545,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/eslint-plugin@npm:8.63.0, @typescript-eslint/eslint-plugin@npm:^8.48.0":
+"@typescript-eslint/eslint-plugin@npm:8.63.0, @typescript-eslint/eslint-plugin@npm:^8.63.0":
   version: 8.63.0
   resolution: "@typescript-eslint/eslint-plugin@npm:8.63.0"
   dependencies:
@@ -1565,7 +1565,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/parser@npm:8.63.0, @typescript-eslint/parser@npm:^8.48.0":
+"@typescript-eslint/parser@npm:8.63.0, @typescript-eslint/parser@npm:^8.63.0":
   version: 8.63.0
   resolution: "@typescript-eslint/parser@npm:8.63.0"
   dependencies:
@@ -1680,7 +1680,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/coverage-v8@npm:^4.0.15":
+"@vitest/coverage-v8@npm:^4.0.15, @vitest/coverage-v8@npm:^4.1.10":
   version: 4.1.10
   resolution: "@vitest/coverage-v8@npm:4.1.10"
   dependencies:
@@ -3099,7 +3099,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^9.39.2":
+"eslint@npm:^9.39.2, eslint@npm:^9.39.4":
   version: 9.39.4
   resolution: "eslint@npm:9.39.4"
   dependencies:
@@ -3342,7 +3342,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-equals@npm:^5.3.3":
+"fast-equals@npm:^5.4.0":
   version: 5.4.0
   resolution: "fast-equals@npm:5.4.0"
   checksum: 10/bea068ceb7825d486d88a17ccc3fe889d1833efefa8dc64c83806e797f66b3ea953ac4aebd96af022d828de315ec87476e76418a5da774217d0ab66de53d68f5
@@ -4647,7 +4647,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.15.0, lodash@npm:^4.17.21":
+"lodash@npm:^4.15.0, lodash@npm:^4.18.1":
   version: 4.18.1
   resolution: "lodash@npm:4.18.1"
   checksum: 10/306fea53dfd39dad1f03d45ba654a2405aebd35797b673077f401edb7df2543623dc44b9effbb98f69b32152295fff725a4cec99c684098947430600c6af0c3f
@@ -4832,34 +4832,34 @@ __metadata:
     "@planttheidea/build-tools": "npm:^2.0.0"
     "@rollup/plugin-typescript": "npm:^12.3.0"
     "@types/bluebird": "npm:^3.5.42"
-    "@types/lodash": "npm:^4.17.21"
-    "@types/node": "npm:^24.10.1"
-    "@typescript-eslint/eslint-plugin": "npm:^8.48.0"
-    "@typescript-eslint/parser": "npm:^8.48.0"
-    "@vitest/coverage-v8": "npm:^4.0.15"
+    "@types/lodash": "npm:^4.17.24"
+    "@types/node": "npm:^24.13.2"
+    "@typescript-eslint/eslint-plugin": "npm:^8.63.0"
+    "@typescript-eslint/parser": "npm:^8.63.0"
+    "@vitest/coverage-v8": "npm:^4.1.10"
     bluebird: "npm:^3.7.2"
     cli-table3: "npm:^0.6.5"
-    eslint: "npm:^9.39.2"
+    eslint: "npm:^9.39.4"
     eslint-plugin-import: "npm:^2.32.0"
     fast-copy: "npm:^4.0.0"
-    fast-equals: "npm:^5.3.3"
+    fast-equals: "npm:^5.4.0"
     fast-memoize: "npm:^2.5.2"
     fast-stringify: "npm:^4.0.0"
-    lodash: "npm:^4.17.21"
+    lodash: "npm:^4.18.1"
     lru-memoize: "npm:^1.1.0"
     mem: "npm:^10.0.0"
     memoizee: "npm:^0.4.17"
     memoizerific: "npm:^1.11.3"
-    prettier: "npm:^3.7.4"
+    prettier: "npm:^3.9.4"
     ramda: "npm:^0.32.0"
-    release-it: "npm:^19.1.0"
-    rollup: "npm:^4.53.5"
-    tinybench: "npm:^6.0.0"
+    release-it: "npm:^19.2.4"
+    rollup: "npm:^4.62.2"
+    tinybench: "npm:^6.0.2"
     typescript: "npm:^5.9.3"
-    typescript-eslint: "npm:^8.48.0"
-    underscore: "npm:^1.13.7"
-    vite: "npm:^7.3.0"
-    vitest: "npm:^4.0.15"
+    typescript-eslint: "npm:^8.63.0"
+    underscore: "npm:^1.13.8"
+    vite: "npm:^7.3.6"
+    vitest: "npm:^4.1.10"
   languageName: unknown
   linkType: soft
 
@@ -5493,7 +5493,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^3.7.4":
+"prettier@npm:^3.7.4, prettier@npm:^3.9.4":
   version: 3.9.4
   resolution: "prettier@npm:3.9.4"
   bin:
@@ -5668,7 +5668,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"release-it@npm:^19.1.0":
+"release-it@npm:^19.1.0, release-it@npm:^19.2.4":
   version: 19.2.4
   resolution: "release-it@npm:19.2.4"
   dependencies:
@@ -5880,7 +5880,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup@npm:^4.43.0, rollup@npm:^4.53.5":
+"rollup@npm:^4.43.0, rollup@npm:^4.53.5, rollup@npm:^4.62.2":
   version: 4.62.2
   resolution: "rollup@npm:4.62.2"
   dependencies:
@@ -6543,7 +6543,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tinybench@npm:^6.0.0":
+"tinybench@npm:^6.0.2":
   version: 6.0.2
   resolution: "tinybench@npm:6.0.2"
   checksum: 10/9193fcae4b7a640603b2d03a1d6080f90c48a33eb131f3a91658daf92f2ec5c91b30a9c8b08c1c6fd5e360613ba3f8864f6528b598e49b710a8d0fa77acf0843
@@ -6697,7 +6697,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript-eslint@npm:^8.48.0, typescript-eslint@npm:^8.50.0":
+"typescript-eslint@npm:^8.50.0, typescript-eslint@npm:^8.63.0":
   version: 8.63.0
   resolution: "typescript-eslint@npm:8.63.0"
   dependencies:
@@ -6744,7 +6744,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"underscore@npm:^1.13.7":
+"underscore@npm:^1.13.8":
   version: 1.13.8
   resolution: "underscore@npm:1.13.8"
   checksum: 10/b50ac5806d059cc180b1bd9adea6f7ed500021f4dc782dfc75d66a90337f6f0506623c1b37863f4a9bf64ffbeb5769b638a54b7f2f5966816189955815953139
@@ -6873,7 +6873,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^7.3.0":
+"vite@npm:^7.3.0, vite@npm:^7.3.6":
   version: 7.3.6
   resolution: "vite@npm:7.3.6"
   dependencies:
@@ -6928,7 +6928,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vitest@npm:^4.0.15":
+"vitest@npm:^4.0.15, vitest@npm:^4.1.10":
   version: 4.1.10
   resolution: "vitest@npm:4.1.10"
   dependencies:
