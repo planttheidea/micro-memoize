@@ -2,7 +2,8 @@
 
 ## 5.1.2
 
-- [#157](https://github.com/planttheidea/micro-memoize/pull/157) - Resolve TS2846 and TS2503 errors from type definitions (fixes [#156](https://github.com/planttheidea/micro-memoize/issues/156))
+- [#157](https://github.com/planttheidea/micro-memoize/pull/157) - Resolve TS2846 and TS2503 errors from type
+  definitions (fixes [#156](https://github.com/planttheidea/micro-memoize/issues/156))
 
 ## 5.1.1
 
