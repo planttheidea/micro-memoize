@@ -1,3 +1,6 @@
 import { createRollupConfig } from '@planttheidea/build-tools';
 
-export default createRollupConfig();
+export default createRollupConfig({
+  sourceMap: true,
+  umd: true,
+});
