@@ -21,7 +21,6 @@
     "target": "ES2015",
     "verbatimModuleSyntax": true,
     "types": [],
-    "baseUrl": "src",
     "inlineSources": true,
     "outDir": "dist",
     "rootDir": "./"
