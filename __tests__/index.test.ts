@@ -1055,7 +1055,7 @@ describe('documentation examples', () => {
 
     expect(ignoreFunctionArg).toHaveBeenCalledTimes(1);
     expect(memoized.cache.snapshot.entries).toEqual([
-      [['["one","() => {\\n    }"]'], { one: 'one', two: expect.any(Function) }],
+      [['["one","() => {}"]'], { one: 'one', two: expect.any(Function) }],
     ]);
     expect(memoized.cache.get(['one', () => {}])).toEqual({
       one: 'one',
