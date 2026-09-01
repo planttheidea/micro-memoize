@@ -46,7 +46,7 @@
     "release-it": "^21.0.2",
     "rollup": "^4.63.1",
     "tinybench": "^6.1.4",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "typescript-eslint": "^8.69.0",
     "underscore": "^1.13.8",
     "vite": "^8.2.2",
