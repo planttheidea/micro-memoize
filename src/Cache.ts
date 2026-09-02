@@ -99,6 +99,30 @@ export class Cache<Fn extends (...args: any[]) => any> {
     }
 
     const emitter = this.o;
+
+    // The walk below exists only so that a node can recognize itself as removed later. The
+    // handlers attached in `w` are the only thing that holds a node beyond the call that
+    // created it, so a synchronous cache with nothing listening can never see one of these
+    // nodes again, and the entries can simply be dropped.
+    if (!emitter && !this.p) {
+      this.h = this.t = undefined;
+      this.c = 0;
+
+      return;
+    }
+
+    if (this.s === 1) {
+      // A single-entry cache holds no list to walk.
+      this.h = this.t = undefined;
+      this.c = 0;
+
+      node.r = true;
+
+      emitter && emitter.n('delete', node, reason);
+
+      return;
+    }
+
     const nodes: Array<CacheNode<Fn>> | undefined = emitter ? [] : undefined;
 
     // Each node must be marked as [r]emoved and unlinked from its neighbors, otherwise any

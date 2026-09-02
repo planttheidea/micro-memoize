@@ -1392,8 +1392,28 @@ describe('cache invalidation integrity', () => {
     expect(memoized.cache.snapshot.keys).toEqual([[2], [1]]);
   });
 
-  test('releases the neighbors of a node removed from cache', () => {
+  test('releases the neighbors of a deleted node', () => {
     const memoized = memoize((value: number) => value, { maxSize: 3 });
+
+    memoized(1);
+    memoized(2);
+    memoized(3);
+
+    const deleted = memoized.cache.h!;
+
+    memoized.cache.delete([3]);
+
+    // Holding a deleted node must not hold the rest of the list alive with it.
+    expect(deleted.n).toBeUndefined();
+    expect(deleted.p).toBeUndefined();
+    expect(deleted.r).toBe(true);
+  });
+
+  test('releases the neighbors on clear when a node can outlive the cache', () => {
+    // An async cache hands node references to its promise handlers, so a cleared node can
+    // still be reached and has to be marked and unlinked. A synchronous cache with nothing
+    // listening drops the whole graph at once and skips that walk.
+    const memoized = memoize((value: number) => Promise.resolve(value), { async: true, maxSize: 3 });
 
     memoized(1);
     memoized(2);
@@ -1402,13 +1422,51 @@ describe('cache invalidation integrity', () => {
     const head = memoized.cache.h!;
     const tail = memoized.cache.t!;
 
-    memoized.cache.delete([3]);
     memoized.cache.clear();
 
     expect(head.n).toBeUndefined();
     expect(head.p).toBeUndefined();
+    expect(head.r).toBe(true);
     expect(tail.n).toBeUndefined();
     expect(tail.p).toBeUndefined();
+    expect(tail.r).toBe(true);
+  });
+
+  test('clears a synchronous cache with no listeners', () => {
+    const memoized = memoize((value: number) => value, { maxSize: 3 });
+
+    memoized(1);
+    memoized(2);
+    memoized(3);
+
+    memoized.cache.clear();
+
+    expect(memoized.cache.size).toBe(0);
+    expect(memoized.cache.h).toBeUndefined();
+    expect(memoized.cache.t).toBeUndefined();
+    expect(memoized.cache.snapshot.keys).toEqual([]);
+    expect(memoized.cache.has([1])).toBe(false);
+
+    memoized(4);
+
+    expect(memoized.cache.size).toBe(1);
+    expect(memoized.cache.snapshot.keys).toEqual([[4]]);
+  });
+
+  test('emits a delete for every entry when clearing a single-entry cache', () => {
+    const memoized = memoize((value: number) => value);
+    const deleteSpy = vi.fn();
+
+    memoized.cache.on('delete', deleteSpy);
+
+    memoized(1);
+    memoized.cache.clear();
+
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
+    expect(deleteSpy.mock.calls[0]![0]).toMatchObject({ key: [1], reason: 'explicit clear', type: 'delete' });
+    expect(memoized.cache.size).toBe(0);
+    expect(memoized.cache.h).toBeUndefined();
+    expect(memoized.cache.t).toBeUndefined();
   });
 });
 
