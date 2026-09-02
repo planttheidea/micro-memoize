@@ -187,9 +187,12 @@ declare class StatsManager<Fn extends (...args: any[]) => any> {
     p: ProfileCounts;
     constructor(cache: Cache<Fn>, statsName: string);
     /**
-     * Method to compute the [m]etrics for the profile stats.
+     * Stop collecting stats for this profile and remove it from the stats registry.
+     *
+     * Profiles are held for the lifetime of the process otherwise, so this is required to
+     * release a memoized method (and everything its cache retains) when it is no longer used.
      */
-    m(): ProfileStats;
+    dispose(): void;
     /**
      * Method to [r]eset the counts.
      */
@@ -202,6 +205,10 @@ declare class StatsManager<Fn extends (...args: any[]) => any> {
 /**
  * Clear all existing stats stored, either of the specific profile whose name is passed,
  * or globally if no name is passed.
+ *
+ * @NOTE
+ * This resets the counts collected; the profiles themselves remain registered and continue
+ * collecting. Use `memoized.statsManager.dispose()` to remove a profile entirely.
  */
 declare function clearStats(statsName?: string): void;
 /**

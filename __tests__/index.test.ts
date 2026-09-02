@@ -1313,3 +1313,101 @@ describe('cache mutation methods', () => {
     expect(persistentHitSpy).toHaveBeenCalledTimes(4);
   });
 });
+
+describe('cache invalidation integrity', () => {
+  test('does not restore cleared entries when an async entry rejects after the clear', async () => {
+    const rejects: Array<(error: Error) => void> = [];
+    const memoized = memoize(
+      (_value: number) =>
+        new Promise((_resolve, reject) => {
+          rejects.push(reject);
+        }),
+      { async: true, maxSize: 5 },
+    );
+
+    [1, 2, 3].forEach((value) => {
+      memoized(value).catch(() => undefined);
+    });
+
+    expect(memoized.cache.size).toBe(3);
+
+    memoized.cache.clear();
+
+    expect(memoized.cache.size).toBe(0);
+
+    // Reject the node that was the head of the list; before it was marked as removed, its
+    // stale `n` pointer would be reinstated as the head of the cache.
+    rejects[2]!(new Error('rejected'));
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(memoized.cache.size).toBe(0);
+    expect(memoized.cache.snapshot.keys).toEqual([]);
+    expect(memoized.cache.has([1])).toBe(false);
+    expect(memoized.cache.has([2])).toBe(false);
+  });
+
+  test('does not notify of an update when an async entry resolves after the clear', async () => {
+    let resolvePending: (value: number) => void = () => undefined;
+
+    const memoized = memoize(
+      (_value: number) =>
+        new Promise((resolve) => {
+          resolvePending = resolve;
+        }),
+      { async: true },
+    );
+
+    const pending = memoized(1);
+
+    const updateSpy = vi.fn();
+    memoized.cache.on('update', updateSpy);
+
+    memoized.cache.clear();
+
+    resolvePending(1);
+
+    await pending;
+
+    expect(updateSpy).not.toHaveBeenCalled();
+    expect(memoized.cache.size).toBe(0);
+  });
+
+  test('ignores a repeated delete of the same node', () => {
+    const memoized = memoize((value: number) => value, { maxSize: 3 });
+
+    memoized(1);
+    memoized(2);
+    memoized(3);
+
+    const node = memoized.cache.h!;
+
+    memoized.cache.d(node, 'first');
+
+    expect(memoized.cache.size).toBe(2);
+
+    memoized.cache.d(node, 'second');
+
+    expect(memoized.cache.size).toBe(2);
+    expect(memoized.cache.snapshot.keys).toEqual([[2], [1]]);
+  });
+
+  test('releases the neighbors of a node removed from cache', () => {
+    const memoized = memoize((value: number) => value, { maxSize: 3 });
+
+    memoized(1);
+    memoized(2);
+    memoized(3);
+
+    const head = memoized.cache.h!;
+    const tail = memoized.cache.t!;
+
+    memoized.cache.delete([3]);
+    memoized.cache.clear();
+
+    expect(head.n).toBeUndefined();
+    expect(head.p).toBeUndefined();
+    expect(tail.n).toBeUndefined();
+    expect(tail.p).toBeUndefined();
+  });
+});

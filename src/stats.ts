@@ -6,6 +6,9 @@ interface ProfileCounts {
   h: number;
 }
 
+/**
+ * Registry of every live profile, keyed by its resolved name.
+ */
 const nameToProfile = new Map<string, StatsManager<any>>();
 
 let active = false;
@@ -30,9 +33,11 @@ export class StatsManager<Fn extends (...args: any[]) => any> {
 
   constructor(cache: Cache<Fn>, statsName: string) {
     this.c = cache;
-    this.n = statsName;
+    // Two memoized methods asking for the same name are still two separate methods, so the
+    // later one is numbered rather than replacing the profile of the earlier.
+    this.n = getAvailableName(statsName);
 
-    nameToProfile.set(statsName, this);
+    nameToProfile.set(this.n, this);
 
     if (active) {
       this.s();
@@ -40,13 +45,15 @@ export class StatsManager<Fn extends (...args: any[]) => any> {
   }
 
   /**
-   * Method to compute the [m]etrics for the profile stats.
+   * Stop collecting stats for this profile and remove it from the stats registry.
+   *
+   * Profiles are held for the lifetime of the process otherwise, so this is required to
+   * release a memoized method (and everything its cache retains) when it is no longer used.
    */
-  m(): ProfileStats {
-    const { c: calls, h: hits } = this.p;
-    const usage = calls ? `${((hits / calls) * 100).toFixed(4)}%` : '0.0000%';
+  dispose(): void {
+    this.d?.();
 
-    return { calls, hits, name: this.n, usage };
+    nameToProfile.delete(this.n);
   }
 
   /**
@@ -85,20 +92,22 @@ export class StatsManager<Fn extends (...args: any[]) => any> {
 /**
  * Clear all existing stats stored, either of the specific profile whose name is passed,
  * or globally if no name is passed.
+ *
+ * @NOTE
+ * This resets the counts collected; the profiles themselves remain registered and continue
+ * collecting. Use `memoized.statsManager.dispose()` to remove a profile entirely.
  */
 export function clearStats(statsName?: string) {
   if (!active) {
     return;
   }
 
-  if (statsName) {
-    const statsManager = nameToProfile.get(statsName);
-
-    if (statsManager) {
-      statsManager.r();
-    }
+  if (statsName != null) {
+    nameToProfile.get(statsName)?.r();
   } else {
-    nameToProfile.clear();
+    nameToProfile.forEach((profile) => {
+      profile.r();
+    });
   }
 }
 
@@ -114,18 +123,8 @@ export function getStats<Name extends string | undefined>(
   }
 
   if (statsName != null) {
-    const statsManager = nameToProfile.get(statsName);
-
-    const profileStats: ProfileStats = statsManager?.p.c
-      ? statsManager.m()
-      : {
-          calls: 0,
-          hits: 0,
-          name: statsName,
-          usage: getUsagePercentage(0, 0),
-        };
     // @ts-expect-error - Conditional returns can be tricky.
-    return profileStats;
+    return getProfileStats(statsName, nameToProfile.get(statsName));
   }
 
   let calls = 0;
@@ -133,11 +132,13 @@ export function getStats<Name extends string | undefined>(
 
   const profiles: Record<string, ProfileStats> = {};
 
-  nameToProfile.forEach((profile, statsName) => {
-    profiles[statsName] = profile.m();
+  nameToProfile.forEach((profile, name) => {
+    const profileStats = getProfileStats(name, profile);
 
-    calls += profile.p.c;
-    hits += profile.p.h;
+    profiles[name] = profileStats;
+
+    calls += profileStats.calls;
+    hits += profileStats.hits;
   });
 
   const globalStats: GlobalStats = {
@@ -149,6 +150,30 @@ export function getStats<Name extends string | undefined>(
 
   // @ts-expect-error - Conditional returns can be tricky.
   return globalStats;
+}
+
+/**
+ * Get a name not already in use, numbering the one requested when it is taken.
+ */
+function getAvailableName(statsName: string): string {
+  let name = statsName;
+  let count = 1;
+
+  while (nameToProfile.has(name)) {
+    name = `${statsName} (${String(++count)})`;
+  }
+
+  return name;
+}
+
+/**
+ * Get the stats for the given profile.
+ */
+function getProfileStats(name: string, profile: StatsManager<any> | undefined): ProfileStats {
+  const calls = profile ? profile.p.c : 0;
+  const hits = profile ? profile.p.h : 0;
+
+  return { calls, hits, name, usage: getUsagePercentage(calls, hits) };
 }
 
 /**

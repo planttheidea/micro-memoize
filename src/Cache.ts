@@ -92,23 +92,27 @@ export class Cache<Fn extends (...args: any[]) => any> {
    * Clear the cache.
    */
   clear(reason = 'explicit clear'): void {
-    if (!this.h) {
+    let node: CacheNode<Fn> | undefined = this.h;
+
+    if (!node) {
       return;
     }
 
     const emitter = this.o;
+    const nodes: Array<CacheNode<Fn>> | undefined = emitter ? [] : undefined;
 
-    let nodes: Array<CacheNode<Fn>> | undefined;
+    // Each node must be marked as [r]emoved and unlinked from its neighbors, otherwise any
+    // deferred operation still holding a reference to it (an async entry that settles after
+    // the clear, for example) can rewire the discarded list back into the cache.
+    while (node != null) {
+      const next: CacheNode<Fn> | undefined = node.n;
 
-    if (emitter) {
-      nodes = [];
+      node.n = node.p = undefined;
+      node.r = true;
 
-      let node: CacheNode<Fn> | undefined = this.h;
+      nodes && nodes.push(node);
 
-      while (node != null) {
-        nodes.push(node);
-        node = node.n;
-      }
+      node = next;
     }
 
     this.h = this.t = undefined;
@@ -205,6 +209,12 @@ export class Cache<Fn extends (...args: any[]) => any> {
    * Method to [d]elete the given `node` from the cache.
    */
   d(node: CacheNode<Fn>, reason: string): void {
+    if (node.r) {
+      // Already removed from cache; re-running the unlink against its stale neighbors would
+      // corrupt the list and drive the count below zero.
+      return;
+    }
+
     const next = node.n;
     const prev = node.p;
 
@@ -222,6 +232,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
 
     --this.c;
 
+    node.n = node.p = undefined;
     node.r = true;
 
     this.o && this.o.n('delete', node, reason);
