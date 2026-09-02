@@ -114,6 +114,18 @@ declare class Cache<Fn extends (...args: any[]) => any> {
      * entry if it rejects.
      */
     w(node: CacheNode<Fn>): ReturnType<Fn>;
+    /**
+     * Method to create a new node for a single-entry cache, the default and most common
+     * configuration.
+     *
+     * A cache of this si[z]e is never a list: there is nothing to link the new node to, nothing
+     * to count, and the entry it replaces can be evicted outright instead of being spliced out.
+     *
+     * @NOTE
+     * This leaves the cache in the same shape a single-entry list would have, so the general
+     * methods (`set`, `delete`, `clear`) continue to operate on it correctly.
+     */
+    z(key: Key, value: ReturnType<Fn>, reason?: string): CacheNode<Fn>;
 }
 
 declare class ExpirationManager<Fn extends (...args: any[]) => any> {

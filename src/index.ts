@@ -38,21 +38,40 @@ function createMemoizedMethod<Fn extends (...args: any) => any, Opts extends Opt
   cache: Cache<Fn>,
   forceUpdate: Opts['forceUpdate'],
 ): Memoized<Fn, Opts> {
-  const memoized = function memoized(this: any, ...args: Parameters<Fn>): ReturnType<Fn> {
-    const key: Key = cache.k ? cache.k(args) : args;
+  // A single-entry cache is the default and by far the most common configuration, and it has
+  // no list to search or reorder: the only entry held is either the one requested or the one
+  // being replaced. Specializing it here skips the search in `cache.g`, the recency update in
+  // `cache.u`, and the size bookkeeping in `cache.n` entirely.
+  const memoized = (
+    cache.s === 1
+      ? function memoized(this: any, ...args: Parameters<Fn>): ReturnType<Fn> {
+          const key: Key = cache.k ? cache.k(args) : args;
+          const node = cache.h;
 
-    let node = cache.g(key);
+          if (node && cache.e(node.k, key)) {
+            cache.o && cache.o.n('hit', node);
 
-    if (!node) {
-      node = cache.n(key, fn.apply(this, args) as ReturnType<Fn>);
-    } else if (node !== cache.h) {
-      cache.u(node, undefined, true);
-    } else if (cache.o) {
-      cache.o.n('hit', node);
-    }
+            return node.v;
+          }
 
-    return node.v;
-  } as Memoized<Fn, Opts>;
+          return cache.z(key, fn.apply(this, args) as ReturnType<Fn>).v;
+        }
+      : function memoized(this: any, ...args: Parameters<Fn>): ReturnType<Fn> {
+          const key: Key = cache.k ? cache.k(args) : args;
+
+          let node = cache.g(key);
+
+          if (!node) {
+            node = cache.n(key, fn.apply(this, args) as ReturnType<Fn>);
+          } else if (node !== cache.h) {
+            cache.u(node, undefined, true);
+          } else if (cache.o) {
+            cache.o.n('hit', node);
+          }
+
+          return node.v;
+        }
+  ) as Memoized<Fn, Opts>;
 
   if (!forceUpdate) {
     return memoized;

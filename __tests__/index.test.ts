@@ -1411,3 +1411,102 @@ describe('cache invalidation integrity', () => {
     expect(tail.p).toBeUndefined();
   });
 });
+
+describe('single-entry cache fast path', () => {
+  test('emits the eviction before the addition when replacing the only entry', () => {
+    const memoized = memoize((value: number) => value);
+    const events: string[] = [];
+
+    memoized.cache.on('add', ({ key, reason }) => {
+      events.push(`add:${String(key[0])}:${String(reason)}`);
+    });
+    memoized.cache.on('delete', ({ key, reason }) => {
+      events.push(`delete:${String(key[0])}:${String(reason)}`);
+    });
+
+    memoized(1);
+    memoized(2);
+
+    expect(events).toEqual(['add:1:undefined', 'delete:1:evicted', 'add:2:undefined']);
+    expect(memoized.cache.size).toBe(1);
+    expect(memoized.cache.snapshot.keys).toEqual([[2]]);
+  });
+
+  test('keeps head, tail and size consistent across repeated replacement', () => {
+    const memoized = memoize((value: number) => value * 2);
+
+    for (let index = 0; index < 5; ++index) {
+      expect(memoized(index)).toBe(index * 2);
+      expect(memoized.cache.size).toBe(1);
+      expect(memoized.cache.h).toBe(memoized.cache.t);
+      expect(memoized.cache.h!.n).toBeUndefined();
+      expect(memoized.cache.h!.p).toBeUndefined();
+    }
+
+    expect(memoized.cache.snapshot).toEqual({
+      entries: [[[4], 8]],
+      keys: [[4]],
+      size: 1,
+      values: [8],
+    });
+  });
+
+  test('still supports the general cache methods after the fast path has run', () => {
+    const memoized = memoize((value: number) => value);
+
+    memoized(1);
+    memoized(2);
+
+    memoized.cache.set([3], 30);
+
+    expect(memoized.cache.size).toBe(1);
+    expect(memoized.cache.get([3])).toBe(30);
+
+    expect(memoized.cache.delete([3])).toBe(true);
+    expect(memoized.cache.size).toBe(0);
+    expect(memoized.cache.h).toBeUndefined();
+    expect(memoized.cache.t).toBeUndefined();
+
+    expect(memoized(4)).toBe(4);
+    expect(memoized.cache.size).toBe(1);
+
+    memoized.cache.clear();
+
+    expect(memoized.cache.size).toBe(0);
+    expect(memoized.cache.snapshot.keys).toEqual([]);
+  });
+
+  test('removes the only entry when its promise rejects', async () => {
+    const memoized = memoize((value: number) => Promise.reject(new Error(`nope ${value}`)), { async: true });
+
+    await expect(memoized(1)).rejects.toThrow('nope 1');
+
+    expect(memoized.cache.size).toBe(0);
+    expect(memoized.cache.h).toBeUndefined();
+    expect(memoized.cache.t).toBeUndefined();
+  });
+
+  test('does not remove a replacement entry when the entry it replaced rejects', async () => {
+    const rejects: Array<(error: Error) => void> = [];
+    const memoized = memoize(
+      (_value: number) =>
+        new Promise((_resolve, reject) => {
+          rejects.push(reject);
+        }),
+      { async: true },
+    );
+
+    const first = memoized(1);
+    first.catch(() => undefined);
+
+    memoized(2).catch(() => undefined);
+
+    // `1` was evicted by `2`; its rejection must not disturb the entry now held.
+    rejects[0]!(new Error('nope'));
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(memoized.cache.size).toBe(1);
+    expect(memoized.cache.snapshot.keys).toEqual([[2]]);
+  });
+});

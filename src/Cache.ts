@@ -360,6 +360,39 @@ export class Cache<Fn extends (...args: any[]) => any> {
       },
     );
   }
+
+  /**
+   * Method to create a new node for a single-entry cache, the default and most common
+   * configuration.
+   *
+   * A cache of this si[z]e is never a list: there is nothing to link the new node to, nothing
+   * to count, and the entry it replaces can be evicted outright instead of being spliced out.
+   *
+   * @NOTE
+   * This leaves the cache in the same shape a single-entry list would have, so the general
+   * methods (`set`, `delete`, `clear`) continue to operate on it correctly.
+   */
+  z(key: Key, value: ReturnType<Fn>, reason?: string): CacheNode<Fn> {
+    const prevHead = this.h;
+    const node = { k: key, n: undefined, p: undefined, v: value };
+
+    if (this.p) {
+      node.v = this.w(node);
+    }
+
+    this.h = this.t = node;
+    this.c = 1;
+
+    if (prevHead) {
+      prevHead.r = true;
+
+      this.o && this.o.n('delete', prevHead, 'evicted');
+    }
+
+    this.o && this.o.n('add', node, reason);
+
+    return node;
+  }
 }
 
 function getIsKeyEqual<Fn extends (...args: any[]) => any>({
