@@ -1,5 +1,19 @@
 # micro-memoize CHANGELOG
 
+## 5.2.0
+
+### Enhancements
+
+- Specialized handling for the default `maxSize` of 1, which has no list to search or reorder
+- Avoid walking the cache on `clear()` when no entry can outlive it
+- Added `dispose()` to the stats manager, to deregister a profile and release the cache it retains
+
+### Fixes
+
+- Fix cleared entries being restored when an `async` entry rejects after the `clear()`
+- Fix `clearStats()` unregistering profiles instead of resetting their counts
+- Fix memoized methods sharing a `statsName` replacing one another instead of being numbered (`foo (2)`)
+
 ## 5.1.2
 
 - [#157](https://github.com/planttheidea/micro-memoize/pull/157) - Resolve TS2846 and TS2503 errors from type
