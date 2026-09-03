@@ -114,6 +114,18 @@ declare class Cache<Fn extends (...args: any[]) => any> {
      * entry if it rejects.
      */
     w(node: CacheNode<Fn>): ReturnType<Fn>;
+    /**
+     * Method to create a new node for a single-entry cache, the default and most common
+     * configuration.
+     *
+     * A cache of this si[z]e is never a list: there is nothing to link the new node to, nothing
+     * to count, and the entry it replaces can be evicted outright instead of being spliced out.
+     *
+     * @NOTE
+     * This leaves the cache in the same shape a single-entry list would have, so the general
+     * methods (`set`, `delete`, `clear`) continue to operate on it correctly.
+     */
+    z(key: Key, value: ReturnType<Fn>, reason?: string): CacheNode<Fn>;
 }
 
 declare class ExpirationManager<Fn extends (...args: any[]) => any> {
@@ -187,9 +199,12 @@ declare class StatsManager<Fn extends (...args: any[]) => any> {
     p: ProfileCounts;
     constructor(cache: Cache<Fn>, statsName: string);
     /**
-     * Method to compute the [m]etrics for the profile stats.
+     * Stop collecting stats for this profile and remove it from the stats registry.
+     *
+     * Profiles are held for the lifetime of the process otherwise, so this is required to
+     * release a memoized method (and everything its cache retains) when it is no longer used.
      */
-    m(): ProfileStats;
+    dispose(): void;
     /**
      * Method to [r]eset the counts.
      */
@@ -202,6 +217,10 @@ declare class StatsManager<Fn extends (...args: any[]) => any> {
 /**
  * Clear all existing stats stored, either of the specific profile whose name is passed,
  * or globally if no name is passed.
+ *
+ * @NOTE
+ * This resets the counts collected; the profiles themselves remain registered and continue
+ * collecting. Use `memoized.statsManager.dispose()` to remove a profile entirely.
  */
 declare function clearStats(statsName?: string): void;
 /**

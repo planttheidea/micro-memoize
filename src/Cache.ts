@@ -92,23 +92,51 @@ export class Cache<Fn extends (...args: any[]) => any> {
    * Clear the cache.
    */
   clear(reason = 'explicit clear'): void {
-    if (!this.h) {
+    let node: CacheNode<Fn> | undefined = this.h;
+
+    if (!node) {
       return;
     }
 
     const emitter = this.o;
 
-    let nodes: Array<CacheNode<Fn>> | undefined;
+    // The walk below exists only so that a node can recognize itself as removed later. The
+    // handlers attached in `w` are the only thing that holds a node beyond the call that
+    // created it, so a synchronous cache with nothing listening can never see one of these
+    // nodes again, and the entries can simply be dropped.
+    if (!emitter && !this.p) {
+      this.h = this.t = undefined;
+      this.c = 0;
 
-    if (emitter) {
-      nodes = [];
+      return;
+    }
 
-      let node: CacheNode<Fn> | undefined = this.h;
+    if (this.s === 1) {
+      // A single-entry cache holds no list to walk.
+      this.h = this.t = undefined;
+      this.c = 0;
 
-      while (node != null) {
-        nodes.push(node);
-        node = node.n;
-      }
+      node.r = true;
+
+      emitter && emitter.n('delete', node, reason);
+
+      return;
+    }
+
+    const nodes: Array<CacheNode<Fn>> | undefined = emitter ? [] : undefined;
+
+    // Each node must be marked as [r]emoved and unlinked from its neighbors, otherwise any
+    // deferred operation still holding a reference to it (an async entry that settles after
+    // the clear, for example) can rewire the discarded list back into the cache.
+    while (node != null) {
+      const next: CacheNode<Fn> | undefined = node.n;
+
+      node.n = node.p = undefined;
+      node.r = true;
+
+      nodes && nodes.push(node);
+
+      node = next;
     }
 
     this.h = this.t = undefined;
@@ -205,6 +233,12 @@ export class Cache<Fn extends (...args: any[]) => any> {
    * Method to [d]elete the given `node` from the cache.
    */
   d(node: CacheNode<Fn>, reason: string): void {
+    if (node.r) {
+      // Already removed from cache; re-running the unlink against its stale neighbors would
+      // corrupt the list and drive the count below zero.
+      return;
+    }
+
     const next = node.n;
     const prev = node.p;
 
@@ -222,6 +256,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
 
     --this.c;
 
+    node.n = node.p = undefined;
     node.r = true;
 
     this.o && this.o.n('delete', node, reason);
@@ -348,6 +383,39 @@ export class Cache<Fn extends (...args: any[]) => any> {
         throw error;
       },
     );
+  }
+
+  /**
+   * Method to create a new node for a single-entry cache, the default and most common
+   * configuration.
+   *
+   * A cache of this si[z]e is never a list: there is nothing to link the new node to, nothing
+   * to count, and the entry it replaces can be evicted outright instead of being spliced out.
+   *
+   * @NOTE
+   * This leaves the cache in the same shape a single-entry list would have, so the general
+   * methods (`set`, `delete`, `clear`) continue to operate on it correctly.
+   */
+  z(key: Key, value: ReturnType<Fn>, reason?: string): CacheNode<Fn> {
+    const prevHead = this.h;
+    const node = { k: key, n: undefined, p: undefined, v: value };
+
+    if (this.p) {
+      node.v = this.w(node);
+    }
+
+    this.h = this.t = node;
+    this.c = 1;
+
+    if (prevHead) {
+      prevHead.r = true;
+
+      this.o && this.o.n('delete', prevHead, 'evicted');
+    }
+
+    this.o && this.o.n('add', node, reason);
+
+    return node;
   }
 }
 

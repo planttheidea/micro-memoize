@@ -1313,3 +1313,258 @@ describe('cache mutation methods', () => {
     expect(persistentHitSpy).toHaveBeenCalledTimes(4);
   });
 });
+
+describe('cache invalidation integrity', () => {
+  test('does not restore cleared entries when an async entry rejects after the clear', async () => {
+    const rejects: Array<(error: Error) => void> = [];
+    const memoized = memoize(
+      (_value: number) =>
+        new Promise((_resolve, reject) => {
+          rejects.push(reject);
+        }),
+      { async: true, maxSize: 5 },
+    );
+
+    [1, 2, 3].forEach((value) => {
+      memoized(value).catch(() => undefined);
+    });
+
+    expect(memoized.cache.size).toBe(3);
+
+    memoized.cache.clear();
+
+    expect(memoized.cache.size).toBe(0);
+
+    // Reject the node that was the head of the list; before it was marked as removed, its
+    // stale `n` pointer would be reinstated as the head of the cache.
+    rejects[2]!(new Error('rejected'));
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(memoized.cache.size).toBe(0);
+    expect(memoized.cache.snapshot.keys).toEqual([]);
+    expect(memoized.cache.has([1])).toBe(false);
+    expect(memoized.cache.has([2])).toBe(false);
+  });
+
+  test('does not notify of an update when an async entry resolves after the clear', async () => {
+    let resolvePending: (value: number) => void = () => undefined;
+
+    const memoized = memoize(
+      (_value: number) =>
+        new Promise((resolve) => {
+          resolvePending = resolve;
+        }),
+      { async: true },
+    );
+
+    const pending = memoized(1);
+
+    const updateSpy = vi.fn();
+    memoized.cache.on('update', updateSpy);
+
+    memoized.cache.clear();
+
+    resolvePending(1);
+
+    await pending;
+
+    expect(updateSpy).not.toHaveBeenCalled();
+    expect(memoized.cache.size).toBe(0);
+  });
+
+  test('ignores a repeated delete of the same node', () => {
+    const memoized = memoize((value: number) => value, { maxSize: 3 });
+
+    memoized(1);
+    memoized(2);
+    memoized(3);
+
+    const node = memoized.cache.h!;
+
+    memoized.cache.d(node, 'first');
+
+    expect(memoized.cache.size).toBe(2);
+
+    memoized.cache.d(node, 'second');
+
+    expect(memoized.cache.size).toBe(2);
+    expect(memoized.cache.snapshot.keys).toEqual([[2], [1]]);
+  });
+
+  test('releases the neighbors of a deleted node', () => {
+    const memoized = memoize((value: number) => value, { maxSize: 3 });
+
+    memoized(1);
+    memoized(2);
+    memoized(3);
+
+    const deleted = memoized.cache.h!;
+
+    memoized.cache.delete([3]);
+
+    // Holding a deleted node must not hold the rest of the list alive with it.
+    expect(deleted.n).toBeUndefined();
+    expect(deleted.p).toBeUndefined();
+    expect(deleted.r).toBe(true);
+  });
+
+  test('releases the neighbors on clear when a node can outlive the cache', () => {
+    // An async cache hands node references to its promise handlers, so a cleared node can
+    // still be reached and has to be marked and unlinked. A synchronous cache with nothing
+    // listening drops the whole graph at once and skips that walk.
+    const memoized = memoize((value: number) => Promise.resolve(value), { async: true, maxSize: 3 });
+
+    memoized(1);
+    memoized(2);
+    memoized(3);
+
+    const head = memoized.cache.h!;
+    const tail = memoized.cache.t!;
+
+    memoized.cache.clear();
+
+    expect(head.n).toBeUndefined();
+    expect(head.p).toBeUndefined();
+    expect(head.r).toBe(true);
+    expect(tail.n).toBeUndefined();
+    expect(tail.p).toBeUndefined();
+    expect(tail.r).toBe(true);
+  });
+
+  test('clears a synchronous cache with no listeners', () => {
+    const memoized = memoize((value: number) => value, { maxSize: 3 });
+
+    memoized(1);
+    memoized(2);
+    memoized(3);
+
+    memoized.cache.clear();
+
+    expect(memoized.cache.size).toBe(0);
+    expect(memoized.cache.h).toBeUndefined();
+    expect(memoized.cache.t).toBeUndefined();
+    expect(memoized.cache.snapshot.keys).toEqual([]);
+    expect(memoized.cache.has([1])).toBe(false);
+
+    memoized(4);
+
+    expect(memoized.cache.size).toBe(1);
+    expect(memoized.cache.snapshot.keys).toEqual([[4]]);
+  });
+
+  test('emits a delete for every entry when clearing a single-entry cache', () => {
+    const memoized = memoize((value: number) => value);
+    const deleteSpy = vi.fn();
+
+    memoized.cache.on('delete', deleteSpy);
+
+    memoized(1);
+    memoized.cache.clear();
+
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
+    expect(deleteSpy.mock.calls[0]![0]).toMatchObject({ key: [1], reason: 'explicit clear', type: 'delete' });
+    expect(memoized.cache.size).toBe(0);
+    expect(memoized.cache.h).toBeUndefined();
+    expect(memoized.cache.t).toBeUndefined();
+  });
+});
+
+describe('single-entry cache fast path', () => {
+  test('emits the eviction before the addition when replacing the only entry', () => {
+    const memoized = memoize((value: number) => value);
+    const events: string[] = [];
+
+    memoized.cache.on('add', ({ key, reason }) => {
+      events.push(`add:${String(key[0])}:${String(reason)}`);
+    });
+    memoized.cache.on('delete', ({ key, reason }) => {
+      events.push(`delete:${String(key[0])}:${String(reason)}`);
+    });
+
+    memoized(1);
+    memoized(2);
+
+    expect(events).toEqual(['add:1:undefined', 'delete:1:evicted', 'add:2:undefined']);
+    expect(memoized.cache.size).toBe(1);
+    expect(memoized.cache.snapshot.keys).toEqual([[2]]);
+  });
+
+  test('keeps head, tail and size consistent across repeated replacement', () => {
+    const memoized = memoize((value: number) => value * 2);
+
+    for (let index = 0; index < 5; ++index) {
+      expect(memoized(index)).toBe(index * 2);
+      expect(memoized.cache.size).toBe(1);
+      expect(memoized.cache.h).toBe(memoized.cache.t);
+      expect(memoized.cache.h!.n).toBeUndefined();
+      expect(memoized.cache.h!.p).toBeUndefined();
+    }
+
+    expect(memoized.cache.snapshot).toEqual({
+      entries: [[[4], 8]],
+      keys: [[4]],
+      size: 1,
+      values: [8],
+    });
+  });
+
+  test('still supports the general cache methods after the fast path has run', () => {
+    const memoized = memoize((value: number) => value);
+
+    memoized(1);
+    memoized(2);
+
+    memoized.cache.set([3], 30);
+
+    expect(memoized.cache.size).toBe(1);
+    expect(memoized.cache.get([3])).toBe(30);
+
+    expect(memoized.cache.delete([3])).toBe(true);
+    expect(memoized.cache.size).toBe(0);
+    expect(memoized.cache.h).toBeUndefined();
+    expect(memoized.cache.t).toBeUndefined();
+
+    expect(memoized(4)).toBe(4);
+    expect(memoized.cache.size).toBe(1);
+
+    memoized.cache.clear();
+
+    expect(memoized.cache.size).toBe(0);
+    expect(memoized.cache.snapshot.keys).toEqual([]);
+  });
+
+  test('removes the only entry when its promise rejects', async () => {
+    const memoized = memoize((value: number) => Promise.reject(new Error(`nope ${value}`)), { async: true });
+
+    await expect(memoized(1)).rejects.toThrow('nope 1');
+
+    expect(memoized.cache.size).toBe(0);
+    expect(memoized.cache.h).toBeUndefined();
+    expect(memoized.cache.t).toBeUndefined();
+  });
+
+  test('does not remove a replacement entry when the entry it replaced rejects', async () => {
+    const rejects: Array<(error: Error) => void> = [];
+    const memoized = memoize(
+      (_value: number) =>
+        new Promise((_resolve, reject) => {
+          rejects.push(reject);
+        }),
+      { async: true },
+    );
+
+    const first = memoized(1);
+    first.catch(() => undefined);
+
+    memoized(2).catch(() => undefined);
+
+    // `1` was evicted by `2`; its rejection must not disturb the entry now held.
+    rejects[0]!(new Error('nope'));
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(memoized.cache.size).toBe(1);
+    expect(memoized.cache.snapshot.keys).toEqual([[2]]);
+  });
+});
