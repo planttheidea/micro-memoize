@@ -791,20 +791,20 @@ stopCollectingStats();
 
 ## Benchmarks
 
-All values provided are the number of operations per second (ops/sec) calculated by the
-[Benchmark suite](https://benchmarkjs.com/). Note that `underscore`, `lodash`, and `ramda` do not support
+All values provided are the number of operations per second (ops/sec) calculated by
+[tinybench](https://github.com/tinylibs/tinybench). Note that `underscore`, `lodash`, and `ramda` do not support
 mulitple-parameter memoization (which is where `micro-memoize` really shines), so they are not included in those
 benchmarks.
 
-Benchmarks was performed on an i9 16-core Linux laptop with 64GB of memory using NodeJS version `24.11.0`. The default
+Benchmarks was performed on an i9 16-core Linux laptop with 64GB of memory using NodeJS version `24.15.0`. The default
 configuration of each library was tested with a fibonacci calculation based on the following parameters:
 
-- Single primitive = `35`
-- Single array = `[35]`
-- Single object = `{ number: 35 }`
-- Multiple primitives = `35, true`
-- Multiple arrays = `[35], [true]`
-- Multiple objects = `{ number: 35 }, { isComplete: true }`
+- Single primitive = `25`
+- Single array = `[25]`
+- Single object = `{ number: 25 }`
+- Multiple primitives = `25, false`
+- Multiple arrays = `[25], [false]`
+- Multiple objects = `{ number: 25 }, { isComplete: false }`
 
 **NOTE**: Not all libraries tested support multiple parameters out of the box, but support the ability to pass a custom
 `resolver`. Because these often need to resolve to a string value,
@@ -817,25 +817,25 @@ is what is used when needed.
 ┌───────────────┬─────────────────┐
 │ Name          │ Ops / sec       │
 ├───────────────┼─────────────────┤
-│ micro-memoize │ 19223652.896122 │
+│ micro-memoize │ 19878405.869513 │
 ├───────────────┼─────────────────┤
-│ lru-memoize   │ 18832637.003931 │
+│ lru-memoize   │ 19502821.957062 │
 ├───────────────┼─────────────────┤
-│ fast-memoize  │ 18656534.751361 │
+│ fast-memoize  │ 19490029.447615 │
 ├───────────────┼─────────────────┤
-│ mem           │ 18002171.563837 │
+│ mem           │ 19279636.934769 │
 ├───────────────┼─────────────────┤
-│ lodash        │ 16593919.372016 │
+│ lodash        │ 15736616.801462 │
 ├───────────────┼─────────────────┤
-│ ramda         │ 15005783.713612 │
+│ ramda         │ 15687681.482776 │
 ├───────────────┼─────────────────┤
-│ addy osmani   │ 14595725.136778 │
+│ memoizee      │ 14749369.228334 │
 ├───────────────┼─────────────────┤
-│ underscore    │ 14394123.608684 │
+│ addy osmani   │ 14138487.10261  │
 ├───────────────┼─────────────────┤
-│ memoizee      │ 14143422.526051 │
+│ underscore    │ 13865374.036187 │
 ├───────────────┼─────────────────┤
-│ memoizerific  │ 9098305.800331  │
+│ memoizerific  │ 9199632.446672  │
 └───────────────┴─────────────────┘
 Fastest was "micro-memoize".
 
@@ -847,27 +847,28 @@ Fastest was "micro-memoize".
 ┌───────────────┬─────────────────┐
 │ Name          │ Ops / sec       │
 ├───────────────┼─────────────────┤
-│ micro-memoize │ 17778297.542508 │
+│ micro-memoize │ 18207906.508748 │
 ├───────────────┼─────────────────┤
-│ lodash        │ 16538329.518316 │
+│ lodash        │ 17089753.632004 │
 ├───────────────┼─────────────────┤
-│ lru-memoize   │ 15486317.927651 │
+│ lru-memoize   │ 16124168.757351 │
 ├───────────────┼─────────────────┤
-│ memoizee      │ 12094740.371154 │
+│ memoizee      │ 12625929.637213 │
 ├───────────────┼─────────────────┤
-│ memoizerific  │ 8539559.392909  │
+│ memoizerific  │ 9069719.223337  │
 ├───────────────┼─────────────────┤
-│ mem           │ 5084143.134978  │
+│ mem           │ 5755070.921705  │
 ├───────────────┼─────────────────┤
-│ ramda         │ 4779283.1256    │
+│ ramda         │ 5276088.346025  │
 ├───────────────┼─────────────────┤
-│ underscore    │ 4536871.295139  │
+│ underscore    │ 4993058.359933  │
 ├───────────────┼─────────────────┤
-│ addy osmani   │ 3930939.284558  │
+│ addy osmani   │ 4441016.626791  │
 ├───────────────┼─────────────────┤
-│ fast-memoize  │ 2280509.909947  │
+│ fast-memoize  │ 2956249.282323  │
 └───────────────┴─────────────────┘
 Fastest was "micro-memoize".
+
 ```
 
 ### Single object parameter
@@ -876,27 +877,28 @@ Fastest was "micro-memoize".
 ┌───────────────┬─────────────────┐
 │ Name          │ Ops / sec       │
 ├───────────────┼─────────────────┤
-│ micro-memoize │ 17660028.460248 │
+│ micro-memoize │ 17990445.065827 │
 ├───────────────┼─────────────────┤
-│ lodash        │ 16156245.220626 │
+│ lru-memoize   │ 16263269.18489  │
 ├───────────────┼─────────────────┤
-│ lru-memoize   │ 15870878.729231 │
+│ lodash        │ 16158739.12453  │
 ├───────────────┼─────────────────┤
-│ memoizee      │ 12282231.140112 │
+│ memoizee      │ 12375358.726362 │
 ├───────────────┼─────────────────┤
-│ memoizerific  │ 8673522.519546  │
+│ memoizerific  │ 8839399.636506  │
 ├───────────────┼─────────────────┤
-│ mem           │ 3990242.123108  │
+│ mem           │ 4438933.93951   │
 ├───────────────┼─────────────────┤
-│ ramda         │ 3740951.604329  │
+│ ramda         │ 4075165.112409  │
 ├───────────────┼─────────────────┤
-│ underscore    │ 3610838.023906  │
+│ underscore    │ 3951068.346673  │
 ├───────────────┼─────────────────┤
-│ addy osmani   │ 3091088.143196  │
+│ addy osmani   │ 3355307.945937  │
 ├───────────────┼─────────────────┤
-│ fast-memoize  │ 2037255.509585  │
+│ fast-memoize  │ 2557749.132062  │
 └───────────────┴─────────────────┘
 Fastest was "micro-memoize".
+
 ```
 
 ### Multiple primitive parameters
@@ -905,27 +907,28 @@ Fastest was "micro-memoize".
 ┌───────────────┬─────────────────┐
 │ Name          │ Ops / sec       │
 ├───────────────┼─────────────────┤
-│ micro-memoize │ 15890715.277889 │
+│ micro-memoize │ 16661302.548879 │
 ├───────────────┼─────────────────┤
-│ lru-memoize   │ 14795822.850331 │
+│ lru-memoize   │ 14879531.883346 │
 ├───────────────┼─────────────────┤
-│ memoizee      │ 8878241.434757  │
+│ memoizee      │ 9366968.363155  │
 ├───────────────┼─────────────────┤
-│ memoizerific  │ 6746446.702835  │
+│ memoizerific  │ 7445095.654414  │
 ├───────────────┼─────────────────┤
-│ addy osmani   │ 5088726.104365  │
+│ mem           │ 5460720.585562  │
 ├───────────────┼─────────────────┤
-│ mem           │ 4919428.914271  │
+│ addy osmani   │ 4903377.822876  │
 ├───────────────┼─────────────────┤
-│ ramda         │ 3931584.638274  │
+│ ramda         │ 4207163.662307  │
 ├───────────────┼─────────────────┤
-│ underscore    │ 3787236.410261  │
+│ underscore    │ 4113846.258468  │
 ├───────────────┼─────────────────┤
-│ lodash        │ 3521399.9522    │
+│ lodash        │ 3889607.988249  │
 ├───────────────┼─────────────────┤
-│ fast-memoize  │ 1921167.148268  │
+│ fast-memoize  │ 2248150.573838  │
 └───────────────┴─────────────────┘
 Fastest was "micro-memoize".
+
 ```
 
 ### Multiple array parameters
@@ -934,27 +937,28 @@ Fastest was "micro-memoize".
 ┌───────────────┬─────────────────┐
 │ Name          │ Ops / sec       │
 ├───────────────┼─────────────────┤
-│ micro-memoize │ 16477581.429235 │
+│ micro-memoize │ 16668684.33111  │
 ├───────────────┼─────────────────┤
-│ lru-memoize   │ 15973386.171668 │
+│ lru-memoize   │ 15782769.870912 │
 ├───────────────┼─────────────────┤
-│ memoizee      │ 8916765.084082  │
+│ memoizee      │ 9092493.003699  │
 ├───────────────┼─────────────────┤
-│ memoizerific  │ 7394462.762389  │
+│ memoizerific  │ 7768681.275842  │
 ├───────────────┼─────────────────┤
-│ mem           │ 4230286.398649  │
+│ mem           │ 4611769.035687  │
 ├───────────────┼─────────────────┤
-│ ramda         │ 3424812.638986  │
+│ ramda         │ 3844524.310138  │
 ├───────────────┼─────────────────┤
-│ underscore    │ 3271019.504488  │
+│ underscore    │ 3544635.721687  │
 ├───────────────┼─────────────────┤
-│ lodash        │ 3058024.57579   │
+│ lodash        │ 3443323.982287  │
 ├───────────────┼─────────────────┤
-│ addy osmani   │ 2556872.10781   │
+│ addy osmani   │ 2732158.515422  │
 ├───────────────┼─────────────────┤
-│ fast-memoize  │ 1664942.513511  │
+│ fast-memoize  │ 2071762.315914  │
 └───────────────┴─────────────────┘
 Fastest was "micro-memoize".
+
 ```
 
 ### Multiple object parameters
@@ -963,27 +967,28 @@ Fastest was "micro-memoize".
 ┌───────────────┬─────────────────┐
 │ Name          │ Ops / sec       │
 ├───────────────┼─────────────────┤
-│ micro-memoize │ 16816183.60597  │
+│ micro-memoize │ 14369200.463018 │
 ├───────────────┼─────────────────┤
-│ lru-memoize   │ 15847710.978627 │
+│ lru-memoize   │ 14333399.949079 │
 ├───────────────┼─────────────────┤
-│ memoizee      │ 8963861.306564  │
+│ memoizee      │ 8752485.371029  │
 ├───────────────┼─────────────────┤
-│ memoizerific  │ 7279084.235795  │
+│ memoizerific  │ 6903317.093568  │
 ├───────────────┼─────────────────┤
-│ mem           │ 2891756.11455   │
+│ mem           │ 3005085.159899  │
 ├───────────────┼─────────────────┤
-│ ramda         │ 2562787.384413  │
+│ lodash        │ 2624397.394368  │
 ├───────────────┼─────────────────┤
-│ underscore    │ 2508806.688495  │
+│ underscore    │ 2385132.287579  │
 ├───────────────┼─────────────────┤
-│ lodash        │ 2413141.440839  │
+│ ramda         │ 2372659.444672  │
 ├───────────────┼─────────────────┤
-│ addy osmani   │ 1882996.512818  │
+│ addy osmani   │ 2092282.102868  │
 ├───────────────┼─────────────────┤
-│ fast-memoize  │ 1431840.065495  │
+│ fast-memoize  │ 1722392.865214  │
 └───────────────┴─────────────────┘
 Fastest was "micro-memoize".
+
 ```
 
 ## Support
