@@ -84,11 +84,11 @@ console.log(memoized('one', 'two')); // pulled from cache
 
 const withUpToFive = memoize(memoized, { maxSize: 5 }); // { maxSize: 5 }
 const withAsync = memoize(withUpToFive, { async: true }); // { async: true, maxSize: 5 }
-const withCustomEquals = memoize(withAsync, { isEqual: deepEqual }); // { async: true, maxSize: 5, isEqual: deepEqual }
+const withCustomEquals = memoize(withAsync, { isKeyItemEqual: 'deep' }); // { async: true, maxSize: 5, isKeyItemEqual: 'deep' }
 ```
 
 **NOTE**: The original function is the function used in the composition, the composition only applies to the options. In
-the example above, `upToFive` does not call `simple`, it calls `fn`.
+the example above, `withUpToFive` does not call `memoized`, it calls `toObject`.
 
 ## Options
 
@@ -171,24 +171,26 @@ memoized has time-based side-effects.
 ```ts
 const fn = (item: string) => item;
 
+const MAX_AGE = 1000 * 60 * 5; // five minutes
 let lastUpdate = Date.now();
 
 const memoized = memoize(fn, {
-  forceUpdate([item]: [string]) {
+  forceUpdate() {
     const now = Date.now();
-    const last = lastUpdated;
+
+    if (now - lastUpdate < MAX_AGE) {
+      return false;
+    }
 
     lastUpdate = now;
-
-    // its been more than 5 minutes since last update
-    return last + 300000 < now;
+    return true;
   },
 });
 
 memoized('one');
 memoized('one'); // pulled from cache
 
-await Promise.resolve(() => setTimeout(resolve, MAX_AGE));
+await new Promise((resolve) => setTimeout(resolve, MAX_AGE));
 
 memoized('one'); // re-calls method and updates cache
 ```
@@ -205,13 +207,13 @@ type Arg = {
 
 const fn = ({ one, two }: Arg) => [one, two];
 
-const isFooEqualAndHasBar = (cacheKey: [Arg], key: [Arg]) =>
-  cacheKey[0].one === key[0].one && cacheKey[1].hasOwnProperty('two') && key[1].hasOwnProperty('two');
+const isFooEqualAndHasBar = (cacheKey: Arg[], key: Arg[]) =>
+  cacheKey[0].one === key[0].one && cacheKey[0].hasOwnProperty('two') && key[0].hasOwnProperty('two');
 
 const memoized = memoize(fn, { isKeyEqual: isFooEqualAndHasBar });
 
-memoized({ one: 'two' }, { two: null });
-memoized({ one: 'two' }, { two: 'three' }); // pulls from cache
+memoized({ one: 'two', two: null });
+memoized({ one: 'two', two: 'three' }); // pulls from cache
 ```
 
 ### isKeyItemEqual
@@ -239,16 +241,18 @@ deepMemoized({ one: { nested: 'one' }, two: 'two' }); // pulls from cache
 
 const shallowMemoized = memoize(fn, { isKeyItemEqual: 'shallow' });
 
-shallowMemoized({ one: 'one', two: 'two' });
-shallowMemoized({ one: 'one', two: 'two' }); // pulls from cache
+const one = { nested: 'one' };
 
-const customMemoized = memoize(fn, {
-    isKeyItemEqual: (cacheKeyArg: Arg, keyArg: Arg) =>
+shallowMemoized({ one, two: 'two' });
+shallowMemoized({ one, two: 'two' }); // pulls from cache
+
+const customMemoized = memoize((item: Record<string, string>) => item, {
+    isKeyItemEqual: (cacheKeyArg: Record<string, string>, keyArg: Record<string, string>) =>
         Object.keys(cacheKeyArg).length === 1 && Object.keys(keyArg).length === 1
     }
 );
 
-customMemoized({ one: 'two' };
+customMemoized({ one: 'two' });
 customMemoized({ two: 'three' }); // pulls from cache
 ```
 
@@ -269,8 +273,8 @@ const fn = (item1: string, item2: string, item3: string) => item1 + item2 + item
 
 const memoized = memoize(fn, { maxArgs: 2 });
 
-memoize('one', 'two', 'three');
-memoize('one', 'two', 'four'); // pulls from cache, as the first two args are the same
+memoized('one', 'two', 'three');
+memoized('one', 'two', 'four'); // pulls from cache, as the first two args are the same
 ```
 
 If `maxArgs` is combined with either `serialize` or `transformKey`, the following order is used:
@@ -311,7 +315,7 @@ Serializes the parameters passed into a string and uses this as the key for cach
 instead of a boolean, it is used as a custom serializer.
 
 ```ts
-const fn = (mutableObject: { one: Record<string, any> }) => mutableObject.property;
+const fn = (mutableObject: { one: Record<string, any> }) => mutableObject.one;
 
 const serializedMemoized = memoize(fn, { serialize: true });
 const customSerializedMemoized = memoize(fn, {
@@ -371,7 +375,7 @@ If your transformed keys require something other than
 const ignoreFunctionArg = (one: string, two: () => void) => [one, two];
 
 const memoized = memoize(ignoreFunctionArg, {
-  isMatchingKey: (key1, key2) => key1[0] === key2[0],
+  isKeyEqual: (key1, key2) => key1[0] === key2[0],
   // Cache based on the serialized first parameter
   transformKey: (args) => [JSON.stringify(args[0])],
 });
@@ -432,7 +436,7 @@ Returns the value in cache if the key based on `args` matches, else returns `und
 values, meant to reflect the arguments passed to the method.
 
 ```ts
-const memoized = memoize((one: string, two: string) => [one, two);
+const memoized = memoize((one: string, two: string) => [one, two]);
 
 memoized('one', 'two');
 
@@ -609,9 +613,9 @@ method.
 
 ```ts
 // single parameter is straightforward
-const memoized = memoize((item: string) => item: string);
+const memoized = memoize((item: string) => item);
 
-memoized.add(['one'], 'two');
+memoized.cache.set(['one'], 'two');
 
 // pulls from cache
 memoized('one');
@@ -651,7 +655,7 @@ As-of version 5, you can collect statistics of memoize to determine if your cach
 stats collection for a given memoized method, you must provide a [`statsName`](#statsname).
 
 ```ts
-import { getStats, memoize, startCollectingStats } from 'memoize';
+import { getStats, memoize, startCollectingStats } from 'micro-memoize';
 
 startCollectingStats();
 
@@ -778,7 +782,6 @@ Start collecting statistics on `memoize`d functions with defined `statsName` opt
 
 ```ts
 startCollectingStats();
-s;
 ```
 
 ### stopCollectingStats()
