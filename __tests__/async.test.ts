@@ -3,6 +3,50 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import { memoize } from '../src/index.js';
 import type { Memoized, Options } from '../src/internalTypes.js';
 
+test('async caches support thenables that resolve synchronously', () => {
+  const thenable = {
+    then(resolve: (value: number) => number) {
+      return resolve(1);
+    },
+  } as unknown as Promise<number>;
+  const memoized = memoize(() => thenable, { async: true });
+  expect(memoized()).toBe(1);
+  expect(memoized.cache.has([])).toBe(true);
+});
+
+test('a replaced promise does not delete the current cache value when it rejects', async () => {
+  let reject!: (reason: Error) => void;
+  const pending = new Promise<number>((_, rejectPromise) => {
+    reject = rejectPromise;
+  });
+  const memoized = memoize(() => pending, { async: true });
+  const previous = memoized();
+  const replacement = Promise.resolve(2);
+  memoized.cache.set([], replacement);
+  const current = memoized();
+  const error = new Error('previous request failed');
+  reject(error);
+  await expect(previous).rejects.toBe(error);
+  expect(memoized.cache.has([])).toBe(true);
+  expect(memoized()).toBe(current);
+  await expect(current).resolves.toBe(2);
+});
+
+test('a replaced promise does not report the current value as resolved', async () => {
+  let resolve!: (value: number) => void;
+  const pending = new Promise<number>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+  const memoized = memoize(() => pending, { async: true });
+  const previous = memoized();
+  memoized.cache.set([], new Promise<number>(() => {}));
+  const update = vi.fn();
+  memoized.cache.on('update', update);
+  resolve(1);
+  await expect(previous).resolves.toBe(1);
+  expect(update).not.toHaveBeenCalled();
+});
+
 function createMethod(type: string, method: 'resolve' | 'reject', PromiseLibrary: PromiseConstructor) {
   if (method === 'reject') {
     return function (number: number, otherNumber: number) {

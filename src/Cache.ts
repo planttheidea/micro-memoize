@@ -371,18 +371,21 @@ export class Cache<Fn extends (...args: any[]) => any> {
       return value;
     }
 
-    return value.then(
+    let wrapped = value;
+    wrapped = value.then(
       (value: any) => {
-        !node.r && this.o && this.o.n('update', node, 'resolved');
+        !node.r && node.v === wrapped && this.o && this.o.n('update', node, 'resolved');
 
         return value;
       },
       (error: unknown) => {
-        !node.r && this.d(node, 'rejected');
+        !node.r && node.v === wrapped && this.d(node, 'rejected');
 
         throw error;
       },
     );
+
+    return wrapped;
   }
 
   /**
