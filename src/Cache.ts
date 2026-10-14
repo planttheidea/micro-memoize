@@ -371,6 +371,7 @@ export class Cache<Fn extends (...args: any[]) => any> {
       return value;
     }
 
+    // Synchronous thenables can settle before the wrapper is assigned.
     let wrapped = value;
     wrapped = value.then(
       (value: any) => {
