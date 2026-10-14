@@ -1,5 +1,10 @@
 # micro-memoize CHANGELOG
 
+## 5.2.1
+
+- [#164](https://github.com/planttheidea/micro-memoize/pull/164) - Ensure stale promises do not delete updated values in
+  async cache (thanks [@feritcemkahraman](https://github.com/feritcemkahraman))
+
 ## 5.2.0
 
 ### Enhancements

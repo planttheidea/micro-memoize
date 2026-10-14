@@ -226,10 +226,10 @@ function for custom comparison.
 
 ```ts
 type Arg = {
-    one: {
-        nested: string;
-    };
-    two: string;
+  one: {
+    nested: string;
+  };
+  two: string;
 };
 
 const fn = ({ one, two }: Arg) => [one, two];
@@ -247,10 +247,9 @@ shallowMemoized({ one, two: 'two' });
 shallowMemoized({ one, two: 'two' }); // pulls from cache
 
 const customMemoized = memoize((item: Record<string, string>) => item, {
-    isKeyItemEqual: (cacheKeyArg: Record<string, string>, keyArg: Record<string, string>) =>
-        Object.keys(cacheKeyArg).length === 1 && Object.keys(keyArg).length === 1
-    }
-);
+  isKeyItemEqual: (cacheKeyArg: Record<string, string>, keyArg: Record<string, string>) =>
+    Object.keys(cacheKeyArg).length === 1 && Object.keys(keyArg).length === 1,
+});
 
 customMemoized({ one: 'two' });
 customMemoized({ two: 'three' }); // pulls from cache
