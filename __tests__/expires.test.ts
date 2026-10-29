@@ -1,4 +1,4 @@
-import { expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { memoize } from '../src/index.js';
 
 function method(one: string, two: string) {
@@ -270,4 +270,128 @@ test('updates the expiration when the async method resolves', async () => {
 
   // Now the updated expiration has happened.
   expect(onDeleteSpy).toHaveBeenCalledWith(expect.objectContaining({ reason: 'expired' }));
+});
+
+describe('expiration across async resolutions', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  test.each([
+    ['first', 'second'],
+    ['second', 'first'],
+  ])('starts each countdown when %s then %s resolves', async (first, second) => {
+    const requests = new Map([
+      ['first', Promise.withResolvers<string>()],
+      ['second', Promise.withResolvers<string>()],
+    ]);
+    const memoized = memoize((key: string) => requests.get(key)!.promise, {
+      async: true,
+      maxSize: 2,
+      expires: { after: 100, update: true },
+    });
+    const firstValue = memoized(first);
+    const secondValue = memoized(second);
+
+    vi.advanceTimersByTime(20);
+    requests.get(first)!.resolve(first);
+    await expect(firstValue).resolves.toBe(first);
+    vi.advanceTimersByTime(30);
+    requests.get(second)!.resolve(second);
+    await expect(secondValue).resolves.toBe(second);
+
+    vi.advanceTimersByTime(51);
+    expect(memoized.cache.has([first])).toBe(true);
+    expect(memoized.cache.has([second])).toBe(true);
+    vi.advanceTimersByTime(20);
+    expect(memoized.cache.has([first])).toBe(false);
+    expect(memoized.cache.has([second])).toBe(true);
+    vi.advanceTimersByTime(30);
+    expect(memoized.cache.has([second])).toBe(false);
+  });
+
+  test.each(['clear', 'delete', 'evict', 'expire'] as const)(
+    'updates the countdown after a resolved entry is removed by %s',
+    async (removal) => {
+      let request = Promise.withResolvers<string>();
+      const memoized = memoize((_key: string) => request.promise, {
+        async: true,
+        expires: { after: 100, update: true },
+      });
+      const firstValue = memoized('key');
+      vi.advanceTimersByTime(20);
+      request.resolve('first');
+      await expect(firstValue).resolves.toBe('first');
+
+      if (removal === 'clear') {
+        memoized.cache.clear();
+      } else if (removal === 'delete') {
+        memoized.cache.delete(['key']);
+      } else if (removal === 'evict') {
+        memoized('other');
+      } else {
+        vi.advanceTimersByTime(101);
+      }
+
+      expect(memoized.cache.has(['key'])).toBe(false);
+      request = Promise.withResolvers<string>();
+      const secondValue = memoized('key');
+      vi.advanceTimersByTime(40);
+      request.resolve('second');
+      await expect(secondValue).resolves.toBe('second');
+
+      vi.advanceTimersByTime(61);
+      expect(memoized.cache.has(['key'])).toBe(true);
+      vi.advanceTimersByTime(40);
+      expect(memoized.cache.has(['key'])).toBe(false);
+    },
+  );
+
+  test.each(['clear', 'delete', 'evict', 'expire'] as const)(
+    'does not restore an entry that resolves after %s',
+    async (removal) => {
+      let request = Promise.withResolvers<string>();
+      const memoized = memoize((_key: string) => request.promise, {
+        async: true,
+        expires: { after: 100, update: true },
+      });
+      const firstValue = memoized('first');
+      request.resolve('first');
+      await firstValue;
+
+      request = Promise.withResolvers<string>();
+      const pending = memoized('pending');
+      if (removal === 'clear') {
+        memoized.cache.clear();
+      } else if (removal === 'delete') {
+        memoized.cache.delete(['pending']);
+      } else if (removal === 'evict') {
+        memoized('replacement');
+      } else {
+        vi.advanceTimersByTime(101);
+      }
+
+      request.resolve('late');
+      await expect(pending).resolves.toBe('late');
+      expect(memoized.cache.has(['pending'])).toBe(false);
+      vi.advanceTimersByTime(101);
+      expect(memoized.cache.has(['pending'])).toBe(false);
+    },
+  );
+
+  test.each([
+    { async: false, update: true },
+    { async: true, update: false },
+  ])('retains insertion-based expiration for %j', async (options) => {
+    const request = Promise.withResolvers<string>();
+    const memoized = memoize(() => request.promise, {
+      async: options.async,
+      expires: { after: 100, update: options.update },
+    });
+    const value = memoized();
+    vi.advanceTimersByTime(40);
+    request.resolve('value');
+    await value;
+    vi.advanceTimersByTime(61);
+    expect(memoized.cache.has([])).toBe(false);
+  });
 });
