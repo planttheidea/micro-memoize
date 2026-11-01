@@ -1,5 +1,13 @@
 # micro-memoize CHANGELOG
 
+## 5.2.2
+
+- [#167](https://github.com/planttheidea/micro-memoize/pull/167) - Reset the expiration on resolution for every `async`
+  entry, not only the first one to resolve, when using `expires.update` (thanks
+  [@mayankdhingra02](https://github.com/mayankdhingra02))
+- [#168](https://github.com/planttheidea/micro-memoize/pull/168) - Avoid a redundant cache lookup when resetting the
+  expiration of a resolved `async` entry
+
 ## 5.2.1
 
 - [#164](https://github.com/planttheidea/micro-memoize/pull/164) - Ensure stale promises do not delete updated values in
