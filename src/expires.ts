@@ -68,9 +68,6 @@ export class ExpirationManager<Fn extends (...args: any[]) => any> {
         const onResolved: CacheEventListener<'update', Fn> = ({ key, reason, value }) => {
           if (reason === 'resolved' && this.a(key, value)) {
             this.s(key, value);
-            // Automatically remove the listener to avoid unnecessary work on updates after
-            // the item is resolved, as that can only ever happen once.
-            this.c.off('update', onResolved);
           }
         };
 
