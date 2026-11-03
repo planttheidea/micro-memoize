@@ -3,6 +3,149 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import { memoize } from '../src/index.js';
 import type { Memoized, Options } from '../src/internalTypes.js';
 
+function synchronouslySettled(value: number, error?: Error): Promise<number> {
+  return {
+    then(resolve: (value: number) => number, reject: (error: Error) => never) {
+      try {
+        return Promise.resolve(error ? reject(error) : resolve(value));
+      } catch (caught) {
+        if (caught instanceof Error) {
+          return Promise.reject(caught);
+        }
+
+        throw caught;
+      }
+    },
+  } as unknown as Promise<number>;
+}
+
+describe.each([1, 3])('synchronous settlements with maxSize %i', (maxSize) => {
+  test.each([false, true])('settles after adding the wrapped value (rejected: %s)', async (rejected) => {
+    const error = new Error('request failed');
+    const fn = vi.fn(() => synchronouslySettled(1, rejected ? error : undefined));
+    const memoized = memoize(fn, { async: true, maxSize });
+    const events: Array<{ type: string; reason?: string; value: Promise<number> }> = [];
+
+    for (const type of ['add', 'delete', 'update'] as const) {
+      memoized.cache.on(type, ({ reason, value }) => events.push({ type, reason, value }));
+    }
+
+    const value = memoized();
+
+    expect(events).toEqual([
+      { type: 'add', reason: undefined, value },
+      { type: rejected ? 'delete' : 'update', reason: rejected ? 'rejected' : 'resolved', value },
+    ]);
+    expect(memoized.cache.snapshot.size).toBe(rejected ? 0 : 1);
+    expect(memoized.cache.size).toBe(rejected ? 0 : 1);
+
+    if (rejected) {
+      await expect(value).rejects.toBe(error);
+      await expect(memoized()).rejects.toBe(error);
+      expect(fn).toHaveBeenCalledTimes(2);
+      expect(memoized.cache.snapshot.keys).toEqual([]);
+    } else {
+      await expect(value).resolves.toBe(1);
+      expect(memoized()).toBe(value);
+      expect(fn).toHaveBeenCalledOnce();
+    }
+  });
+
+  test.each([false, true])('does not notify a removed entry as resolved (rejected: %s)', async (rejected) => {
+    const error = new Error('request failed');
+    const memoized = memoize(() => synchronouslySettled(1, rejected ? error : undefined), { async: true, maxSize });
+    const update = vi.fn();
+    const deleted = vi.fn();
+    memoized.cache.on('update', update);
+    memoized.cache.on('delete', deleted);
+    memoized.cache.on('add', () => {
+      memoized.cache.clear();
+    });
+
+    const value = memoized();
+
+    if (rejected) {
+      await expect(value).rejects.toBe(error);
+    } else {
+      await expect(value).resolves.toBe(1);
+    }
+
+    expect(update).not.toHaveBeenCalled();
+    expect(deleted).toHaveBeenCalledOnce();
+    expect(deleted.mock.calls[0]![0].reason).toBe('explicit clear');
+    expect(memoized.cache.size).toBe(0);
+    expect(memoized.cache.snapshot.keys).toEqual([]);
+  });
+
+  test.each([false, true])('does not settle a replacement made by an add listener (rejected: %s)', async (rejected) => {
+    const error = new Error('request failed');
+    const memoized = memoize(() => synchronouslySettled(1, rejected ? error : undefined), { async: true, maxSize });
+    const update = vi.fn();
+    const deleted = vi.fn();
+    memoized.cache.on('update', update);
+    memoized.cache.on('delete', deleted);
+    memoized.cache.on('add', ({ value }) => {
+      void value.catch(() => undefined);
+      memoized.cache.set([], new Promise(() => {}));
+    });
+
+    const replacement = memoized();
+
+    expect(memoized()).toBe(replacement);
+    expect(memoized.cache.size).toBe(1);
+    expect(memoized.cache.snapshot.keys).toEqual([[]]);
+    expect(update).not.toHaveBeenCalled();
+    expect(deleted).not.toHaveBeenCalled();
+    await Promise.resolve();
+  });
+
+  test('removes a rejected replacement assigned with cache.set', async () => {
+    const error = new Error('request failed');
+    const memoized = memoize(() => new Promise<number>(() => {}), { async: true, maxSize });
+    let rejected!: Promise<number>;
+    memoized.cache.on('delete', ({ value }) => {
+      rejected = value;
+    });
+    memoized();
+    memoized.cache.set([], synchronouslySettled(1, error));
+
+    await expect(rejected).rejects.toBe(error);
+    expect(memoized.cache.size).toBe(0);
+    expect(memoized.cache.snapshot.keys).toEqual([]);
+  });
+
+  test('finishes a rejection even if an add listener throws', async () => {
+    const error = new Error('request failed');
+    const listenerError = new Error('listener failed');
+    const memoized = memoize(() => synchronouslySettled(1, error), { async: true, maxSize });
+    let rejected!: Promise<number>;
+    memoized.cache.on('add', ({ value }) => {
+      rejected = value;
+      throw listenerError;
+    });
+
+    expect(() => memoized()).toThrow(listenerError);
+    await expect(rejected).rejects.toBe(error);
+    expect(memoized.cache.size).toBe(0);
+    expect(memoized.cache.snapshot.keys).toEqual([]);
+  });
+});
+
+test('a synchronous rejection does not unlink unrelated entries', async () => {
+  const error = new Error('request failed');
+  const fn = vi.fn((key: string) => (key === 'bad' ? synchronouslySettled(0, error) : Promise.resolve(1)));
+  const memoized = memoize(fn, { async: true, maxSize: 3 });
+  const first = memoized('first');
+  const second = memoized('second');
+
+  await expect(memoized('bad')).rejects.toBe(error);
+  expect(memoized.cache.size).toBe(2);
+  expect(memoized.cache.snapshot.keys).toEqual([['second'], ['first']]);
+  expect(memoized('first')).toBe(first);
+  expect(memoized('second')).toBe(second);
+  expect(fn).toHaveBeenCalledTimes(3);
+});
+
 test('async caches support thenables that resolve synchronously', () => {
   const thenable = {
     then(resolve: (value: number) => number) {

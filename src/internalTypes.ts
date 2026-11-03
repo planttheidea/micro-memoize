@@ -31,6 +31,10 @@ export interface CacheNode<Fn extends (...args: any[]) => any> {
    */
   r?: true;
   /**
+   * A synchronous promise settlement [q]ueued until its wrapped value is installed.
+   */
+  q?: { type: 'resolved' | 'rejected'; value?: ReturnType<Fn>; pending?: true };
+  /**
    * The [k]ey for the given node in cache.
    */
   k: Key;

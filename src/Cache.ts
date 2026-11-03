@@ -15,6 +15,8 @@ import { getMaxArgsTransformKey } from './maxArgs.js';
 import { isSerializedKeyEqual, transformKeySerialized } from './serialize.js';
 import { isNumericValueValid } from './utils.js';
 
+const PENDING_PROMISE = {};
+
 export class Cache<Fn extends (...args: any[]) => any> {
   /**
    * The current [c]ount of entries in the cache.
@@ -223,7 +225,11 @@ export class Cache<Fn extends (...args: any[]) => any> {
         node.v = this.w(node);
       }
 
-      node !== this.h && this.u(node, reason, false);
+      try {
+        node !== this.h && this.u(node, reason, false);
+      } finally {
+        this.p && node.q && finishSettlement(this, node);
+      }
     } else {
       node = this.n(normalizedKey, value);
     }
@@ -301,25 +307,29 @@ export class Cache<Fn extends (...args: any[]) => any> {
   n(key: Key, value: ReturnType<Fn>, reason?: string): CacheNode<Fn> {
     const prevHead = this.h;
     const prevTail = this.t;
-    const node = { k: key, n: prevHead, p: undefined, v: value };
+    const node: CacheNode<Fn> = { k: key, n: prevHead, p: undefined, v: value };
 
     if (this.p) {
       node.v = this.w(node);
     }
 
-    this.h = node;
+    try {
+      this.h = node;
 
-    if (prevHead) {
-      prevHead.p = node;
-    } else {
-      this.t = node;
+      if (prevHead) {
+        prevHead.p = node;
+      } else {
+        this.t = node;
+      }
+
+      if (++this.c > this.s && prevTail) {
+        this.d(prevTail, 'evicted');
+      }
+
+      this.o && this.o.n('add', node, reason);
+    } finally {
+      this.p && node.q && finishSettlement(this, node);
     }
-
-    if (++this.c > this.s && prevTail) {
-      this.d(prevTail, 'evicted');
-    }
-
-    this.o && this.o.n('add', node, reason);
 
     return node;
   }
@@ -372,19 +382,33 @@ export class Cache<Fn extends (...args: any[]) => any> {
     }
 
     // Synchronous thenables can settle before the wrapper is assigned.
-    let wrapped = value;
+    let wrapped = PENDING_PROMISE as ReturnType<Fn>;
     wrapped = value.then(
       (value: any) => {
-        !node.r && node.v === wrapped && this.o && this.o.n('update', node, 'resolved');
+        if (wrapped === PENDING_PROMISE) {
+          node.q = { type: 'resolved', pending: true };
+        } else {
+          !node.r && node.v === wrapped && this.o && this.o.n('update', node, 'resolved');
+        }
 
         return value;
       },
       (error: unknown) => {
-        !node.r && node.v === wrapped && this.d(node, 'rejected');
+        if (wrapped === PENDING_PROMISE) {
+          node.q = { type: 'rejected', pending: true };
+        } else {
+          !node.r && node.v === wrapped && this.d(node, 'rejected');
+        }
 
         throw error;
       },
     );
+    const settlement = node.q;
+
+    if (settlement?.pending) {
+      settlement.value = wrapped;
+      settlement.pending = undefined;
+    }
 
     return wrapped;
   }
@@ -402,24 +426,47 @@ export class Cache<Fn extends (...args: any[]) => any> {
    */
   z(key: Key, value: ReturnType<Fn>, reason?: string): CacheNode<Fn> {
     const prevHead = this.h;
-    const node = { k: key, n: undefined, p: undefined, v: value };
+    const node: CacheNode<Fn> = { k: key, n: undefined, p: undefined, v: value };
 
     if (this.p) {
       node.v = this.w(node);
     }
 
-    this.h = this.t = node;
-    this.c = 1;
+    try {
+      this.h = this.t = node;
+      this.c = 1;
 
-    if (prevHead) {
-      prevHead.r = true;
+      if (prevHead) {
+        prevHead.r = true;
 
-      this.o && this.o.n('delete', prevHead, 'evicted');
+        this.o && this.o.n('delete', prevHead, 'evicted');
+      }
+
+      this.o && this.o.n('add', node, reason);
+    } finally {
+      this.p && node.q && finishSettlement(this, node);
     }
 
-    this.o && this.o.n('add', node, reason);
-
     return node;
+  }
+}
+
+/**
+ * Finish a synchronous settlement after the value and cache entry are installed.
+ */
+function finishSettlement<Fn extends (...args: any[]) => any>(cache: Cache<Fn>, node: CacheNode<Fn>): void {
+  const settlement = node.q;
+
+  node.q = undefined;
+
+  if (!settlement || node.r || node.v !== settlement.value) {
+    return;
+  }
+
+  if (settlement.type === 'rejected') {
+    cache.d(node, 'rejected');
+  } else {
+    cache.o && cache.o.n('update', node, 'resolved');
   }
 }
 
