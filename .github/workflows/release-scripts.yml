@@ -29,11 +29,11 @@ jobs:
           node-version: lts/*
 
       # Corepack is no longer bundled with Node 25+, so install it explicitly.
+      # Yarn version is resolved from the `packageManager` field in `package.json`.
       - name: Setup Yarn
         run: |
           npm install --global corepack@latest
           corepack enable
-          corepack prepare yarn@4.18.1 --activate
           yarn --version
 
       - name: Cache Yarn dependencies
