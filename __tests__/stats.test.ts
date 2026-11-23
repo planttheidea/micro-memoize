@@ -248,6 +248,38 @@ describe('getStats', () => {
     second.statsManager!.dispose();
   });
 
+  test.each([true, false])('keeps a reused profile after repeated disposal with collection active=%s', (active) => {
+    if (!active) {
+      stopCollectingStats();
+    }
+
+    const statsName = 'reusedAfterRepeatedDisposal';
+    const first = memoize(method, { statsName });
+
+    first.statsManager!.dispose();
+
+    const second = memoize(method, { statsName });
+
+    try {
+      first.statsManager!.dispose();
+      startCollectingStats();
+
+      second(foo, bar);
+      second(foo, bar);
+
+      expect(getStats(statsName)).toEqual({ calls: 2, hits: 1, name: statsName, usage: '50.0000%' });
+      expect(getStats()!.profiles[statsName]).toEqual(getStats(statsName));
+
+      stopCollectingStats();
+      startCollectingStats();
+      second(foo, bar);
+
+      expect(getStats(statsName)).toEqual({ calls: 1, hits: 1, name: statsName, usage: '100.0000%' });
+    } finally {
+      second.statsManager!.dispose();
+    }
+  });
+
   test('should remove a disposed profile from the registry and stop collecting', () => {
     const statsName = 'disposed';
     const profiled = memoize(method, { statsName });

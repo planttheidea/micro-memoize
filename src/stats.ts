@@ -53,7 +53,9 @@ export class StatsManager<Fn extends (...args: any[]) => any> {
   dispose(): void {
     this.d?.();
 
-    nameToProfile.delete(this.n);
+    if (nameToProfile.get(this.n) === this) {
+      nameToProfile.delete(this.n);
+    }
   }
 
   /**
