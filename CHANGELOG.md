@@ -2,7 +2,8 @@
 
 ## 5.2.3
 
-- [#172](https://github.com/planttheidea/micro-memoize/pull/172) - Keep a replacement stats profile registered when a previously disposed profile with the same name is disposed again.(thanks [@fbirds5320](https://github.com/fbirds5230))
+- [#172](https://github.com/planttheidea/micro-memoize/pull/172) - Keep a replacement stats profile registered when a
+  previously disposed profile with the same name is disposed again (thanks [@fbirds5320](https://github.com/fbirds5230))
 
 ## 5.2.2
 
